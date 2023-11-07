@@ -9,6 +9,7 @@ log = logging.getLogger("uvicorn")
 class Settings(BaseSettings):
     ALLOWED_ORIGINS: str
     APP_ENVIRONMENT: str
+    DB_TYPE: str
     DB_HOST: str
     DB_NAME: str
     DB_USERNAME: str

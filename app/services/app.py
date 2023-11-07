@@ -4,7 +4,7 @@ import os
 
 class AppService:
     def __init__(self):
-        self.table_name = os.environ.get('GSM_TABLE, 'GlobalStateTable')
+        self.table_name = os.environ.get('GSM_TABLE', 'GlobalStateTable')
         self.region_name = os.environ.get('AWS_REGION', 'us-east-1')
 
         self.dynamodb_resource = boto3.resource('dynamodb', region_name=self.region_name)
