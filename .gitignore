@@ -167,3 +167,6 @@ alembic.ini
 .vscode/
 
 *.db
+Dockerfile
+build.sql
+docker-compose.yml
