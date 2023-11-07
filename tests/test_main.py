@@ -1,4 +1,8 @@
-def test_main(http_event):
-    # Implement you test here...
+from fastapi import status
 
-    assert True
+
+def test_health_check(client):
+    response = client.get("/api/health-check")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": "OK"}
