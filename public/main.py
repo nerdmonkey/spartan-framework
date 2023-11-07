@@ -5,6 +5,7 @@ from mangum import Mangum
 from config.app import get_settings
 from routes import router
 
+
 description = """
 Artisan is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
 """
@@ -35,9 +36,10 @@ app = FastAPI(
     root_path=root_path,
 )
 
+allowed_origins = settings.ALLOWED_ORIGINS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins="*",
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
