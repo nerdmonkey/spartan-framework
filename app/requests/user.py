@@ -8,5 +8,5 @@ class UserCreateRequest(BaseModel):
 
 
 class UserEditRequest(UserCreateRequest):
-    email: None
-    password: None
+    email: str
+    password: str
