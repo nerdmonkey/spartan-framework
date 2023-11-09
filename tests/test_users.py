@@ -1,5 +1,3 @@
-# test_users.py
-
 from fastapi import status
 
 # Test case for creating a user
