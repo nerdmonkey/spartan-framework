@@ -58,8 +58,8 @@ version_path_separator = os  # Use os.pathsep. Default configuration used for ne
 # sqlalchemy.url = driver://user:pass@localhost/dbname
 
 # Uncomment this if you want to test the database using sqlite locally.
-# Make sure you have artisan.db inside the database folder.
-sqlalchemy.url = sqlite:///./database/artisan.db
+# Make sure you have spartan.db inside the database folder.
+sqlalchemy.url = sqlite:///./database/spartan.db
 
 
 [post_write_hooks]

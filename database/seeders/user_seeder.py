@@ -7,22 +7,22 @@ def run():
     users = [
         {
             "username": "andeng",
-            "email": "andeng@python-artisan.com",
+            "email": "andeng@python-spartan.com",
             "password": "andeng",
         },
         {
             "username": "iviang",
-            "email": "iviang@python-artisan.com",
+            "email": "iviang@python-spartan.com",
             "password": "iviang",
         },
         {
             "username": "loki",
-            "email": "loki@python-artisan.com",
+            "email": "loki@python-spartan.com",
             "password": "loki",
         },
         {
             "username": "lara",
-            "email": "lara@python-artisan.com",
+            "email": "lara@python-spartan.com",
             "password": "lara",
         },
     ]

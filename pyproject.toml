@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "artisan-framework"
+name = "spartan-framework"
 version = "0.1.0"
 description = "A micro framework for AWS cloud developer"
 authors = ["Sydel Palinlin <sydel.palinlin@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "artisan_framework"}]
+packages = [{include = "spartan_framework"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
