@@ -13,7 +13,7 @@ from config.app import get_settings
 from routes import users, health
 
 description = """
-Artisan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
+Spartan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
 """
 
 tags_metadata = [
@@ -33,7 +33,7 @@ if settings.APP_ENVIRONMENT == "local" or settings.APP_ENVIRONMENT == "test":
     root_path = "/"
 
 app = FastAPI(
-    title="Artisan",
+    title="Spartan",
     description=description,
     version="0.1.0",
     terms_of_service="N/A",
