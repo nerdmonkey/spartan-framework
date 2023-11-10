@@ -19,11 +19,11 @@ Spartan, often referred to as "The swiss army knife for serverless development,"
 tags_metadata = [
     {
         "name": "Users",
-        "description": "This endpoint allows performing operations related to users. It provides functionality to save and download users through a RESTful API.",
+        "description": "This endpoint allows performing operations related to users. It provides functionality to users through a RESTful API.",
     },
      {
         "name": "Health Check",
-        "description": "A health check for an API serves as a method to verify the API's functional condition."
+        "description": "This is a health check endpoint for an API serves as a method to verify the API's functional condition."
     },
 ]
 
