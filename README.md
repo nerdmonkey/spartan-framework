@@ -7,20 +7,23 @@ Spartan, often referred to as "The swiss army knife for serverless development,"
 ```bash
 pip install -r requirements.txt
 ```
-
-or
-
-```bash
-poetry install
-````
-
 2. Copy the .env.example to .env
 
-3. Then run it using the following command
+3. Copy alembic.ini.example to alembic.ini
+
+4. Create spartan.db inside the database folder
+
+5. Create all the tables
 ```bash
-uvicorn public.main:app --reload --port 8888
+spartan migrate upgrade
 ```
-or
+
+6. Insert dummy data
+```bash
+spartan db seed
+```
+
+7. Then run it using the following command
 ```bash
 spartan serve
 ```
