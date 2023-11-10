@@ -27,3 +27,14 @@ spartan db seed
 ```bash
 spartan serve
 ```
+
+## Spartan CLI Tool
+1. To install
+```bash
+pip install python-spartan
+```
+
+2. Try
+```bash
+spartan --help
+```
