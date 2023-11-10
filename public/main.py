@@ -12,8 +12,6 @@ from mangum import Mangum
 from config.app import get_settings
 from routes import users, health
 
-import os
-
 description = """
 Artisan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
 """
@@ -60,7 +58,6 @@ app.add_middleware(
 app.include_router(health.route)
 app.include_router(users.route)
 
-# Initialize templates with the directory containing your HTML files
 templates = Jinja2Templates(directory="public")
 
 @app.get("/", include_in_schema=False)
