@@ -6,20 +6,20 @@ from app.services.queue import (
     QueueService,
 )  # Replace 'your_module' with the actual module name
 
-# @mock_sqs
-# def test_send_message():
-#     # Setup
-#     sqs = boto3.resource('sqs', region_name='us-east-1')
-#     sqs.create_queue(QueueName='TestQueue')
-#     queue_url = sqs.get_queue_by_name(QueueName='TestQueue').url
-#     queue_service = QueueService()
-#     message = {"key": "value"}
+@mock_sqs
+def test_send_message_to_standard_queue():
+    # Setup
+    sqs = boto3.resource('sqs', region_name='us-east-1')
+    sqs.create_queue(QueueName='TestQueue')
+    queue_url = sqs.get_queue_by_name(QueueName='TestQueue').url
+    queue_service = QueueService()
+    message = {"key": "value"}
 
-#     # Test
-#     response = queue_service.send_message(queue_url, message, str(1), str(1))
+    # Test
+    response = queue_service.send_message(queue_url, message, str(1), str(1))
 
-#     # Assert
-#     assert 'MessageId' in response
+    # Assert
+    assert 'MessageId' in response
 
 
 @mock_sqs
