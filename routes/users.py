@@ -1,6 +1,5 @@
-from typing import List
-
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -34,9 +33,18 @@ def get_user_by_id(user_id: int, db: Session) -> User:
     return user
 
 
+# Add query parameters for pagination
 @route.get("/users", status_code=200, response_model=List[UserResponse])
-async def get_users(db: Session = Depends(get_session)):
-    users = db.query(User).all()
+async def get_users(
+    page: Optional[int] = Query(1, description="Page number", gt=0),
+    items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
+    db: Session = Depends(get_session),
+):
+    # Calculate the offset based on page and items_per_page
+    offset = (page - 1) * items_per_page
+
+    # Query the database with pagination
+    users = db.query(User).offset(offset).limit(items_per_page).all()
 
     # Create a list of UserResponse objects from the database results
     user_responses = [
