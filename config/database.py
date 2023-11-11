@@ -44,7 +44,7 @@ def create_database_engine() -> Engine:
             )
             return create_engine(database_url)
 
-        raise ValueError(f"Unsupported database type: {database_type}")
+    raise ValueError(f"Unsupported database type: {database_type}")
 
 
 engine = create_database_engine()

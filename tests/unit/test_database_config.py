@@ -1,12 +1,15 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 from sqlalchemy.engine import Engine
 
 from config.app import get_settings
-from config.database import \
-    get_session  # Replace 'your_module' with the actual module name
+from config.database import create_database_engine, get_session  # Replace 'your_module' with the actual module name
 
+class MockSettings:
+    DB_TYPE = 'unsupported_db_type'
+    DB_NAME = 'testdb'
+    # Add other necessary settings attributes if required
 
 def test_get_session():
     """
@@ -18,7 +21,7 @@ def test_get_session():
     """
     test_settings = {
         "DB_NAME": "test_db",
-        "DB_TYPE": "sqlite",
+        "DB_TYPE": "hunk",
         "DB_HOST": "",
         "DB_PORT": "",
         "DB_USERNAME": "",
