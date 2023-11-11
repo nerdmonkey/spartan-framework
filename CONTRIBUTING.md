@@ -58,4 +58,3 @@ We expect all contributors and community members to follow our [Code of Conduct]
 By contributing to this project, you agree to abide by our Code of Conduct.
 
 Thank you for your contributions and support!
-```
