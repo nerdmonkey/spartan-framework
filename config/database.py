@@ -27,24 +27,24 @@ def create_database_engine() -> Engine:
     if database_type == "sqlite":
         database_url = f"sqlite:///./database/{database}.db"
         return create_engine(database_url, connect_args={"check_same_thread": False})
+    else:
+        # Mapping for different database types to their URL formats
+        url_formats = {
+            "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
+            "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
+        }
 
-    # Mapping for different database types to their URL formats
-    url_formats = {
-        "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
-        "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
-    }
+        if database_type in url_formats:
+            database_url = url_formats[database_type].format(
+                username=settings.DB_USERNAME,
+                password=settings.DB_PASSWORD,
+                host=settings.DB_HOST,
+                port=settings.DB_PORT,
+                database=database,
+            )
+            return create_engine(database_url)
 
-    if database_type in url_formats:
-        database_url = url_formats[database_type].format(
-            username=settings.DB_USERNAME,
-            password=settings.DB_PASSWORD,
-            host=settings.DB_HOST,
-            port=settings.DB_PORT,
-            database=database,
-        )
-        return create_engine(database_url)
-
-    raise ValueError(f"Unsupported database type: {database_type}")
+        raise ValueError(f"Unsupported database type: {database_type}")
 
 
 engine = create_database_engine()

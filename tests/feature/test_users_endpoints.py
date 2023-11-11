@@ -5,9 +5,9 @@ from fastapi import status
 def test_create_user(client):
     # Given: the payload for a new user
     payload = {
-        "username": "testuser",
-        "email": "testuser@example.com",
-        "password": "testpassword",
+        "username": "testuseranother",
+        "email": "testuseranother@example.com",
+        "password": "test1password",
     }
 
     # When: the client makes a POST request to create a user
@@ -16,7 +16,7 @@ def test_create_user(client):
     # Then: the server should respond with a 201 status code
     # and the response body should contain the username of the new user
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()["username"] == "testuser"
+    assert response.json()["username"] == "testuseranother"
 
 
 # Test case for retrieving a list of users
@@ -47,7 +47,7 @@ def test_read_user(client):
 
 
 # Test case for updating a user's information
-def test_update_user(client):
+def test_update_user(client, test_data):
     # Given: a user with a known ID and the payload for updating the user
     user_id = 1  # Replace with a setup to create a user and get the ID
     payload = {
