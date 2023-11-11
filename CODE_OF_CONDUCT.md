@@ -38,7 +38,7 @@ Unacceptable behavior includes, but is not limited to:
 
 ## Reporting Violations
 
-If you witness or experience any behavior that violates this Code of Conduct, please report it to the project maintainers or community moderators. You can do so by contacting [contact_email@example.com].
+If you witness or experience any behavior that violates this Code of Conduct, please report it to the project maintainers or community moderators. You can do so by contacting [sydel.palinlin@gmail.com].
 
 All reports will be kept confidential, and we will investigate and take appropriate action as necessary.
 
