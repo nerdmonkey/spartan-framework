@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import (UserCreateResponse, UserResponse,
-                                UserUpdateResponse)
+from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
 from config.database import get_session
+from sqlalchemy.exc import DatabaseError
 
 route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
@@ -33,26 +33,40 @@ def get_user_by_id(user_id: int, db: Session) -> User:
     return user
 
 
-# Add query parameters for pagination
 @route.get("/users", status_code=200, response_model=List[UserResponse])
 async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
     db: Session = Depends(get_session),
 ):
-    # Calculate the offset based on page and items_per_page
-    offset = (page - 1) * items_per_page
+    try:
+        # Calculate the offset based on page and items_per_page
+        offset = (page - 1) * items_per_page
 
-    # Query the database with pagination
-    users = db.query(User).offset(offset).limit(items_per_page).all()
+        # Query the database with pagination
+        users = db.query(User).offset(offset).limit(items_per_page).all()
 
-    # Create a list of UserResponse objects from the database results
-    user_responses = [
-        UserResponse(id=user.id, username=user.username, email=user.email)
-        for user in users
-    ]
+        # Create a list of UserResponse objects from the database results
+        user_responses = [
+            UserResponse(id=user.id, username=user.username, email=user.email)
+            for user in users
+        ]
 
-    return user_responses
+        return user_responses
+
+    except DatabaseError as e:
+        # Log the exception details, e.g., using logging
+        # logging.error(f"Database error occurred: {e}")
+        raise HTTPException(
+            status_code=500, internal_server_error="Internal server error"
+        )
+
+    except Exception as e:
+        # Handle unexpected exceptions
+        # logging.error(f"Unexpected error occurred: {e}")
+        raise HTTPException(
+            status_code=500, internal_server_error="Internal server error"
+        )
 
 
 @route.get("/users/{user_id}", status_code=200, response_model=UserResponse)

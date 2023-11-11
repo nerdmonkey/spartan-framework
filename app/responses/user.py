@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class UserResponse(BaseModel):
     """
     Pydantic model representing a User response.
@@ -14,6 +15,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
 
+
 class UserCreateResponse(BaseModel):
     """
     Pydantic model representing a response for creating a User.
@@ -27,6 +29,7 @@ class UserCreateResponse(BaseModel):
     id: int
     username: str
     email: str
+
 
 class UserUpdateResponse(BaseModel):
     """

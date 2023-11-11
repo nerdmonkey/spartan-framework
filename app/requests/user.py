@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class UserCreateRequest(BaseModel):
     """
     Pydantic model representing a request for creating a User.
@@ -13,6 +14,7 @@ class UserCreateRequest(BaseModel):
     username: str
     email: str
     password: str
+
 
 class UserUpdateRequest(UserCreateRequest):
     """

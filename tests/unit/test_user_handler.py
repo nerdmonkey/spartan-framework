@@ -2,8 +2,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from handlers.user import \
-    main  # Replace 'your_lambda_file' with the actual name of your lambda file
+from handlers.user import (
+    main,
+)  # Replace 'your_lambda_file' with the actual name of your lambda file
 
 
 def test_user_lambda_function():

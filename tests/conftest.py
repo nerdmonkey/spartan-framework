@@ -13,6 +13,7 @@ get_db = get_session()
 # Assuming you have a way to configure your app to use this test database
 TEST_DATABASE_URL = "sqlite:///./database/spartan.db"
 
+
 @pytest.fixture(scope="module")
 def test_db_session():
     # Setup: Create a new test database
@@ -29,11 +30,16 @@ def test_db_session():
     db.close()
     Base.metadata.drop_all(bind=engine)
 
+
 @pytest.fixture(scope="module")
 def test_data(test_db_session):
     # Create test data (5 users)
     users = [
-        User(username=f"testuser{i}", email=f"testuser{i}@example.com", password="password123")
+        User(
+            username=f"testuser{i}",
+            email=f"testuser{i}@example.com",
+            password="password123",
+        )
         for i in range(1, 6)
     ]
 
@@ -47,6 +53,7 @@ def test_data(test_db_session):
     for user in users:
         test_db_session.delete(user)
     test_db_session.commit()
+
 
 @pytest.fixture(scope="function")
 def client(test_db_session):
