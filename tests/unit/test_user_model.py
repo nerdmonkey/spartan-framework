@@ -1,4 +1,3 @@
-# test_user_model.py
 import pytest
 from sqlalchemy import Integer, String
 from app.models.base import Base  # Replace 'your_module' with the actual module name

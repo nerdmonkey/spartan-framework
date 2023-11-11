@@ -1,4 +1,3 @@
-# test_models.py
 import pytest
 from sqlalchemy.orm import declarative_base
 
