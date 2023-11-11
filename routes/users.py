@@ -71,7 +71,7 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(
-            status_code=400, detail="User with this email already exists"
+            status_code=422, detail="User with this email already exists"
         )
 
     # TODO: Add password hashing logic here
