@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-database = os.environ.get('DB_NAME')
+database = os.environ.get("DB_NAME")
 
 if os.environ.get("DB_TYPE") == "sqlite":
     database_url = f"sqlite:///./database/{database}.db"
@@ -19,18 +19,22 @@ else:
     database_type = os.environ.get("DB_TYPE")
 
     if database_type == "psql":
-        database_url = f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        database_url = (
+            f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        )
     elif database_type == "mysql":
-        database_url = f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        database_url = (
+            f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        )
     else:
-        database_url = f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        database_url = (
+            f"postgresql+pg8000://{username}:{password}@{host}:{port}/{database}"
+        )
     engine = create_engine(database_url)
 
 
-
-
-
 Session = sessionmaker(bind=engine)
+
 
 def get_session() -> Session:
     return Session()

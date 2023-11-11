@@ -1,5 +1,6 @@
 from fastapi import status
 
+
 def test_health_check(client):
     # Given an operational web service
 

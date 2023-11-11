@@ -1,16 +1,16 @@
 import sys
+
 sys.path.append(".")
 
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 from mangum import Mangum
 
 from config.app import get_settings
-from routes import users, health
+from routes import health, users
 
 description = """
 Spartan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
@@ -21,9 +21,9 @@ tags_metadata = [
         "name": "Users",
         "description": "This endpoint allows performing operations related to users. It provides functionality to users through a RESTful API.",
     },
-     {
+    {
         "name": "Health Check",
-        "description": "This is a health check endpoint for an API serves as a method to verify the API's functional condition."
+        "description": "This is a health check endpoint for an API serves as a method to verify the API's functional condition.",
     },
 ]
 
@@ -60,8 +60,12 @@ app.include_router(users.route)
 
 templates = Jinja2Templates(directory="public")
 
+
 @app.get("/", include_in_schema=False)
 async def read_welcome(request: Request):
-    return templates.TemplateResponse("static/welcome.html", {"request": request, "root_path": app.root_path})
+    return templates.TemplateResponse(
+        "static/welcome.html", {"request": request, "root_path": app.root_path}
+    )
+
 
 handle = Mangum(app)

@@ -1,6 +1,8 @@
 import json
-import boto3
 from typing import Any, Dict
+
+import boto3
+
 
 class QueueService:
     """
@@ -10,7 +12,7 @@ class QueueService:
     an SQS queue. It uses the boto3 library to communicate with AWS services.
     """
 
-    def __init__(self, region_name: str = 'us-east-1') -> None:
+    def __init__(self, region_name: str = "us-east-1") -> None:
         """
         Initializes the QueueService class.
 
@@ -31,7 +33,11 @@ class QueueService:
         return json.dumps(message)
 
     def send_message(
-        self, queue_url: str, message: dict, group_id: str = None, deduplication_id: str = None
+        self,
+        queue_url: str,
+        message: dict,
+        group_id: str = None,
+        deduplication_id: str = None,
     ) -> dict:
         """
         Sends a message to an SQS queue.
@@ -49,21 +55,16 @@ class QueueService:
         Returns:
             dict: The response from the SQS service after sending the message.
         """
-        send_params = {
-            "QueueUrl": queue_url,
-            "MessageBody": json.dumps(message)
-        }
+        send_params = {"QueueUrl": queue_url, "MessageBody": json.dumps(message)}
 
         # Check if the queue is a FIFO queue
-        if queue_url.endswith('.fifo'):
+        if queue_url.endswith(".fifo"):
             if group_id is not None:
                 send_params["MessageGroupId"] = group_id
             if deduplication_id is not None:
                 send_params["MessageDeduplicationId"] = deduplication_id
 
         return self.sqs_client.send_message(**send_params)
-
-
 
     def receive_message(self, queue_url: str) -> Dict[str, Any]:
         """
@@ -90,4 +91,6 @@ class QueueService:
         Returns:
             dict: The response from the SQS service after deleting the message.
         """
-        return self.sqs_client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
+        return self.sqs_client.delete_message(
+            QueueUrl=queue_url, ReceiptHandle=receipt_handle
+        )
