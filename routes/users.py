@@ -1,31 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.models.user import User
-from app.requests.user import UserCreateRequest, UserEditRequest
-from config.database import get_session
-from pydantic import BaseModel
 from typing import List
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.models.user import User
+from app.requests.user import UserCreateRequest, UserUpdateRequest
+from app.responses.user import (UserCreateResponse, UserResponse,
+                                UserUpdateResponse)
+from config.database import get_session
+
 route = APIRouter(
-    prefix="/api",
-    tags=["Users"],
-    responses={404: {"description": "Not found"}}
+    prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
 )
 
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-
-class UserCreateResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-
-class UserUpdateResponse(BaseModel):
-    id: int
-    username: str
-    email: str
 
 def get_user_by_id(user_id: int, db: Session) -> User:
     """
@@ -46,6 +33,7 @@ def get_user_by_id(user_id: int, db: Session) -> User:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+
 @route.get("/users", status_code=200, response_model=List[UserResponse])
 async def get_users(db: Session = Depends(get_session)):
     users = db.query(User).all()
@@ -57,6 +45,7 @@ async def get_users(db: Session = Depends(get_session)):
     ]
 
     return user_responses
+
 
 @route.get("/users/{user_id}", status_code=200, response_model=UserResponse)
 async def get_user(user_id: int, db: Session = Depends(get_session)):
@@ -73,7 +62,9 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
     # Check if a user with the same email already exists
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="User with this email already exists")
+        raise HTTPException(
+            status_code=400, detail="User with this email already exists"
+        )
 
     # TODO: Add password hashing logic here
     hashed_password = "hashed_" + user.password
@@ -93,7 +84,9 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
 
 
 @route.put("/users/{user_id}", status_code=200, response_model=UserUpdateResponse)
-async def update_user(user_id: int, user: UserEditRequest, db: Session = Depends(get_session)):
+async def update_user(
+    user_id: int, user: UserUpdateRequest, db: Session = Depends(get_session)
+):
     db_user = get_user_by_id(user_id, db)
     user_data = user.dict(exclude_unset=True)
     # TODO: Add password hashing logic here if password is being updated

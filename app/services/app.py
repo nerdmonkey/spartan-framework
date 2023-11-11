@@ -1,7 +1,9 @@
+import logging
 import os
+
 import boto3
 import jsonpickle
-import logging
+
 
 class AppService:
     """
@@ -67,7 +69,11 @@ class AppService:
         """Removes a state from the DynamoDB table."""
         try:
             response = self.table.delete_item(Key={"Key": key})
-            return response["Attributes"]["Attr_Data"] if "Attributes" in response else None
+            return (
+                response["Attributes"]["Attr_Data"]
+                if "Attributes" in response
+                else None
+            )
         except boto3.exceptions.Boto3Error as e:
             self.logger.error(f"Error removing state: {e}")
             return None

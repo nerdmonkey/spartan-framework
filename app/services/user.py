@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from app.models.user import User
 from config.database import Session
 

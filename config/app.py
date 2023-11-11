@@ -1,9 +1,11 @@
 import logging
 from functools import lru_cache
+
 from pydantic import BaseSettings
 
 # Configure the logger
 log = logging.getLogger("uvicorn")
+
 
 class Settings(BaseSettings):
     """
@@ -18,6 +20,7 @@ class Settings(BaseSettings):
         DB_USERNAME (str): Username for the database.
         DB_PASSWORD (str): Password for the database.
     """
+
     ALLOWED_ORIGINS: str
     APP_ENVIRONMENT: str
     DB_TYPE: str
@@ -29,6 +32,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
 
 @lru_cache()
 def get_settings() -> Settings:

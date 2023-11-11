@@ -1,5 +1,6 @@
 from . import user_seeder as UserSeeder
 
+
 class DatabaseSeeder:
     """
     A class responsible for running database seeders.

@@ -1,7 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock
-from handlers.user import main  # Replace 'your_lambda_file' with the actual name of your lambda file
-from unittest.mock import patch
+
+from handlers.user import \
+    main  # Replace 'your_lambda_file' with the actual name of your lambda file
+
 
 def test_user_lambda_function():
     """
@@ -17,14 +20,9 @@ def test_user_lambda_function():
     mock_user_service.return_value.save = mock_save
 
     # Patch the UserService with the mock
-    with patch('handlers.user.UserService', new=mock_user_service):
+    with patch("handlers.user.UserService", new=mock_user_service):
         # Simulate Lambda event and context
-        event = {
-            "Records": [
-                {"body": "user1"},
-                {"body": "user2"}
-            ]
-        }
+        event = {"Records": [{"body": "user1"}, {"body": "user2"}]}
         context = {}  # Context can be an empty dictionary if not used in the function
 
         # Call the Lambda function

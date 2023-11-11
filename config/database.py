@@ -1,8 +1,12 @@
 from typing import Union
-from sqlalchemy.engine import Engine
+
 from sqlalchemy import create_engine  # Import create_engine
-from sqlalchemy.orm import sessionmaker, Session as SQLAlchemySession
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import sessionmaker
+
 from config.app import get_settings
+
 
 def create_database_engine() -> Engine:
     """
@@ -27,7 +31,7 @@ def create_database_engine() -> Engine:
     # Mapping for different database types to their URL formats
     url_formats = {
         "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
-        "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+        "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
     }
 
     if database_type in url_formats:
@@ -36,14 +40,16 @@ def create_database_engine() -> Engine:
             password=settings.DB_PASSWORD,
             host=settings.DB_HOST,
             port=settings.DB_PORT,
-            database=database
+            database=database,
         )
         return create_engine(database_url)
 
     raise ValueError(f"Unsupported database type: {database_type}")
 
+
 engine = create_database_engine()
 Session = sessionmaker(bind=engine)
+
 
 def get_session() -> SQLAlchemySession:
     """

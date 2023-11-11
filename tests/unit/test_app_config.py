@@ -1,7 +1,11 @@
 import os
-import pytest
 from unittest.mock import patch
-from config.app import Settings, get_settings  # Replace 'your_module' with the actual module name
+
+import pytest
+
+from config.app import (  # Replace 'your_module' with the actual module name
+    Settings, get_settings)
+
 
 def test_settings_loads_env_vars():
     """
@@ -28,6 +32,7 @@ def test_settings_loads_env_vars():
     assert settings.DB_USERNAME == "user"
     assert settings.DB_PASSWORD == "password"
 
+
 def test_get_settings_cached():
     """
     Test that the get_settings function is using cache for returning the Settings.
@@ -35,7 +40,7 @@ def test_get_settings_cached():
     This test verifies that when get_settings is called multiple times, it returns
     the same instance of Settings, indicating that the function's result is being cached.
     """
-    with patch('config.app.Settings', return_value=Settings()):
+    with patch("config.app.Settings", return_value=Settings()):
         first_call = get_settings()
         second_call = get_settings()
 

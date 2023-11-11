@@ -3,6 +3,7 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
+
 def test_base_creation():
     """
     Test to ensure that the SQLAlchemy Base class is successfully created.

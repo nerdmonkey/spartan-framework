@@ -1,8 +1,12 @@
-import pytest
 from unittest.mock import patch
-from config.app import get_settings
+
+import pytest
 from sqlalchemy.engine import Engine
-from config.database import get_session  # Replace 'your_module' with the actual module name
+
+from config.app import get_settings
+from config.database import \
+    get_session  # Replace 'your_module' with the actual module name
+
 
 def test_get_session():
     """
@@ -13,15 +17,15 @@ def test_get_session():
     SQLite database for testing to avoid side effects on the actual database.
     """
     test_settings = {
-        'DB_NAME': 'test_db',
-        'DB_TYPE': 'sqlite',
-        'DB_HOST': '',
-        'DB_PORT': '',
-        'DB_USERNAME': '',
-        'DB_PASSWORD': '',
+        "DB_NAME": "test_db",
+        "DB_TYPE": "sqlite",
+        "DB_HOST": "",
+        "DB_PORT": "",
+        "DB_USERNAME": "",
+        "DB_PASSWORD": "",
     }
 
-    with patch('config.app.get_settings', return_value=test_settings):
+    with patch("config.app.get_settings", return_value=test_settings):
         session = get_session()
 
         assert session is not None

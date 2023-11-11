@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import MagicMock
-from app.services.user import UserService
+
+import pytest
+
 from app.models.user import User
+from app.services.user import UserService
 from config.database import Session
+
 
 class TestUserService:
     def test_all(self, mocker):
@@ -14,7 +17,7 @@ class TestUserService:
         # Mock the session instance and its query method
         mocked_session = mocker.MagicMock()
         mocked_session.query.return_value.all.return_value = []
-        mocker.patch('app.services.user.Session', return_value=mocked_session)
+        mocker.patch("app.services.user.Session", return_value=mocked_session)
 
         service = UserService()
         result = service.all()
@@ -29,14 +32,15 @@ class TestUserService:
         """
         # Mock the session instance and its query method
         mocked_session = mocker.MagicMock()
-        mocked_session.query.return_value.filter_by.return_value.first.return_value = None
-        mocker.patch('app.services.user.Session', return_value=mocked_session)
+        mocked_session.query.return_value.filter_by.return_value.first.return_value = (
+            None
+        )
+        mocker.patch("app.services.user.Session", return_value=mocked_session)
 
         service = UserService()
         result = service.find(1)
 
         assert result is None
-
 
     def test_save(self, mocker):
         """
@@ -46,13 +50,13 @@ class TestUserService:
         """
         # Mock the session instance and its methods
         mocked_session = mocker.MagicMock()
-        mocker.patch('app.services.user.Session', return_value=mocked_session)
+        mocker.patch("app.services.user.Session", return_value=mocked_session)
 
         # Mock User object to simulate database save and refresh
-        mocked_user = User(id=1, username='test', email='test@example.com')
-        mocker.patch('app.services.user.User', return_value=mocked_user)
+        mocked_user = User(id=1, username="test", email="test@example.com")
+        mocker.patch("app.services.user.User", return_value=mocked_user)
 
         service = UserService()
-        new_user_id = service.save({'username': 'test', 'email': 'test@example.com'})
+        new_user_id = service.save({"username": "test", "email": "test@example.com"})
 
         assert new_user_id == 1  # Assuming the User's id is set to 1

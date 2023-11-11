@@ -7,6 +7,7 @@ class UserCreateRequest(BaseModel):
     password: str
 
 
-class UserEditRequest(UserCreateRequest):
+class UserUpdateRequest(UserCreateRequest):
+    username: str
     email: str
     password: str

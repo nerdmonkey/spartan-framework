@@ -2,16 +2,16 @@ import boto3
 import pytest
 from moto import mock_sqs
 
-from app.services.queue import (
-    QueueService,
-)  # Replace 'your_module' with the actual module name
+from app.services.queue import \
+    QueueService  # Replace 'your_module' with the actual module name
+
 
 @mock_sqs
 def test_send_message_to_standard_queue():
     # Setup
-    sqs = boto3.resource('sqs', region_name='us-east-1')
-    sqs.create_queue(QueueName='TestQueue')
-    queue_url = sqs.get_queue_by_name(QueueName='TestQueue').url
+    sqs = boto3.resource("sqs", region_name="us-east-1")
+    sqs.create_queue(QueueName="TestQueue")
+    queue_url = sqs.get_queue_by_name(QueueName="TestQueue").url
     queue_service = QueueService()
     message = {"key": "value"}
 
@@ -19,7 +19,7 @@ def test_send_message_to_standard_queue():
     response = queue_service.send_message(queue_url, message, str(1), str(1))
 
     # Assert
-    assert 'MessageId' in response
+    assert "MessageId" in response
 
 
 @mock_sqs
