@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from handlers.user import main  # Replace 'your_lambda_file' with the actual name of your lambda file
 from unittest.mock import patch
 
-def test_lambda_function():
+def test_user_lambda_function():
     """
     Test the AWS Lambda function to ensure it processes the event records correctly.
 
