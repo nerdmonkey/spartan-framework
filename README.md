@@ -10,21 +10,22 @@ pip install -r requirements.txt
 ```
 2. Copy the .env.example to .env
 
-3. Copy alembic.ini.example to alembic.ini
+3. Configure the migration
+```bash
+spartan migrate init
+```
 
-4. Create spartan.db inside the database folder
-
-5. Create all the tables
+4. Create all the tables
 ```bash
 spartan migrate upgrade
 ```
 
-6. Insert dummy data
+5. Insert dummy data
 ```bash
 spartan db seed
 ```
 
-7. Then run it using the following command
+6. Then run it using the following command
 ```bash
 spartan serve
 ```
