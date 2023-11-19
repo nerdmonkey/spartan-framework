@@ -66,6 +66,3 @@ def get_settings() -> Settings:
         Settings.Config.env_file = ".env_testing"
 
     return Settings()
-
-# Example usage
-settings = get_settings()

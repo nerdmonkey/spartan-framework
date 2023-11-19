@@ -1,62 +1,74 @@
-from unittest.mock import MagicMock
-
 import pytest
-
+from unittest.mock import create_autospec, patch
+from sqlalchemy.orm import Session
 from app.models.user import User
 from app.services.user import UserService
-from config.database import Session
 
+@pytest.fixture
+def mock_session():
+    # Create a mock session to simulate database interactions
+    session = create_autospec(Session, instance=True)
+    return session
 
-class TestUserService:
-    def test_all(self, mocker):
-        """
-        Test the all method of UserService.
-        This test ensures that the all method queries the User model for all records.
-        It mocks the Session and query to prevent database access.
-        """
-        # Mock the session instance and its query method
-        mocked_session = mocker.MagicMock()
-        mocked_session.query.return_value.all.return_value = []
-        mocker.patch("app.services.user.Session", return_value=mocked_session)
+@pytest.fixture
+def user_service(mock_session):
+    # Patch the Session object in user_service to use the mock session
+    with patch('app.services.user.Session', return_value=mock_session):
+        yield UserService()
 
-        service = UserService()
-        result = service.all()
+def test_all_users(user_service, mock_session):
+    """
+    Test retrieving all users.
+    """
+    mock_session.query.return_value.all.return_value = [
+        User(id=1, username='testuser1'),
+        User(id=2, username='testuser2')
+    ]
+    users = user_service.all()
+    assert len(users) == 2
+    assert users[0].id == 1
+    assert users[1].username == 'testuser2'
 
-        assert result == []
+def test_find_user(user_service, mock_session):
+    """
+    Test finding a specific user.
+    """
+    mock_user = User(id=1, username='testuser')
+    mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
+    user = user_service.find(1)
+    assert user.id == 1
+    assert user.username == 'testuser'
 
-    def test_find(self, mocker):
-        """
-        Test the find method of UserService.
-        This test ensures that the find method queries the User model for a specific record by ID.
-        It mocks the Session and query to prevent database access.
-        """
-        # Mock the session instance and its query method
-        mocked_session = mocker.MagicMock()
-        mocked_session.query.return_value.filter_by.return_value.first.return_value = (
-            None
-        )
-        mocker.patch("app.services.user.Session", return_value=mocked_session)
+def test_save_user(user_service, mock_session):
+    """
+    Test saving a new user.
+    """
+    user_service.save({'username': 'newuser', 'password': 'newpass'})
+    mock_session.add.assert_called_once()
+    mock_session.flush.assert_called_once()
 
-        service = UserService()
-        result = service.find(1)
+def test_update_user(user_service, mock_session):
+    """
+    Test updating an existing user.
+    """
+    mock_user = User(id=1, username='olduser')
+    mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
+    updated_user = user_service.update(1, {'username': 'updateduser'})
+    assert updated_user.username == 'updateduser'
 
-        assert result is None
+def test_delete_user(user_service, mock_session):
+    """
+    Test deleting a user.
+    """
+    user_service.delete(1)
+    mock_session.query.return_value.filter_by.return_value.delete.assert_called_once()
 
-    def test_save(self, mocker):
-        """
-        Test the save method of UserService.
-        This test ensures that the save method adds a new record to the User model.
-        It mocks the Session and the add, commit, and refresh methods to prevent database access.
-        """
-        # Mock the session instance and its methods
-        mocked_session = mocker.MagicMock()
-        mocker.patch("app.services.user.Session", return_value=mocked_session)
+def test_update_nonexistent_user(user_service, mock_session):
+    """
+    Test updating a user that does not exist.
+    """
+    mock_session.query.return_value.filter_by.return_value.first.return_value = None
+    with pytest.raises(ValueError):
+        user_service.update(99, {'username': 'nonexistent'})
 
-        # Mock User object to simulate database save and refresh
-        mocked_user = User(id=1, username="test", email="test@example.com")
-        mocker.patch("app.services.user.User", return_value=mocked_user)
-
-        service = UserService()
-        new_user_id = service.save({"username": "test", "email": "test@example.com"})
-
-        assert new_user_id == 1  # Assuming the User's id is set to 1
+# Additional tests to cover failure scenarios and exception handling can be added here.
