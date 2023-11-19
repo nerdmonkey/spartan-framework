@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import pytest
 from starlette.testclient import TestClient
 from fastapi.testclient import TestClient
@@ -8,14 +10,44 @@ from app.models.base import Base  # Import your SQLAlchemy Base here
 from app.models.user import User
 from config.database import get_session  # Import the get_db dependency
 
+load_dotenv(dotenv_path=".env_testing")
+
 get_db = get_session()
 
-# Assuming you have a way to configure your app to use this test database
-TEST_DATABASE_URL = "sqlite:///./database/spartan.db"
+# Function to construct database URL based on environment variables
+def construct_database_url():
+    db_type = os.environ.get("DB_TYPE", "sqlite")
+    db_name = os.environ.get("DB_NAME", "spartan")
+    if db_type == "sqlite":
+        # SQLite uses a different URL format
+        return f"sqlite:///./database/{db_name}.db"
+    else:
+            db_host = os.getenv("DB_HOST", "localhost")
+            db_port = os.getenv("DB_PORT", "5432")
+            db_username = os.getenv("DB_USERNAME", "user")
+            db_password = os.getenv("DB_PASSWORD", "password")
+
+            # PostgreSQL URL format
+            if db_type == "psql":
+                return f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+            # MySQL URL format
+            elif db_type == "mysql":
+                return f"mysql+pymysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+            else:
+                raise ValueError(f"Unsupported database type: {db_type}")
+
+    raise ValueError(f"Unsupported database type: {db_type}")
+
 
 
 @pytest.fixture(scope="module")
 def test_db_session():
+    # Use the constructed database URL for testing
+    TEST_DATABASE_URL = construct_database_url()
+
+    # Assuming you have a way to configure your app to use this test database
+    # TEST_DATABASE_URL = "sqlite:///./database/spartan.db"
+
     # Setup: Create a new test database
     engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(bind=engine)
