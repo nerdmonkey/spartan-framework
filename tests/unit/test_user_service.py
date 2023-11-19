@@ -70,5 +70,3 @@ def test_update_nonexistent_user(user_service, mock_session):
     mock_session.query.return_value.filter_by.return_value.first.return_value = None
     with pytest.raises(ValueError):
         user_service.update(99, {'username': 'nonexistent'})
-
-# Additional tests to cover failure scenarios and exception handling can be added here.

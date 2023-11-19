@@ -1,77 +1,55 @@
-import os
-from unittest.mock import patch
-
-import boto3
 import pytest
-from moto import mock_dynamodb
-
+from unittest.mock import MagicMock, patch
 from app.services.app import AppService
+from botocore.exceptions import BotoCoreError
+import jsonpickle
 
+@pytest.fixture
+def mock_dynamodb_resource(mocker):
+    return mocker.patch('boto3.resource')
 
-@pytest.fixture(scope="function")
-def dynamodb_setup():
-    """
-    Fixture for setting up DynamoDB for testing.
-    """
-    os.environ["GSM_TABLE"] = "GlobalStateTable"
-    os.environ["AWS_REGION"] = "us-east-1"
+@pytest.fixture
+def mock_table():
+    table = MagicMock()
+    table.name = 'test_table'
+    return table
 
-    with mock_dynamodb():
-        dynamodb = boto3.resource("dynamodb", "us-east-1")
-        table = dynamodb.create_table(
-            TableName="GlobalStateTable",
-            KeySchema=[{"AttributeName": "Key", "KeyType": "HASH"}],
-            AttributeDefinitions=[{"AttributeName": "Key", "AttributeType": "S"}],
-            ProvisionedThroughput={"ReadCapacityUnits": 10, "WriteCapacityUnits": 10},
-        )
-        table.meta.client.get_waiter("table_exists").wait(TableName="GlobalStateTable")
-        yield
+@pytest.fixture
+def app_service(mock_dynamodb_resource, mock_table):
+    mock_dynamodb_resource.return_value.Table.return_value = mock_table
+    service = AppService()
+    return service
 
+def test_set_state_success(app_service, mock_table):
+    """Test setting state successfully."""
+    mock_table.update_item.return_value = {"Attributes": {"Attr_Data": "serialized_data"}}
+    response = app_service.set_state("test_key", {"some": "data"})
+    assert response == "serialized_data"
 
-@pytest.fixture(scope="function")
-def app_service(dynamodb_setup):
-    """
-    Fixture for creating an instance of AppService.
-    """
-    return AppService()
+def test_set_state_error(app_service, mock_table):
+    """Test error during setting state."""
+    mock_table.update_item.side_effect = BotoCoreError
+    with pytest.raises(BotoCoreError):
+        app_service.set_state("test_key", {"some": "data"})
 
+def test_get_state_success(app_service, mock_table):
+    """Test retrieving state successfully."""
+    test_data = {"some": "data"}
+    serialized_data = jsonpickle.encode(test_data)
+    mock_table.get_item.return_value = {"Item": {"Attr_Data": serialized_data}}
+    response = app_service.get_state("test_key")
+    assert response == test_data
 
-def test_set_state(app_service):
-    """
-    Test setting a state in the DynamoDB table.
-    """
-    key = "testKey"
-    value = {"data": "testValue"}
-    result = app_service.set_state(key, value)
+def test_get_state_not_found(app_service, mock_table):
+    """Test retrieving state that doesn't exist."""
+    mock_table.get_item.return_value = {}
+    response = app_service.get_state("missing_key")
+    assert response is None
 
-    assert result is not None
+def test_remove_state_success(app_service, mock_table):
+    """Test removing state successfully."""
+    mock_table.delete_item.return_value = {}
+    response = app_service.remove_state("test_key")
+    assert response is None
 
-
-def test_get_state(app_service):
-    """
-    Test retrieving a state from the DynamoDB table.
-    """
-    key = "testKey"
-    value = {"data": "testValue"}
-    app_service.set_state(key, value)
-
-    result = app_service.get_state(key)
-    assert result == value
-
-
-def test_remove_state(app_service):
-    """
-    Test removing a state from the DynamoDB table.
-    """
-    # Mock delete_item method to include 'Attr_Data' in the response
-    with patch.object(
-        app_service.table,
-        "delete_item",
-        return_value={"Attributes": {"Attr_Data": "some_serialized_data"}},
-    ):
-        key = "testKey"
-        value = {"data": "testValue"}
-        app_service.set_state(key, value)
-
-        result = app_service.remove_state(key)
-        assert result == "some_serialized_data"
+# Additional tests for error handling in get_state and remove_state can be added here.
