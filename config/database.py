@@ -10,7 +10,6 @@ def create_database_engine() -> Engine:
     database = settings.DB_NAME
 
     # Mapping for different database types to their URL formats
-    print(database_type)
     url_formats = {
         "sqlite": f"sqlite:///./database/{database}.db",
         "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
