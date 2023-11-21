@@ -14,6 +14,7 @@ def create_database_engine() -> Engine:
         "sqlite": f"sqlite:///./database/{database}.db",
         "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
         "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
+        "mssql": "mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}",
     }
 
     if database_type in url_formats:
@@ -25,6 +26,7 @@ def create_database_engine() -> Engine:
                 host=settings.DB_HOST,
                 port=settings.DB_PORT,
                 database=database,
+                driver=settings.DB_DRIVER
             )
         return create_engine(database_url, connect_args={"check_same_thread": False} if database_type == "sqlite" else {})
 

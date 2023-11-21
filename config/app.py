@@ -27,7 +27,9 @@ class Settings(BaseSettings):
         ALLOWED_ORIGINS (str): Comma-separated list of allowed origins for CORS.
         APP_ENVIRONMENT (str): The current environment of the app (e.g., local, production).
         DB_TYPE (str): Type of the database (e.g., sqlite, postgres).
+        DB_DRIVER (str): Driver of the database (e.g., ODBC+Driver+17+for+SQL+Server).
         DB_HOST (str): Host address of the database.
+        DB_PORT (int): Port number of the database.
         DB_NAME (str): Name of the database.
         DB_USERNAME (str): Username for the database.
         DB_PASSWORD (str): Password for the database.
@@ -36,7 +38,9 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str
     APP_ENVIRONMENT: str
     DB_TYPE: str
+    DB_DRIVER: str
     DB_HOST: str
+    DB_PORT: int
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
@@ -61,8 +65,8 @@ def get_settings() -> Settings:
     log.info("Loading config settings from the environment...")
     app_environment = os.environ.get("APP_ENVIRONMENT", "production")
 
-    if app_environment == "local":
-        log.info("Using .env_testing for local environment")
+    if app_environment == "test":
+        log.info("Using .env_testing for test environment")
         Settings.Config.env_file = ".env_testing"
 
     return Settings()
