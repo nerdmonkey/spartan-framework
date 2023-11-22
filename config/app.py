@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 import logging
 from functools import lru_cache
-from pydantic import BaseSettings
+from pydantic import BaseSettings, validator
+from typing import Optional
 
 # Load environment variables from a specific file based on a condition
 if os.environ.get("APP_ENVIRONMENT") == "local":
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
         DB_TYPE (str): Type of the database (e.g., sqlite, postgres).
         DB_DRIVER (str): Driver of the database (e.g., ODBC+Driver+17+for+SQL+Server).
         DB_HOST (str): Host address of the database.
-        DB_PORT (int): Port number of the database.
+        DB_PORT (Optional[int]): Port number of the database. Can be None.
         DB_NAME (str): Name of the database.
         DB_USERNAME (str): Username for the database.
         DB_PASSWORD (str): Password for the database.
@@ -40,7 +41,7 @@ class Settings(BaseSettings):
     DB_TYPE: str
     DB_DRIVER: str
     DB_HOST: str
-    DB_PORT: int
+    DB_PORT: Optional[int] = None
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
@@ -48,6 +49,13 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+    @validator('DB_PORT', pre=True, always=True)
+    def default_db_port(cls, v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
 
 @lru_cache()
 def get_settings() -> Settings:

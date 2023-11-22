@@ -14,6 +14,10 @@ section = config.config_ini_section
 config.set_section_option(section, "DB_USERNAME", f"{settings.DB_USERNAME}")
 config.set_section_option(section, "DB_PASSWORD", f"{settings.DB_PASSWORD}")
 config.set_section_option(section, "DB_HOST", f"{settings.DB_HOST}")
+
+if settings.DB_PORT is not None:
+    config.set_section_option(section, "DB_PORT", str(settings.DB_PORT))
+
 config.set_section_option(section, "DB_NAME", f"{settings.DB_NAME}")
 config.set_section_option(section, "DB_DRIVER", f"{settings.DB_DRIVER}")
 
