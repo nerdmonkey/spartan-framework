@@ -17,10 +17,10 @@ get_db = get_session()
 # Function to construct database URL based on environment variables
 def construct_database_url():
     db_type = os.environ.get("DB_TYPE", "sqlite")
-    db_name = os.environ.get("DB_NAME", "spartan")
+    db_name = 'spartan.db'
     if db_type == "sqlite":
         # SQLite uses a different URL format
-        return f"sqlite:///./database/{db_name}.db"
+        return f"sqlite:///./database/{db_name}"
     else:
             db_host = os.getenv("DB_HOST", "localhost")
             db_port = os.getenv("DB_PORT", "5432")
