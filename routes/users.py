@@ -7,7 +7,6 @@ from config.database import get_session
 from sqlalchemy.exc import DatabaseError
 from app.services.user import UserService
 
-
 # Create an instance of the UserService and use it in the API endpoints
 user_service = UserService(db=None)  # Pass the database session as needed
 
@@ -21,16 +20,47 @@ async def get_users(
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
     db: Session = Depends(get_session),
 ):
+    """
+    Get a list of users with pagination.
+
+    Args:
+        page (int): The page number.
+        items_per_page (int): Number of items per page.
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        List[UserResponse]: List of user objects.
+    """
     user_service.db = db
     return user_service.get_users(page, items_per_page)
 
 @route.get("/users/{user_id}", status_code=200, response_model=UserResponse)
 async def get_user(user_id: int, db: Session = Depends(get_session)):
+    """
+    Get a user by their unique identifier.
+
+    Args:
+        user_id (int): The unique identifier of the user.
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        UserResponse: User object.
+    """
     user_service.db = db
     return user_service.get_user(user_id)
 
 @route.post("/users", status_code=201, response_model=UserCreateResponse)
 async def create_user(user: UserCreateRequest, db: Session = Depends(get_session)):
+    """
+    Create a new user.
+
+    Args:
+        user (UserCreateRequest): User creation request.
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        UserCreateResponse: Created user object.
+    """
     user_service.db = db
     return user_service.create_user(user)
 
@@ -38,11 +68,29 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
 async def update_user(
     user_id: int, user: UserUpdateRequest, db: Session = Depends(get_session)
 ):
+    """
+    Update an existing user's information.
+
+    Args:
+        user_id (int): The unique identifier of the user to update.
+        user (UserUpdateRequest): User update request.
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        UserUpdateResponse: Updated user object.
+    """
     user_service.db = db
     return user_service.update_user(user_id, user)
 
 @route.delete("/users/{user_id}", status_code=204)
 async def delete_user(user_id: int, db: Session = Depends(get_session)):
+    """
+    Delete a user by their unique identifier.
+
+    Args:
+        user_id (int): The unique identifier of the user to delete.
+        db (Session): SQLAlchemy database session.
+    """
     user_service.db = db
     user_service.delete_user(user_id)
     return {"ok": True}
