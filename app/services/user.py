@@ -1,59 +1,76 @@
-from typing import List, Optional
-from contextlib import contextmanager
-from sqlalchemy.exc import SQLAlchemyError
+from typing import List
+from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from app.models.user import User
-from config.database import Session
+from app.requests.user import UserCreateRequest, UserUpdateRequest
+from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
+from sqlalchemy.exc import DatabaseError
 
 class UserService:
-    """
-    A service class for handling user-related operations.
-    Provides methods to interact with the User model using SQLAlchemy.
-    """
+    def __init__(self, db: Session):
+        self.db = db
 
-    @contextmanager
-    def session_scope(self):
-        """Provide a transactional scope around a series of operations."""
-        session = Session()
+    def get_user_by_id(self, user_id: int) -> User:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+
+    def get_users(
+        self, page: int, items_per_page: int
+    ) -> List[UserResponse]:
         try:
-            yield session
-            session.commit()
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+            offset = (page - 1) * items_per_page
+            users = self.db.query(User).offset(offset).limit(items_per_page).all()
+            user_responses = [
+                UserResponse(id=user.id, username=user.username, email=user.email)
+                for user in users
+            ]
+            return user_responses
+        except DatabaseError as e:
+            raise HTTPException(status_code=500, detail="Internal server error")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Internal server error")
 
-    def all(self) -> List[User]:
-        """Retrieves all user records from the database."""
-        with self.session_scope() as session:
-            return session.query(User).all()
+    def get_user(self, user_id: int) -> UserResponse:
+        user = self.get_user_by_id(user_id)
+        return UserResponse(id=user.id, username=user.username, email=user.email)
 
-    def find(self, id: int) -> Optional[User]:
-        """Retrieves a single user record by its ID."""
-        with self.session_scope() as session:
-            return session.query(User).filter_by(id=id).first()
+    def create_user(self, user: UserCreateRequest) -> UserCreateResponse:
+        existing_user = self.db.query(User).filter(User.email == user.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=422, detail="User with this email already exists"
+            )
+        hashed_password = "hashed_" + user.password
+        db_user = User(username=user.username, email=user.email, password=hashed_password)
+        self.db.add(db_user)
+        self.db.commit()
+        self.db.refresh(db_user)
+        response_data = {
+            "id": db_user.id,
+            "username": db_user.username,
+            "email": db_user.email,
+        }
+        return response_data
 
-    def save(self, data: dict) -> int:
-        """Adds a new user record to the database."""
-        with self.session_scope() as session:
-            new_user = User(**data)
-            session.add(new_user)
-            session.flush()
-            return new_user.id
+    def update_user(self, user_id: int, user: UserUpdateRequest) -> UserUpdateResponse:
+        db_user = self.get_user_by_id(user_id)
+        user_data = user.dict(exclude_unset=True)
+        if "password" in user_data:
+            user_data["password"] = "hashed_" + user_data["password"]
+        for key, value in user_data.items():
+            setattr(db_user, key, value)
+        self.db.commit()
+        self.db.refresh(db_user)
+        response_data = {
+            "id": db_user.id,
+            "username": db_user.username,
+            "email": db_user.email,
+        }
+        return response_data
 
-    def update(self, id: int, data: dict) -> User:
-        """Updates an existing user record in the database."""
-        with self.session_scope() as session:
-            user = session.query(User).filter_by(id=id).first()
-            if not user:
-                raise ValueError(f"User with ID {id} not found")
-
-            for key, value in data.items():
-                setattr(user, key, value)
-            return user
-
-    def delete(self, id: int) -> int:
-        """Deletes a user record from the database."""
-        with self.session_scope() as session:
-            session.query(User).filter_by(id=id).delete()
-            return id
+    def delete_user(self, user_id: int):
+        db_user = self.get_user_by_id(user_id)
+        self.db.delete(db_user)
+        self.db.commit()
