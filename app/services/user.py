@@ -43,40 +43,40 @@ class UserService:
                 status_code=422, detail="User with this email already exists"
             )
         hashed_password = "hashed_" + user.password
-        db = User(username=user.username, email=user.email, password=hashed_password)
-        self.db.add(db)
+        item = User(username=user.username, email=user.email, password=hashed_password)
+        self.db.add(item)
         self.db.commit()
-        self.db.refresh(db)
+        self.db.refresh(item)
         response_data = {
-            "id": db.id,
-            "username": db.username,
-            "email": db.email,
+            "id": item.id,
+            "username": item.username,
+            "email": item.email,
         }
         return response_data
 
     def update(self, id: int, user: UserUpdateRequest) -> UserUpdateResponse:
-        db = self.get_by_id(id)
+        item = self.get_by_id(id)
         data = user.dict(exclude_unset=True)
         if "password" in data:
             data["password"] = "hashed_" + data["password"]
         for key, value in data.items():
-            setattr(db, key, value)
+            setattr(item, key, value)
         self.db.commit()
-        self.db.refresh(db)
+        self.db.refresh(item)
         response_data = {
-            "id": db.id,
-            "username": db.username,
-            "email": db.email,
+            "id": item.id,
+            "username": item.username,
+            "email": item.email,
         }
         return response_data
 
     def delete(self, id: int):
-        db = self.get_by_id(id)
-        self.db.delete(db)
+        item = self.get_by_id(id)
+        self.db.delete(item)
         self.db.commit()
         response_data = {
-            "id": db.id,
-            "username": db.username,
-            "email": db.email,
+            "id": item.id,
+            "username": item.username,
+            "email": item.email,
         }
         return response_data
