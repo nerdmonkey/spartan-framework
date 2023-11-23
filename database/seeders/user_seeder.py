@@ -1,23 +1,17 @@
 from config.database import get_session
 from app.models.user import User
+from faker import Faker
 
 def run():
-    users = [
-        {"username": "andeng", "email": "andeng@python-spartan.com", "password": "andeng", },
-        {"username": "iviang", "email": "iviang@python-spartan.com", "password": "iviang", },
-        {"username": "loki", "email": "loki@python-spartan.com", "password": "loki"},
-        {"username": "laleng", "email": "laleng@python-spartan.com", "password": "laleng"},
-        {"username": "zeus", "email": "zeus@python-spartan.com", "password": "zeus123"},
-        {"username": "hera", "email": "hera@python-spartan.com", "password": "hera123"},
-        {"username": "athena", "email": "athena@python-spartan.com", "password": "athena123", },
-        {"username": "apollo", "email": "apollo@python-spartan.com", "password": "apollo123", },
-        {"username": "artemis", "email": "artemis@python-spartan.com", "password": "artemis123", },
-        {"username": "hunk", "email": "hunk@python-spartan.com", "password": "hunk123", },
-    ]
-
     db = get_session()
+    fake = Faker()
 
-    for user in users:
+    for x in range(1,30):
+        user = {
+            "username": fake.user_name(),
+            "email": fake.email(),
+            "password": fake.password(),
+        }
         user = User(**user)
         db.add(user)
         db.commit()
