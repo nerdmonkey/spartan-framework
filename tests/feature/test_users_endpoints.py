@@ -72,6 +72,6 @@ def test_delete_user(client):
 
     # When: the client makes a DELETE request to remove the user
     response = client.delete(f"/api/users/{user_id}")
-
+    print(response.content)
     # Then: the server should respond with a 204 status code indicating successful deletion
     assert response.status_code == status.HTTP_204_NO_CONTENT
