@@ -6,7 +6,7 @@ def run():
     db = get_session()
     fake = Faker()
 
-    for x in range(1,30):
+    for x in range(0,30):
         user = {
             "username": fake.user_name(),
             "email": fake.email(),
