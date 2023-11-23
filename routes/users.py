@@ -36,13 +36,13 @@ async def get_users(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@route.get("/users/{user_id}", status_code=200, response_model=UserResponse)
-async def get_user(user_id: int, db: Session = Depends(get_session)):
+@route.get("/users/{id}", status_code=200, response_model=UserResponse)
+async def get_user(id: int, db: Session = Depends(get_session)):
     """
     Get a user by their unique identifier.
 
     Args:
-        user_id (int): The unique identifier of the user.
+        id (int): The unique identifier of the user.
         db (Session): SQLAlchemy database session.
 
     Returns:
@@ -50,7 +50,7 @@ async def get_user(user_id: int, db: Session = Depends(get_session)):
     """
     try:
         user_service.db = db
-        user = user_service.find(user_id)
+        user = user_service.find(id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         return user
@@ -76,15 +76,15 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@route.put("/users/{user_id}", status_code=200, response_model=UserUpdateResponse)
+@route.put("/users/{id}", status_code=200, response_model=UserUpdateResponse)
 async def update_user(
-    user_id: int, user: UserUpdateRequest, db: Session = Depends(get_session)
+    id: int, user: UserUpdateRequest, db: Session = Depends(get_session)
 ):
     """
     Update an existing user's information.
 
     Args:
-        user_id (int): The unique identifier of the user to update.
+        id (int): The unique identifier of the user to update.
         user (UserUpdateRequest): User update request.
         db (Session): SQLAlchemy database session.
 
@@ -93,25 +93,25 @@ async def update_user(
     """
     try:
         user_service.db = db
-        updated_user = user_service.update(user_id, user)
+        updated_user = user_service.update(id, user)
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
         return updated_user
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@route.delete("/users/{user_id}", status_code=204)
-async def delete_user(user_id: int, db: Session = Depends(get_session)):
+@route.delete("/users/{id}", status_code=204)
+async def delete_user(id: int, db: Session = Depends(get_session)):
     """
     Delete a user by their unique identifier.
 
     Args:
-        user_id (int): The unique identifier of the user to delete.
+        id (int): The unique identifier of the user to delete.
         db (Session): SQLAlchemy database session.
     """
     try:
         user_service.db = db
-        success = user_service.delete(user_id)
+        success = user_service.delete(id)
         if not success:
             raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
