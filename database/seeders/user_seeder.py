@@ -1,9 +1,7 @@
-from app.services.user import UserService
-
+from config.database import get_session
+from app.models.user import User
 
 def run():
-    user_service = UserService()
-
     users = [
         {
             "username": "andeng",
@@ -16,7 +14,7 @@ def run():
             "password": "iviang",
         },
         {"username": "loki", "email": "loki@python-spartan.com", "password": "loki"},
-        {"username": "lara", "email": "lara@python-spartan.com", "password": "lara"},
+        {"username": "laleng", "email": "laleng@python-spartan.com", "password": "laleng"},
         {"username": "zeus", "email": "zeus@python-spartan.com", "password": "zeus123"},
         {"username": "hera", "email": "hera@python-spartan.com", "password": "hera123"},
         {
@@ -35,11 +33,17 @@ def run():
             "password": "artemis123",
         },
         {
-            "username": "hades",
-            "email": "hades@python-spartan.com",
-            "password": "hades123",
+            "username": "hunk",
+            "email": "hunk@python-spartan.com",
+            "password": "hunk123",
         },
     ]
 
+    user_model = User
+    db = get_session()
+
     for user in users:
-        user_service.save(user)
+        user = User(username=user['username'], email=user['email'], password=user['password'])
+        db.add(user)
+        db.commit()
+        db.refresh(user)
