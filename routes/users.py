@@ -6,8 +6,7 @@ from app.responses.user import UserCreateResponse, UserResponse, UserUpdateRespo
 from config.database import get_session
 from app.services.user import UserService
 
-# Create an instance of the UserService and use it in the API endpoints
-user_service = UserService(db=None)  # Pass the database session as needed
+user_service = UserService(db=None)
 
 route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
