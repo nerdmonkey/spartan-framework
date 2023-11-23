@@ -43,7 +43,7 @@ def run():
     db = get_session()
 
     for user in users:
-        user = User(username=user['username'], email=user['email'], password=user['password'])
+        user = User(**user)
         db.add(user)
         db.commit()
         db.refresh(user)
