@@ -22,8 +22,8 @@ class UserCreateRequest(BaseModel):
 class UserUpdateRequest(UserCreateRequest):
     @validator('email')
     def email_must_be_unique(cls, v, values, **kwargs):
-        # Assuming you have access to the user's ID or some unique identifier here
-        user_id = values.get('user_id')  # Replace 'user_id' with the actual field name
+
+        user_id = values.get('user_id')
         if cls.is_email_exist(v, db):
             raise ValueError('Email already in use')
         return v
