@@ -96,6 +96,8 @@ async def update_user(
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
         return updated_user
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
