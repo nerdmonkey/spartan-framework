@@ -1,10 +1,6 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from handlers.user import (
-    main,
-)
+from handlers.user import main
 
 
 def test_user_lambda_function():
