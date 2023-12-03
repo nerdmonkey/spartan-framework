@@ -39,7 +39,7 @@ if settings.APP_ENVIRONMENT == "local" or settings.APP_ENVIRONMENT == "test":
 app = FastAPI(
     title="Spartan",
     description=description,
-    version="0.1.0",
+    version="0.2.0",
     terms_of_service="N/A",
     contact={
         "name": "Sydel Palinlin",
