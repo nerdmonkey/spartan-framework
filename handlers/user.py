@@ -1,5 +1,6 @@
 from app.services.user import UserService
 
+
 def main(event, context):
     """
     Process and save user data from AWS Lambda event records.

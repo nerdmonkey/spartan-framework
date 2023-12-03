@@ -1,43 +1,45 @@
 import os
-from dotenv import load_dotenv
+
 import pytest
-from starlette.testclient import TestClient
+from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from public.main import app
+from starlette.testclient import TestClient
+
 from app.models.base import Base  # Import your SQLAlchemy Base here
 from app.models.user import User
 from config.database import get_session  # Import the get_db dependency
+from public.main import app
 
 load_dotenv(dotenv_path=".env_testing")
 
 get_db = get_session()
 
+
 # Function to construct database URL based on environment variables
 def construct_database_url():
     db_type = os.environ.get("DB_TYPE", "sqlite")
-    db_name = 'spartan.db'
+    db_name = "spartan.db"
     if db_type == "sqlite":
         # SQLite uses a different URL format
         return f"sqlite:///./database/{db_name}"
     else:
-            db_host = os.getenv("DB_HOST", "localhost")
-            db_port = os.getenv("DB_PORT", "5432")
-            db_username = os.getenv("DB_USERNAME", "user")
-            db_password = os.getenv("DB_PASSWORD", "password")
+        db_host = os.getenv("DB_HOST", "localhost")
+        db_port = os.getenv("DB_PORT", "5432")
+        db_username = os.getenv("DB_USERNAME", "user")
+        db_password = os.getenv("DB_PASSWORD", "password")
 
-            # PostgreSQL URL format
-            if db_type == "psql":
-                return f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
-            # MySQL URL format
-            elif db_type == "mysql":
-                return f"mysql+pymysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
-            else:
-                raise ValueError(f"Unsupported database type: {db_type}")
+        # PostgreSQL URL format
+        if db_type == "psql":
+            return f"postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+        # MySQL URL format
+        elif db_type == "mysql":
+            return f"mysql+pymysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+        else:
+            raise ValueError(f"Unsupported database type: {db_type}")
 
     raise ValueError(f"Unsupported database type: {db_type}")
-
 
 
 @pytest.fixture(scope="module")

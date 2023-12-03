@@ -1,16 +1,19 @@
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
-from config.database import get_session
 from app.services.user import UserService
+from config.database import get_session
 
 user_service = UserService(db=None)
 
 route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
 )
+
 
 @route.get("/users", status_code=200, response_model=List[UserResponse])
 async def get_users(
@@ -35,6 +38,7 @@ async def get_users(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @route.get("/users/{id}", status_code=200, response_model=UserResponse)
 async def get_user(id: int, db: Session = Depends(get_session)):
     """
@@ -56,6 +60,7 @@ async def get_user(id: int, db: Session = Depends(get_session)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
 @route.post("/users", status_code=201, response_model=UserCreateResponse)
 async def create_user(user: UserCreateRequest, db: Session = Depends(get_session)):
     """
@@ -74,6 +79,7 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
         return created_user
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @route.put("/users/{id}", status_code=200, response_model=UserUpdateResponse)
 async def update_user(
@@ -100,6 +106,7 @@ async def update_user(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @route.delete("/users/{id}", status_code=204)
 async def delete_user(id: int, db: Session = Depends(get_session)):

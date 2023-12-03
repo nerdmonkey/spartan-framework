@@ -1,10 +1,13 @@
 from typing import List
-from sqlalchemy.orm import Session
+
 from fastapi import HTTPException
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import Session
+
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
-from sqlalchemy.exc import DatabaseError
+
 
 class UserService:
     def __init__(self, db: Session):
@@ -16,9 +19,7 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(
-        self, page: int, items_per_page: int
-    ) -> List[UserResponse]:
+    def all(self, page: int, items_per_page: int) -> List[UserResponse]:
         try:
             offset = (page - 1) * items_per_page
             users = self.db.query(User).offset(offset).limit(items_per_page).all()

@@ -1,9 +1,12 @@
-from pydantic import BaseModel, validator, EmailStr
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, validator
+
 from app.models.user import User
 from config.database import get_session
 
 db = get_session()
+
 
 class UserCreateRequest(BaseModel):
     username: str

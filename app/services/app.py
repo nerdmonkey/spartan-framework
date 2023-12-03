@@ -1,7 +1,9 @@
 import logging
 import os
+
 import boto3
 import jsonpickle
+
 
 class AppService:
     """
@@ -59,7 +61,7 @@ class AppService:
             )
             return response["Attributes"]["Attr_Data"]
         except boto3.exceptions.Boto3Error as e:
-            self._handle_dynamodb_error(e, 'setting')
+            self._handle_dynamodb_error(e, "setting")
 
     def get_state(self, key):
         """Retrieves a state from the DynamoDB table."""
@@ -68,7 +70,7 @@ class AppService:
             item = response.get("Item", {})
             return self._deserialize(item["Attr_Data"]) if "Attr_Data" in item else None
         except boto3.exceptions.Boto3Error as e:
-            self._handle_dynamodb_error(e, 'getting')
+            self._handle_dynamodb_error(e, "getting")
 
     def remove_state(self, key):
         """Removes a state from the DynamoDB table."""
@@ -76,4 +78,4 @@ class AppService:
             response = self.table.delete_item(Key={"Key": key})
             return response.get("Attributes", {}).get("Attr_Data")
         except boto3.exceptions.Boto3Error as e:
-            self._handle_dynamodb_error(e, 'removing')
+            self._handle_dynamodb_error(e, "removing")

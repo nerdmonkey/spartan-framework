@@ -1,9 +1,10 @@
-import os
-from dotenv import load_dotenv
 import logging
+import os
 from functools import lru_cache
-from pydantic import BaseSettings, validator
 from typing import Optional
+
+from dotenv import load_dotenv
+from pydantic import BaseSettings, validator
 
 # Load environment variables from a specific file based on a condition
 if os.environ.get("APP_ENVIRONMENT") == "local":
@@ -50,12 +51,13 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
-    @validator('DB_PORT', pre=True, always=True)
+    @validator("DB_PORT", pre=True, always=True)
     def default_db_port(cls, v):
         try:
             return int(v)
         except (TypeError, ValueError):
             return None
+
 
 @lru_cache()
 def get_settings() -> Settings:

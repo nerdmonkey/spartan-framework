@@ -1,8 +1,12 @@
 from typing import Union
+
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session as SQLAlchemySession, sessionmaker
+from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import sessionmaker
+
 from config.app import get_settings
+
 
 def create_database_engine() -> Engine:
     settings = get_settings()
@@ -26,14 +30,21 @@ def create_database_engine() -> Engine:
                 host=settings.DB_HOST,
                 port=settings.DB_PORT,
                 database=database,
-                driver=settings.DB_DRIVER
+                driver=settings.DB_DRIVER,
             )
-        return create_engine(database_url, connect_args={"check_same_thread": False} if database_type == "sqlite" else {})
+        return create_engine(
+            database_url,
+            connect_args={"check_same_thread": False}
+            if database_type == "sqlite"
+            else {},
+        )
 
     raise ValueError(f"Unsupported database type: {database_type}")
 
+
 engine = create_database_engine()
 Session = sessionmaker(bind=engine)
+
 
 def get_session() -> SQLAlchemySession:
     return Session()
