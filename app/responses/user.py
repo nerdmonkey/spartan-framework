@@ -15,6 +15,17 @@ class UserResponse(BaseModel):
     username: str
     email: str
 
+class SingleUserResponse(BaseModel):
+    """
+    Pydantic model representing a response for a single User.
+
+    Attributes:
+        data (UserResponse): The user response data.
+        status_code (int): The HTTP status code of the response.
+    """
+    data: UserResponse
+    status_code: int
+
 class Pagination(BaseModel):
     """
     Pydantic model representing pagination information.
@@ -38,6 +49,7 @@ class PaginatedUserResponse(BaseModel):
     """
     data: List[UserResponse]
     meta: Pagination
+    status_code: int
 
 class UserCreateResponse(BaseModel):
     """

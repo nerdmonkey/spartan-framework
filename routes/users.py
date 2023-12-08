@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse, PaginatedUserResponse
+from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse, PaginatedUserResponse, SingleUserResponse
 from app.services.user import UserService
 from config.database import get_session
 
 import logging
+from app.models.user import User
 
 user_service = UserService(db=None)
 
@@ -46,7 +47,8 @@ async def get_users(
                 "current_page": page,
                 "items_per_page": items_per_page,
                 "total": total,
-            }
+            },
+            "status_code": 200
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=f"{e}")
@@ -55,7 +57,7 @@ async def get_users(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@route.get("/users/{id}", status_code=200, response_model=UserResponse)
+@route.get("/users/{id}", status_code=200, response_model=SingleUserResponse)
 async def get_user(id: int, db: Session = Depends(get_session)):
     """
     Get a user by their unique identifier.
@@ -72,12 +74,15 @@ async def get_user(id: int, db: Session = Depends(get_session)):
         user = user_service.find(id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return user
+        return {
+            "data": user,
+            "status_code": 200
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@route.post("/users", status_code=201, response_model=UserCreateResponse)
+@route.post("/users", status_code=201, response_model=SingleUserResponse)
 async def create_user(user: UserCreateRequest, db: Session = Depends(get_session)):
     """
     Create a new user.
@@ -88,16 +93,23 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
 
     Returns:
         UserCreateResponse: Created user object.
+
+    Raises:
+        HTTPException: If there is an internal server error.
+
     """
     try:
         user_service.db = db
         created_user = user_service.save(user)
-        return created_user
+        return {
+            "data": created_user,
+            "status_code": 201
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@route.put("/users/{id}", status_code=200, response_model=UserUpdateResponse)
+@route.put("/users/{id}", status_code=200, response_model=SingleUserResponse)
 async def update_user(
     id: int, user: UserUpdateRequest, db: Session = Depends(get_session)
 ):
@@ -111,20 +123,29 @@ async def update_user(
 
     Returns:
         UserUpdateResponse: Updated user object.
+
+    Raises:
+        HTTPException: If the user is not found (status_code=404),
+                       if there is a value error (status_code=400),
+                       or if there is an internal server error (status_code=500).
     """
     try:
         user_service.db = db
         updated_user = user_service.update(id, user)
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
-        return updated_user
+        return {
+            "data": updated_user,
+            "status_code": 200
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@route.delete("/users/{id}", status_code=204)
+@route.delete("/users/{id}", status_code=200, response_model=SingleUserResponse)
+
 async def delete_user(id: int, db: Session = Depends(get_session)):
     """
     Delete a user by their unique identifier.
@@ -132,11 +153,26 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
     Args:
         id (int): The unique identifier of the user to delete.
         db (Session): SQLAlchemy database session.
+
+    Returns:
+        dict: A dictionary containing the deleted user data and the status code.
+
+    Raises:
+        HTTPException: If the user is not found or if there is an internal server error.
     """
     try:
         user_service.db = db
-        success = user_service.delete(id)
-        if not success:
-            raise HTTPException(status_code=404, detail="User not found")
+
+        user = user_service.delete(id)
+
+        if not user:
+            raise HTTPException(status_code=500, detail="Failed to delete user")
+
+        return {
+            "data": user,
+            "status_code": 200
+        }
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Internal server error {e}")
