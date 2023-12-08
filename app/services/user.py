@@ -16,6 +16,12 @@ class UserService:
     """
 
     def __init__(self, db: Session):
+        """
+        Initialize the UserService class.
+
+        Args:
+            db (Session): The database session.
+        """
         self.db = db
 
     def get_by_id(self, id: int) -> User:
@@ -37,6 +43,19 @@ class UserService:
         return user
 
     def all(self, page: int, items_per_page: int) -> List[UserResponse]:
+        """
+        Retrieve all users with pagination.
+
+        Args:
+            page (int): The page number.
+            items_per_page (int): The number of items per page.
+
+        Returns:
+            Tuple[List[UserResponse], int]: A tuple containing the list of user responses and the total number of users.
+
+        Raises:
+            HTTPException: If there is an internal server error.
+        """
         try:
             offset = (page - 1) * items_per_page
             logging.info(f"offset: {offset}")
