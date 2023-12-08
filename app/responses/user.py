@@ -24,9 +24,9 @@ class Pagination(BaseModel):
         items_per_page (int): The number of items per page.
         total_items (int): The total number of items.
     """
-    page: int
+    current_page: int
     items_per_page: int
-    total_items: int
+    total: int
 
 class PaginatedUserResponse(BaseModel):
     """
@@ -36,8 +36,8 @@ class PaginatedUserResponse(BaseModel):
         users (List[UserResponse]): The list of users.
         pagination (Pagination): The pagination information.
     """
-    users: List[UserResponse]
-    pagination: Pagination
+    data: List[UserResponse]
+    meta: Pagination
 
 class UserCreateResponse(BaseModel):
     """

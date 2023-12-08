@@ -4,9 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
+from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse, PaginatedUserResponse
 from app.services.user import UserService
 from config.database import get_session
+
+import logging
 
 user_service = UserService(db=None)
 
@@ -14,8 +16,7 @@ route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
 )
 
-@route.get("/users", status_code=200)
-# @route.get("/users", status_code=200, response_model=List[UserResponse])
+@route.get("/users", status_code=200, response_model=PaginatedUserResponse)
 async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
@@ -36,15 +37,21 @@ async def get_users(
         user_service.db = db
         items, total = user_service.all(page, items_per_page)
 
+        if not items:
+            raise ValueError("No users found")
+
         return {
             "data": items,
             "meta": {
-                "page": page,
+                "current_page": page,
                 "items_per_page": items_per_page,
                 "total": total,
             }
         }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=f"{e}")
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

@@ -39,6 +39,7 @@ class Settings(BaseSettings):
 
     ALLOWED_ORIGINS: str
     APP_ENVIRONMENT: str
+    APP_DEBUG: bool
     DB_TYPE: str
     DB_DRIVER: str
     DB_HOST: str

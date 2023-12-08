@@ -10,6 +10,10 @@ from mangum import Mangum
 from config.app import get_settings
 from routes import health, users
 
+from config.app import get_settings
+
+settings = get_settings()
+
 # Description of the FastAPI application
 description = """
 Spartan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
@@ -48,6 +52,7 @@ app = FastAPI(
     },
     openapi_tags=tags_metadata,
     root_path=root_path,
+    debug=settings.APP_DEBUG
 )
 
 # Define allowed origins for CORS

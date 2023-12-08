@@ -42,7 +42,8 @@ class UserService:
             responses = [
                 UserResponse(**user.__dict__) for user in users
             ]
-            return responses, self.total
+
+            return responses, self.total()
         except DatabaseError as e:
             raise HTTPException(status_code=500, detail="Internal server error")
         except Exception as e:
