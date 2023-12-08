@@ -3,16 +3,39 @@ from pydantic import BaseModel
 
 
 class UserResponse(BaseModel):
+    """
+    Pydantic model representing a response for a User.
+
+    Attributes:
+        id (int): The unique identifier of the user.
+        username (str): The username of the user.
+        email (str): The email address of the user.
+    """
     id: int
     username: str
     email: str
 
 class Pagination(BaseModel):
+    """
+    Pydantic model representing pagination information.
+
+    Attributes:
+        page (int): The current page number.
+        items_per_page (int): The number of items per page.
+        total_items (int): The total number of items.
+    """
     page: int
     items_per_page: int
     total_items: int
 
 class PaginatedUserResponse(BaseModel):
+    """
+    Pydantic model representing a paginated response for a list of users.
+
+    Attributes:
+        users (List[UserResponse]): The list of users.
+        pagination (Pagination): The pagination information.
+    """
     users: List[UserResponse]
     pagination: Pagination
 
@@ -25,7 +48,6 @@ class UserCreateResponse(BaseModel):
         username (str): The username of the created user.
         email (str): The email address of the created user.
     """
-
     id: int
     username: str
     email: str
@@ -40,7 +62,6 @@ class UserUpdateResponse(BaseModel):
         username (str): The updated username of the user.
         email (str): The updated email address of the user.
     """
-
     id: int
     username: str
     email: str
