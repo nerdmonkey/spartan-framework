@@ -1,20 +1,20 @@
+from typing import List
 from pydantic import BaseModel
 
 
 class UserResponse(BaseModel):
-    """
-    Pydantic model representing a User response.
-
-    Attributes:
-        id (int): The unique identifier of the user.
-        username (str): The username of the user.
-        email (str): The email address of the user.
-    """
-
     id: int
     username: str
     email: str
 
+class Pagination(BaseModel):
+    page: int
+    items_per_page: int
+    total_items: int
+
+class PaginatedUserResponse(BaseModel):
+    users: List[UserResponse]
+    pagination: Pagination
 
 class UserCreateResponse(BaseModel):
     """
