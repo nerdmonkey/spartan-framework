@@ -14,8 +14,8 @@ route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
 )
 
-
-@route.get("/users", status_code=200, response_model=List[UserResponse])
+@route.get("/users", status_code=200)
+# @route.get("/users", status_code=200, response_model=List[UserResponse])
 async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
@@ -34,7 +34,16 @@ async def get_users(
     """
     try:
         user_service.db = db
-        return user_service.all(page, items_per_page)
+        items, total = user_service.all(page, items_per_page)
+
+        return {
+            "data": items,
+            "meta": {
+                "page": page,
+                "items_per_page": items_per_page,
+                "total": total,
+            }
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
