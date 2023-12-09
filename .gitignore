@@ -171,4 +171,5 @@ Dockerfile
 build.sql
 docker-compose.yml
 
+serverless.yml
 try.py
