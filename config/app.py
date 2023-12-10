@@ -74,10 +74,5 @@ def get_settings() -> Settings:
     """
 
     log.info("Loading config settings from the environment...")
-    app_environment = os.environ.get("APP_ENVIRONMENT", "production")
-
-    if app_environment == "test":
-        log.info("Using .env_testing for test environment")
-        Settings.Config.env_file = ".env_testing"
 
     return Settings()
