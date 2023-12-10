@@ -1,4 +1,5 @@
 from typing import List
+
 from pydantic import BaseModel
 
 
@@ -11,9 +12,11 @@ class UserResponse(BaseModel):
         username (str): The username of the user.
         email (str): The email address of the user.
     """
+
     id: int
     username: str
     email: str
+
 
 class SingleUserResponse(BaseModel):
     """
@@ -23,8 +26,10 @@ class SingleUserResponse(BaseModel):
         data (UserResponse): The user response data.
         status_code (int): The HTTP status code of the response.
     """
+
     data: UserResponse
     status_code: int
+
 
 class Pagination(BaseModel):
     """
@@ -35,9 +40,11 @@ class Pagination(BaseModel):
         items_per_page (int): The number of items per page.
         total_items (int): The total number of items.
     """
+
     current_page: int
     items_per_page: int
     total: int
+
 
 class PaginatedUserResponse(BaseModel):
     """
@@ -47,9 +54,11 @@ class PaginatedUserResponse(BaseModel):
         users (List[UserResponse]): The list of users.
         pagination (Pagination): The pagination information.
     """
+
     data: List[UserResponse]
     meta: Pagination
     status_code: int
+
 
 class UserCreateResponse(BaseModel):
     """
@@ -60,6 +69,7 @@ class UserCreateResponse(BaseModel):
         username (str): The username of the created user.
         email (str): The email address of the created user.
     """
+
     id: int
     username: str
     email: str
@@ -74,6 +84,7 @@ class UserUpdateResponse(BaseModel):
         username (str): The updated username of the user.
         email (str): The updated email address of the user.
     """
+
     id: int
     username: str
     email: str

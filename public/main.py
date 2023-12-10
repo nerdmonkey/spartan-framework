@@ -10,8 +10,6 @@ from mangum import Mangum
 from config.app import get_settings
 from routes import health, users
 
-from config.app import get_settings
-
 settings = get_settings()
 
 # Description of the FastAPI application
@@ -52,7 +50,7 @@ app = FastAPI(
     },
     openapi_tags=tags_metadata,
     root_path=root_path,
-    debug=settings.APP_DEBUG
+    debug=settings.APP_DEBUG,
 )
 
 # Define allowed origins for CORS

@@ -1,21 +1,27 @@
+import logging
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse, PaginatedUserResponse, SingleUserResponse
+from app.responses.user import (
+    PaginatedUserResponse,
+    SingleUserResponse,
+    UserCreateResponse,
+    UserResponse,
+    UserUpdateResponse,
+)
 from app.services.user import UserService
 from config.database import get_session
-
-import logging
-from app.models.user import User
 
 user_service = UserService(db=None)
 
 route = APIRouter(
     prefix="/api", tags=["Users"], responses={404: {"description": "Not found"}}
 )
+
 
 @route.get("/users", status_code=200, response_model=PaginatedUserResponse)
 async def get_users(
@@ -48,7 +54,7 @@ async def get_users(
                 "items_per_page": items_per_page,
                 "total": total,
             },
-            "status_code": 200
+            "status_code": 200,
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=f"{e}")
@@ -74,10 +80,7 @@ async def get_user(id: int, db: Session = Depends(get_session)):
         user = user_service.find(id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return {
-            "data": user,
-            "status_code": 200
-        }
+        return {"data": user, "status_code": 200}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -101,10 +104,7 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
     try:
         user_service.db = db
         created_user = user_service.save(user)
-        return {
-            "data": created_user,
-            "status_code": 201
-        }
+        return {"data": created_user, "status_code": 201}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -134,10 +134,7 @@ async def update_user(
         updated_user = user_service.update(id, user)
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
-        return {
-            "data": updated_user,
-            "status_code": 200
-        }
+        return {"data": updated_user, "status_code": 200}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -145,7 +142,6 @@ async def update_user(
 
 
 @route.delete("/users/{id}", status_code=200, response_model=SingleUserResponse)
-
 async def delete_user(id: int, db: Session = Depends(get_session)):
     """
     Delete a user by their unique identifier.
@@ -168,10 +164,7 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
         if not user:
             raise HTTPException(status_code=500, detail="Failed to delete user")
 
-        return {
-            "data": user,
-            "status_code": 200
-        }
+        return {"data": user, "status_code": 200}
     except HTTPException as e:
         raise e
     except Exception as e:

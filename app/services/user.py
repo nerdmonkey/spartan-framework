@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import HTTPException
@@ -8,7 +9,6 @@ from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
 
-import logging
 
 class UserService:
     """
@@ -60,9 +60,7 @@ class UserService:
             offset = (page - 1) * items_per_page
             logging.info(f"offset: {offset}")
             users = self.db.query(User).offset(offset).limit(items_per_page).all()
-            responses = [
-                UserResponse(**user.__dict__) for user in users
-            ]
+            responses = [UserResponse(**user.__dict__) for user in users]
 
             return responses, self.total()
         except DatabaseError as e:
