@@ -6,11 +6,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from pydantic import BaseSettings, validator
 
-# Load environment variables from a specific file based on a condition
-if os.environ.get("APP_ENVIRONMENT") == "local":
-    load_dotenv(dotenv_path=".env_testing")
-else:
-    load_dotenv(dotenv_path=".env")
+load_dotenv(dotenv_path=".env")
 
 # Configure the logger
 log = logging.getLogger("uvicorn")
