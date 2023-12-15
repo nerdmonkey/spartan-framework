@@ -42,7 +42,7 @@ async def get_users(
     """
     try:
         user_service.db = db
-        items, total, last_page = user_service.all(page, items_per_page)
+        items, total, last_page, first_item, last_item = user_service.all(page, items_per_page)
 
         if not items:
             raise ValueError("No users found")
@@ -52,6 +52,8 @@ async def get_users(
             "meta": {
                 "current_page": page,
                 "last_page": last_page,
+                "first_item": first_item,
+                "last_item": last_item,
                 "items_per_page": items_per_page,
                 "total": total,
             },

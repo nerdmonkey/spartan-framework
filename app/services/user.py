@@ -42,7 +42,7 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int) -> Tuple[List[UserResponse], int, int]:
+    def all(self, page: int, items_per_page: int) -> Tuple[List[UserResponse], int, int, int, int]:
         """
         Retrieve all users with pagination.
 
@@ -51,7 +51,7 @@ class UserService:
             items_per_page (int): The number of items per page.
 
         Returns:
-            Tuple[List[UserResponse], int, int]: A tuple containing the list of user responses, the total number of users, and the last page number.
+            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
 
         Raises:
             HTTPException: If there is an internal server error.
@@ -65,7 +65,10 @@ class UserService:
             total_users = self.total()
             last_page = (total_users - 1) // items_per_page + 1
 
-            return responses, total_users, last_page
+            first_item_number = offset + 1
+            last_item_number = min(offset + items_per_page, total_users)
+
+            return responses, total_users, last_page, first_item_number, last_item_number
         except DatabaseError as e:
             raise HTTPException(status_code=500, detail="Internal server error")
         except Exception as e:

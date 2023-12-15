@@ -43,6 +43,8 @@ class Pagination(BaseModel):
 
     current_page: int
     last_page: int
+    first_item: int
+    last_item: int
     items_per_page: int
     total: int
 
