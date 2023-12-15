@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
@@ -42,7 +42,7 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int) -> List[UserResponse]:
+    def all(self, page: int, items_per_page: int) -> Tuple[List[UserResponse], int, int]:
         """
         Retrieve all users with pagination.
 
@@ -51,7 +51,7 @@ class UserService:
             items_per_page (int): The number of items per page.
 
         Returns:
-            Tuple[List[UserResponse], int]: A tuple containing the list of user responses and the total number of users.
+            Tuple[List[UserResponse], int, int]: A tuple containing the list of user responses, the total number of users, and the last page number.
 
         Raises:
             HTTPException: If there is an internal server error.
@@ -62,7 +62,10 @@ class UserService:
             users = self.db.query(User).offset(offset).limit(items_per_page).all()
             responses = [UserResponse(**user.__dict__) for user in users]
 
-            return responses, self.total()
+            total_users = self.total()
+            last_page = (total_users - 1) // items_per_page + 1
+
+            return responses, total_users, last_page
         except DatabaseError as e:
             raise HTTPException(status_code=500, detail="Internal server error")
         except Exception as e:
