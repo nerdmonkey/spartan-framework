@@ -205,27 +205,30 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def delete(self, id: int) -> UserResponse:
-        """
-        Delete a user from the database.
+            """
+            Delete a user from the database.
 
-        Args:
-            id (int): The ID of the user.
+            Args:
+                id (int): The ID of the user to be deleted.
 
-        Returns:
-            dict: The response data of the deleted user.
-        """
-        try:
-            item = self.get_by_id(id)
-            self.db.delete(item)
-            self.db.commit()
-            response_data = {
-                "id": item.id,
-                "username": item.username,
-                "email": item.email,
-                "created_at": item.created_at,
-                "updated_at": item.updated_at,
-            }
-            return response_data
-        except DatabaseError as e:
-            logging.error(f"Error occurred while deleting user: {str(e)}")
-            raise HTTPException(status_code=500, detail="Internal server error")
+            Returns:
+                dict: The response data of the deleted user.
+
+            Raises:
+                HTTPException: If an error occurs while deleting the user.
+            """
+            try:
+                item = self.get_by_id(id)
+                self.db.delete(item)
+                self.db.commit()
+                response_data = {
+                    "id": item.id,
+                    "username": item.username,
+                    "email": item.email,
+                    "created_at": item.created_at,
+                    "updated_at": item.updated_at,
+                }
+                return response_data
+            except DatabaseError as e:
+                logging.error(f"Error occurred while deleting user: {str(e)}")
+                raise HTTPException(status_code=500, detail="Internal server error")
