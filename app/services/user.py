@@ -42,13 +42,15 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int) -> Tuple[List[UserResponse], int, int, int, int]:
+    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'username') -> Tuple[List[UserResponse], int, int, int, int]:
         """
         Retrieve all users with pagination.
 
         Args:
             page (int): The page number.
             items_per_page (int): The number of items per page.
+            sort_type (str): The sort type ('asc' or 'desc').
+            sort_by (str): The field to sort by ('created_at' or 'username').
 
         Returns:
             Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
@@ -56,23 +58,40 @@ class UserService:
         Raises:
             HTTPException: If there is an internal server error.
         """
-        try:
-            offset = (page - 1) * items_per_page
-            logging.info(f"offset: {offset}")
-            users = self.db.query(User).offset(offset).limit(items_per_page).all()
-            responses = [UserResponse(**user.__dict__) for user in users]
+        # try:
+        offset = (page - 1) * items_per_page
+        print(sort_by, sort_type)
 
-            total_users = self.total()
-            last_page = (total_users - 1) // items_per_page + 1
+        # Apply sorting
+        if sort_by == 'email':
+            sort_field = User.email
+        elif sort_by == 'username':
+            sort_field = User.username
+        else:
+            raise HTTPException(status_code=400, detail="Invalid sort_by field")
 
-            first_item_number = offset + 1
-            last_item_number = min(offset + items_per_page, total_users)
+        if sort_type == 'asc':
+            users = self.db.query(User).order_by(sort_field.asc()).offset(offset).limit(items_per_page).all()
+        elif sort_type == 'desc':
+            users = self.db.query(User).order_by(sort_field.desc()).offset(offset).limit(items_per_page).all()
+        else:
+            raise HTTPException(status_code=400, detail="Invalid sort_type")
 
-            return responses, total_users, last_page, first_item_number, last_item_number
-        except DatabaseError as e:
-            raise HTTPException(status_code=500, detail="Internal server error")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="Internal server error")
+        responses = [UserResponse(**user.__dict__) for user in users]
+
+        total_users = self.total()
+        last_page = (total_users - 1) // items_per_page + 1
+
+        first_item_number = offset + 1
+        last_item_number = min(offset + items_per_page, total_users)
+
+        return responses, total_users, last_page, first_item_number, last_item_number
+        # except DatabaseError as e:
+        #     logging.error(e)
+        #     raise HTTPException(status_code=500, detail="Internal server error")
+        # except Exception as e:
+        #     logging.error(e)
+        #     raise HTTPException(status_code=500, detail="Internal server error")
 
     def total(self) -> int:
         """

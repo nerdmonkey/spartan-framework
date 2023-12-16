@@ -24,6 +24,8 @@ route = APIRouter(
 async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
+    sort_type: Optional[str] = Query('asc', description="Sort type (asc or desc)"),
+    sort_by: Optional[str] = Query('username', description="Sort by field"),
     db: Session = Depends(get_session),
 ):
     """
@@ -32,35 +34,37 @@ async def get_users(
     Args:
         page (int): The page number.
         items_per_page (int): Number of items per page.
+        sort_by (str): Sort by field.
+        sort_type (str): Sort type (asc or desc).
         db (Session): SQLAlchemy database session.
 
     Returns:
         List[UserResponse]: List of user objects.
     """
-    try:
-        user_service.db = db
-        items, total, last_page, first_item, last_item = user_service.all(page, items_per_page)
+    # try:
+    user_service.db = db
+    items, total, last_page, first_item, last_item = user_service.all(page, items_per_page, sort_type=sort_type, sort_by=sort_by)
 
-        if not items:
-            raise ValueError("No users found")
+    if not items:
+        raise ValueError("No users found")
 
-        return {
-            "data": items,
-            "meta": {
-                "current_page": page,
-                "last_page": last_page,
-                "first_item": first_item,
-                "last_item": last_item,
-                "items_per_page": items_per_page,
-                "total": total,
-            },
-            "status_code": 200,
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=f"{e}")
-    except Exception as e:
-        logging.error(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
+    return {
+        "data": items,
+        "meta": {
+            "current_page": page,
+            "last_page": last_page,
+            "first_item": first_item,
+            "last_item": last_item,
+            "items_per_page": items_per_page,
+            "total": total,
+        },
+        "status_code": 200,
+    }
+    # except ValueError as e:
+    #     raise HTTPException(status_code=404, detail=f"{e}")
+    # except Exception as e:
+    #     logging.error(e)
+    #     raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @route.get("/users/{id}", status_code=200, response_model=SingleUserResponse)
