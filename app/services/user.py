@@ -58,40 +58,40 @@ class UserService:
         Raises:
             HTTPException: If there is an internal server error.
         """
-        # try:
-        offset = (page - 1) * items_per_page
-        print(sort_by, sort_type)
+        try:
+            offset = (page - 1) * items_per_page
+            print(sort_by, sort_type)
 
-        # Apply sorting
-        if sort_by == 'email':
-            sort_field = User.email
-        elif sort_by == 'username':
-            sort_field = User.username
-        else:
-            raise HTTPException(status_code=400, detail="Invalid sort_by field")
+            # Apply sorting
+            if sort_by == 'email':
+                sort_field = User.email
+            elif sort_by == 'username':
+                sort_field = User.username
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_by field")
 
-        if sort_type == 'asc':
-            users = self.db.query(User).order_by(sort_field.asc()).offset(offset).limit(items_per_page).all()
-        elif sort_type == 'desc':
-            users = self.db.query(User).order_by(sort_field.desc()).offset(offset).limit(items_per_page).all()
-        else:
-            raise HTTPException(status_code=400, detail="Invalid sort_type")
+            if sort_type == 'asc':
+                users = self.db.query(User).order_by(sort_field.asc()).offset(offset).limit(items_per_page).all()
+            elif sort_type == 'desc':
+                users = self.db.query(User).order_by(sort_field.desc()).offset(offset).limit(items_per_page).all()
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_type")
 
-        responses = [UserResponse(**user.__dict__) for user in users]
+            responses = [UserResponse(**user.__dict__) for user in users]
 
-        total_users = self.total()
-        last_page = (total_users - 1) // items_per_page + 1
+            total_users = self.total()
+            last_page = (total_users - 1) // items_per_page + 1
 
-        first_item_number = offset + 1
-        last_item_number = min(offset + items_per_page, total_users)
+            first_item_number = offset + 1
+            last_item_number = min(offset + items_per_page, total_users)
 
-        return responses, total_users, last_page, first_item_number, last_item_number
-        # except DatabaseError as e:
-        #     logging.error(e)
-        #     raise HTTPException(status_code=500, detail="Internal server error")
-        # except Exception as e:
-        #     logging.error(e)
-        #     raise HTTPException(status_code=500, detail="Internal server error")
+            return responses, total_users, last_page, first_item_number, last_item_number
+        except DatabaseError as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Internal server error")
+        except Exception as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     def total(self) -> int:
         """

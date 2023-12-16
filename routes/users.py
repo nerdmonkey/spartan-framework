@@ -41,30 +41,30 @@ async def get_users(
     Returns:
         List[UserResponse]: List of user objects.
     """
-    # try:
-    user_service.db = db
-    items, total, last_page, first_item, last_item = user_service.all(page, items_per_page, sort_type=sort_type, sort_by=sort_by)
+    try:
+        user_service.db = db
+        items, total, last_page, first_item, last_item = user_service.all(page, items_per_page, sort_type=sort_type, sort_by=sort_by)
 
-    if not items:
-        raise ValueError("No users found")
+        if not items:
+            raise ValueError("No users found")
 
-    return {
-        "data": items,
-        "meta": {
-            "current_page": page,
-            "last_page": last_page,
-            "first_item": first_item,
-            "last_item": last_item,
-            "items_per_page": items_per_page,
-            "total": total,
-        },
-        "status_code": 200,
-    }
-    # except ValueError as e:
-    #     raise HTTPException(status_code=404, detail=f"{e}")
-    # except Exception as e:
-    #     logging.error(e)
-    #     raise HTTPException(status_code=500, detail="Internal server error")
+        return {
+            "data": items,
+            "meta": {
+                "current_page": page,
+                "last_page": last_page,
+                "first_item": first_item,
+                "last_item": last_item,
+                "items_per_page": items_per_page,
+                "total": total,
+            },
+            "status_code": 200,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=f"{e}")
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @route.get("/users/{id}", status_code=200, response_model=SingleUserResponse)
