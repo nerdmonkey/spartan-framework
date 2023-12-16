@@ -60,9 +60,7 @@ class UserService:
         """
         try:
             offset = (page - 1) * items_per_page
-            print(sort_by, sort_type)
 
-            # Apply sorting
             if sort_by == 'email':
                 sort_field = User.email
             elif sort_by == 'username':
