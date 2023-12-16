@@ -152,8 +152,9 @@ class UserService:
                 raise HTTPException(
                     status_code=422, detail="User with this email already exists"
                 )
-            hashed_password = "hashed_" + user.password
-            item = User(username=user.username, email=user.email, password=hashed_password)
+            data = user.dict(exclude_unset=True)
+            data["password"] = "hashed_" + data["password"]
+            item = User(**data)
             self.db.add(item)
             self.db.commit()
             self.db.refresh(item)
