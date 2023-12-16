@@ -195,6 +195,8 @@ class UserService:
                 "id": item.id,
                 "username": item.username,
                 "email": item.email,
+                "created_at": item.created_at,
+                "updated_at": item.updated_at,
             }
             return response_data
         except DatabaseError as e:
