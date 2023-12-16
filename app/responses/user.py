@@ -1,7 +1,7 @@
 from typing import List
 
 from pydantic import BaseModel
-
+from datetime import datetime
 
 class UserResponse(BaseModel):
     """
@@ -16,6 +16,8 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class SingleUserResponse(BaseModel):
@@ -75,7 +77,8 @@ class UserCreateResponse(BaseModel):
 
     id: int
     username: str
-    email: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserUpdateResponse(BaseModel):

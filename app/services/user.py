@@ -42,7 +42,7 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'username') -> Tuple[List[UserResponse], int, int, int, int]:
+    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'id') -> Tuple[List[UserResponse], int, int, int, int]:
         """
         Retrieve all users with pagination.
 
@@ -65,6 +65,8 @@ class UserService:
                 sort_field = User.email
             elif sort_by == 'username':
                 sort_field = User.username
+            elif sort_by == 'id':
+                sort_field = User.id
             else:
                 raise HTTPException(status_code=400, detail="Invalid sort_by field")
 

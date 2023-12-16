@@ -25,7 +25,7 @@ async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
     sort_type: Optional[str] = Query('asc', description="Sort type (asc or desc)"),
-    sort_by: Optional[str] = Query('username', description="Sort by field"),
+    sort_by: Optional[str] = Query('id', description="Sort by field"),
     db: Session = Depends(get_session),
 ):
     """
