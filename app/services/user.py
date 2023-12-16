@@ -133,7 +133,7 @@ class UserService:
         user = self.get_by_id(id)
         return UserResponse(**user.__dict__)
 
-    def save(self, user: UserCreateRequest): #-> UserCreateResponse:
+    def save(self, user: UserCreateRequest) -> UserCreateResponse:
         """
         Save a new user to the database.
 
@@ -182,20 +182,24 @@ class UserService:
         Returns:
             UserUpdateResponse: The response data of the updated user.
         """
-        item = self.get_by_id(id)
-        data = user.dict(exclude_unset=True)
-        if "password" in data:
-            data["password"] = "hashed_" + data["password"]
-        for key, value in data.items():
-            setattr(item, key, value)
-        self.db.commit()
-        self.db.refresh(item)
-        response_data = {
-            "id": item.id,
-            "username": item.username,
-            "email": item.email,
-        }
-        return response_data
+        try:
+            item = self.get_by_id(id)
+            data = user.dict(exclude_unset=True)
+            if "password" in data:
+                data["password"] = "hashed_" + data["password"]
+            for key, value in data.items():
+                setattr(item, key, value)
+            self.db.commit()
+            self.db.refresh(item)
+            response_data = {
+                "id": item.id,
+                "username": item.username,
+                "email": item.email,
+            }
+            return response_data
+        except DatabaseError as e:
+            logging.error(f"Error occurred while updating user: {str(e)}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     def delete(self, id: int):
         """
