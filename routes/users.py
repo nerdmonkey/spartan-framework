@@ -27,10 +27,10 @@ async def get_users(
     items_per_page: Optional[int] = Query(10, description="items per page", gt=0),
     sort_type: Optional[str] = Query('asc', description="sort type (asc or desc)"),
     sort_by: Optional[str] = Query('id', description="sort by field"),
-    start_date: Optional[date] = Query(None, description="start date filter"),
-    end_date: Optional[date] = Query(None, description="end date filter"),
     username: Optional[str] = Query(None, description="username filter"),
     email: Optional[str] = Query(None, description="email filter"),
+    start_date: Optional[date] = Query(None, description="start date filter"),
+    end_date: Optional[date] = Query(None, description="end date filter"),
     db: Session = Depends(get_session),
 ):
     """
