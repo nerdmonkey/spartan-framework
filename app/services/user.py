@@ -42,7 +42,126 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'id') -> Tuple[List[UserResponse], int, int, int, int]:
+    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'id', start_date: str = None, end_date: str = None, username: str = None, email: str = None) -> Tuple[List[UserResponse], int, int, int, int]:
+        """
+        Retrieve all users with pagination and optional date, username, and email filters.
+
+        Args:
+            page (int): The page number.
+            items_per_page (int): The number of items per page.
+            sort_type (str): The sort type ('asc' or 'desc').
+            sort_by (str): The field to sort by ('created_at' or 'username').
+            start_date (str): The start date for the filter (YYYY-MM-DD).
+            end_date (str): The end date for the filter (YYYY-MM-DD).
+            username (str): The username filter.
+            email (str): The email filter.
+
+        Returns:
+            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
+
+        Raises:
+            HTTPException: If there is an internal server error.
+        """
+        try:
+            offset = (page - 1) * items_per_page
+
+            if sort_by == 'email':
+                sort_field = User.email
+            elif sort_by == 'username':
+                sort_field = User.username
+            elif sort_by == 'id':
+                sort_field = User.id
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_by field")
+
+            if sort_type == 'asc':
+                query = self.db.query(User).order_by(sort_field.asc())
+            elif sort_type == 'desc':
+                query = self.db.query(User).order_by(sort_field.desc())
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_type")
+
+            if start_date and end_date:
+                query = query.filter(User.created_at.between(start_date, end_date))
+
+            if username:
+                query = query.filter(User.username.like(f'%{username}%'))
+
+            if email:
+                query = query.filter(User.email.like(f'%{email}%'))
+
+            users = query.offset(offset).limit(items_per_page).all()
+
+            responses = [UserResponse(**user.__dict__) for user in users]
+
+            total_users = self.total()
+            last_page = (total_users - 1) // items_per_page + 1
+
+            first_item_number = offset + 1
+            last_item_number = min(offset + items_per_page, total_users)
+
+            return responses, total_users, last_page, first_item_number, last_item_number
+        except DatabaseError as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Internal server error")
+        except Exception as e:
+            logging.error(e)
+        """
+        Retrieve all users with pagination and optional date filter.
+
+        Args:
+            page (int): The page number.
+            items_per_page (int): The number of items per page.
+            sort_type (str): The sort type ('asc' or 'desc').
+            sort_by (str): The field to sort by ('created_at' or 'username').
+            start_date (str): The start date for the filter (YYYY-MM-DD).
+            end_date (str): The end date for the filter (YYYY-MM-DD).
+
+        Returns:
+            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
+
+        Raises:
+            HTTPException: If there is an internal server error.
+        """
+        try:
+            offset = (page - 1) * items_per_page
+
+            if sort_by == 'email':
+                sort_field = User.email
+            elif sort_by == 'username':
+                sort_field = User.username
+            elif sort_by == 'id':
+                sort_field = User.id
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_by field")
+
+            if sort_type == 'asc':
+                query = self.db.query(User).order_by(sort_field.asc())
+            elif sort_type == 'desc':
+                query = self.db.query(User).order_by(sort_field.desc())
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_type")
+
+            if start_date and end_date:
+                query = query.filter(User.created_at.between(start_date, end_date))
+
+            users = query.offset(offset).limit(items_per_page).all()
+
+            responses = [UserResponse(**user.__dict__) for user in users]
+
+            total_users = self.total()
+            last_page = (total_users - 1) // items_per_page + 1
+
+            first_item_number = offset + 1
+            last_item_number = min(offset + items_per_page, total_users)
+
+            return responses, total_users, last_page, first_item_number, last_item_number
+        except DatabaseError as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Internal server error")
+        except Exception as e:
+            logging.error(e)
+            raise HTTPException(status_code=500, detail="Internal server error")
         """
         Retrieve all users with pagination.
 

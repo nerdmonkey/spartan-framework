@@ -12,6 +12,7 @@ from app.responses.user import (
 )
 from app.services.user import UserService
 from config.database import get_session
+from datetime import date
 
 user_service = UserService(db=None)
 
@@ -21,6 +22,61 @@ route = APIRouter(
 
 
 @route.get("/users", status_code=200, response_model=PaginatedUserResponse)
+async def get_users(
+    page: Optional[int] = Query(1, description="page number", gt=0),
+    items_per_page: Optional[int] = Query(10, description="items per page", gt=0),
+    sort_type: Optional[str] = Query('asc', description="sort type (asc or desc)"),
+    sort_by: Optional[str] = Query('id', description="sort by field"),
+    start_date: Optional[date] = Query(None, description="start date filter"),
+    end_date: Optional[date] = Query(None, description="end date filter"),
+    username: Optional[str] = Query(None, description="username filter"),
+    email: Optional[str] = Query(None, description="email filter"),
+    db: Session = Depends(get_session),
+):
+    """
+    Get a list of users with pagination and optional filters.
+
+    Args:
+        page (int): The page number.
+        items_per_page (int): Number of items per page.
+        sort_by (str): Sort by field.
+        sort_type (str): Sort type (asc or desc).
+        start_date (date): Start date filter.
+        end_date (date): End date filter.
+        username (str): Username filter.
+        email (str): Email filter.
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        List[UserResponse]: List of user objects.
+    """
+    try:
+        user_service.db = db
+        items, total, last_page, first_item, last_item = user_service.all(
+            page, items_per_page, sort_type=sort_type, sort_by=sort_by,
+            start_date=start_date, end_date=end_date, username=username, email=email
+        )
+
+        if not items:
+            raise ValueError("No users found")
+
+        return {
+            "data": items,
+            "meta": {
+                "current_page": page,
+                "last_page": last_page,
+                "first_item": first_item,
+                "last_item": last_item,
+                "items_per_page": items_per_page,
+                "total": total,
+            },
+            "status_code": 200,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=f"{e}")
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
 async def get_users(
     page: Optional[int] = Query(1, description="Page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="Items per page", gt=0),
