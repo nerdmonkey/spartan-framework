@@ -106,111 +106,7 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
         except Exception as e:
             logging.error(e)
-        """
-        Retrieve all users with pagination and optional date filter.
 
-        Args:
-            page (int): The page number.
-            items_per_page (int): The number of items per page.
-            sort_type (str): The sort type ('asc' or 'desc').
-            sort_by (str): The field to sort by ('created_at' or 'username').
-            start_date (str): The start date for the filter (YYYY-MM-DD).
-            end_date (str): The end date for the filter (YYYY-MM-DD).
-
-        Returns:
-            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
-
-        Raises:
-            HTTPException: If there is an internal server error.
-        """
-        try:
-            offset = (page - 1) * items_per_page
-
-            if sort_by == 'email':
-                sort_field = User.email
-            elif sort_by == 'username':
-                sort_field = User.username
-            elif sort_by == 'id':
-                sort_field = User.id
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_by field")
-
-            if sort_type == 'asc':
-                query = self.db.query(User).order_by(sort_field.asc())
-            elif sort_type == 'desc':
-                query = self.db.query(User).order_by(sort_field.desc())
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_type")
-
-            if start_date and end_date:
-                query = query.filter(User.created_at.between(start_date, end_date))
-
-            users = query.offset(offset).limit(items_per_page).all()
-
-            responses = [UserResponse(**user.__dict__) for user in users]
-
-            total_users = self.total()
-            last_page = (total_users - 1) // items_per_page + 1
-
-            first_item_number = offset + 1
-            last_item_number = min(offset + items_per_page, total_users)
-
-            return responses, total_users, last_page, first_item_number, last_item_number
-        except DatabaseError as e:
-            logging.error(e)
-            raise HTTPException(status_code=500, detail="Internal server error")
-        except Exception as e:
-            logging.error(e)
-            raise HTTPException(status_code=500, detail="Internal server error")
-        """
-        Retrieve all users with pagination.
-
-        Args:
-            page (int): The page number.
-            items_per_page (int): The number of items per page.
-            sort_type (str): The sort type ('asc' or 'desc').
-            sort_by (str): The field to sort by ('created_at' or 'username').
-
-        Returns:
-            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
-
-        Raises:
-            HTTPException: If there is an internal server error.
-        """
-        try:
-            offset = (page - 1) * items_per_page
-
-            if sort_by == 'email':
-                sort_field = User.email
-            elif sort_by == 'username':
-                sort_field = User.username
-            elif sort_by == 'id':
-                sort_field = User.id
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_by field")
-
-            if sort_type == 'asc':
-                users = self.db.query(User).order_by(sort_field.asc()).offset(offset).limit(items_per_page).all()
-            elif sort_type == 'desc':
-                users = self.db.query(User).order_by(sort_field.desc()).offset(offset).limit(items_per_page).all()
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_type")
-
-            responses = [UserResponse(**user.__dict__) for user in users]
-
-            total_users = self.total()
-            last_page = (total_users - 1) // items_per_page + 1
-
-            first_item_number = offset + 1
-            last_item_number = min(offset + items_per_page, total_users)
-
-            return responses, total_users, last_page, first_item_number, last_item_number
-        except DatabaseError as e:
-            logging.error(e)
-            raise HTTPException(status_code=500, detail="Internal server error")
-        except Exception as e:
-            logging.error(e)
-            raise HTTPException(status_code=500, detail="Internal server error")
 
     def total(self) -> int:
         """
@@ -235,9 +131,9 @@ class UserService:
             HTTPException: If the user is not found.
         """
         user = self.get_by_id(id)
-        return UserResponse(id=user.id, username=user.username, email=user.email)
+        return UserResponse(**user.__dict__)
 
-    def save(self, user: UserCreateRequest) -> UserCreateResponse:
+    def save(self, user: UserCreateRequest): #-> UserCreateResponse:
         """
         Save a new user to the database.
 
@@ -250,22 +146,30 @@ class UserService:
         Raises:
             HTTPException: If a user with the same email already exists.
         """
-        existing = self.db.query(User).filter(User.email == user.email).first()
-        if existing:
-            raise HTTPException(
-                status_code=422, detail="User with this email already exists"
-            )
-        hashed_password = "hashed_" + user.password
-        item = User(username=user.username, email=user.email, password=hashed_password)
-        self.db.add(item)
-        self.db.commit()
-        self.db.refresh(item)
-        response_data = {
-            "id": item.id,
-            "username": item.username,
-            "email": item.email,
-        }
-        return response_data
+        try:
+            existing = self.db.query(User).filter(User.email == user.email).first()
+            if existing:
+                raise HTTPException(
+                    status_code=422, detail="User with this email already exists"
+                )
+            hashed_password = "hashed_" + user.password
+            item = User(username=user.username, email=user.email, password=hashed_password)
+            self.db.add(item)
+            self.db.commit()
+            self.db.refresh(item)
+
+            item = self.db.query(User).filter(User.id == item.id).first()
+            response_data = {
+                "id": item.id,
+                "username": item.username,
+                "email": item.email,
+                "created_at": item.created_at,
+                "updated_at": item.updated_at,
+            }
+            return response_data
+        except DatabaseError as e:
+            logging.error(f"Error occurred while saving user: {str(e)}")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     def update(self, id: int, user: UserUpdateRequest) -> UserUpdateResponse:
         """

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
 class UserCreateRequest(BaseModel):
@@ -16,6 +17,8 @@ class UserCreateRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()
 
 
 class UserUpdateRequest(BaseModel):
@@ -31,3 +34,5 @@ class UserUpdateRequest(BaseModel):
     username: Optional[str]
     email: Optional[EmailStr]
     password: Optional[str]
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()

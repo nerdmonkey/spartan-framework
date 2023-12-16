@@ -17,8 +17,6 @@ def run():
             "username": fake.user_name(),
             "email": fake.email(),
             "password": fake.password(),
-            "created_at": fake.date_time_between(start_date=two_months_ago, end_date=current_time),
-            "updated_at": fake.date_time_between(start_date=two_months_ago, end_date=current_time),
         }
         user = User(**user)
         db.add(user)

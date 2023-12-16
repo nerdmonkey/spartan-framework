@@ -77,6 +77,7 @@ class UserCreateResponse(BaseModel):
 
     id: int
     username: str
+    email: str
     created_at: datetime
     updated_at: datetime
 
@@ -94,3 +95,5 @@ class UserUpdateResponse(BaseModel):
     id: int
     username: str
     email: str
+    created_at: datetime
+    updated_at: datetime

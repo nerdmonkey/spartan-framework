@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime, func
 
 from .base import Base
-from sqlalchemy import DateTime
 
 
 class User(Base):
@@ -13,6 +12,8 @@ class User(Base):
         username (str): The unique username of the user.
         email (str): The unique email address of the user.
         password (str): The hashed password of the user.
+        created_at (DateTime): The timestamp when the user was created.
+        updated_at (DateTime): The timestamp when the user was last updated.
     """
 
     __tablename__ = "users"
@@ -21,5 +22,5 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
+    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp())
