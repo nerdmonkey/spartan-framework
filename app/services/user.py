@@ -253,13 +253,13 @@ class UserService:
 
     def delete(self, id: int) -> UserResponse:
             """
-            Delete a user from the database.
+            Deletes a user by their ID.
 
             Args:
-                id (int): The ID of the user to be deleted.
+                id (int): The ID of the user to delete.
 
             Returns:
-                dict: The response data of the deleted user.
+                dict: A dictionary containing the details of the deleted user.
 
             Raises:
                 HTTPException: If an error occurs while deleting the user.
