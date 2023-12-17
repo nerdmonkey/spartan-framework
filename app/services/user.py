@@ -65,33 +65,9 @@ class UserService:
         try:
             offset = (page - 1) * items_per_page
 
-            if sort_by == 'email':
-                sort_field = User.email
-            elif sort_by == 'username':
-                sort_field = User.username
-            elif sort_by == 'id':
-                sort_field = User.id
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_by field")
+            sort_field = self.get_sort_field(sort_by)
 
-            if sort_type == 'asc':
-                query = self.db.query(User).order_by(sort_field.asc())
-            elif sort_type == 'desc':
-                query = self.db.query(User).order_by(sort_field.desc())
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_type")
-
-            start_date = str(start_date) + ' 00:00:00' if start_date else ""
-            end_date = str(end_date) + ' 23:59:59' if end_date else ""
-
-            if start_date and end_date:
-                query = query.filter(User.created_at.between(start_date, end_date))
-
-            if username:
-                query = query.filter(User.username.like(f'%{username}%'))
-
-            if email:
-                query = query.filter(User.email.like(f'%{email}%'))
+            query = self.build_query(sort_field, sort_type, start_date, end_date, username, email)
 
             users = query.offset(offset).limit(items_per_page).all()
 
@@ -103,19 +79,49 @@ class UserService:
                 updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
             ) for user in users]
 
-            total_users = self.total()
+            total_users = query.count()
             last_page = (total_users - 1) // items_per_page + 1
+            first_item = offset + 1
+            last_item = min(offset + items_per_page, total_users)
 
-            first_item_number = offset + 1
-            last_item_number = min(offset + items_per_page, total_users)
+            return responses, total_users, last_page, first_item, last_item
 
-            return responses, total_users, last_page, first_item_number, last_item_number
-        except DatabaseError as e:
-            logging.error(e)
+        except DatabaseError:
             raise HTTPException(status_code=500, detail="Internal server error")
-        except Exception as e:
-            logging.error(e)
 
+    def get_sort_field(self, sort_by: str):
+        if sort_by == 'email':
+            return User.email
+        elif sort_by == 'username':
+            return User.username
+        elif sort_by == 'id':
+            return User.id
+        else:
+            raise HTTPException(status_code=400, detail="Invalid sort_by field")
+
+    def build_query(self, sort_field, sort_type, start_date, end_date, username, email):
+        query = self.db.query(User)
+
+        if sort_type == 'asc':
+            query = query.order_by(sort_field.asc())
+        elif sort_type == 'desc':
+            query = query.order_by(sort_field.desc())
+        else:
+            raise HTTPException(status_code=400, detail="Invalid sort_type")
+
+        start_date = str(start_date) if start_date else ''
+        end_date = str(end_date) if end_date else ''
+
+        if start_date and end_date:
+            query = query.filter(User.created_at.between(start_date + ' 00:00:00', end_date + ' 23:59:59'))
+
+        if username:
+            query = query.filter(User.username.like(f'%{username}%'))
+
+        if email:
+            query = query.filter(User.email.like(f'%{email}%'))
+
+        return query
 
     def total(self) -> int:
         """
