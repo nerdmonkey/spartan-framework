@@ -81,6 +81,9 @@ class UserService:
             else:
                 raise HTTPException(status_code=400, detail="Invalid sort_type")
 
+            start_date = str(start_date) + ' 00:00:00' if start_date else ""
+            end_date = str(end_date) + ' 23:59:59' if end_date else ""
+
             if start_date and end_date:
                 query = query.filter(User.created_at.between(start_date, end_date))
 
