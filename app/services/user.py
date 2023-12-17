@@ -90,16 +90,42 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def get_sort_field(self, sort_by: str):
-        if sort_by == 'email':
-            return User.email
-        elif sort_by == 'username':
-            return User.username
-        elif sort_by == 'id':
-            return User.id
-        else:
-            raise HTTPException(status_code=400, detail="Invalid sort_by field")
+            """
+            Returns the corresponding sort field based on the given sort_by parameter.
+
+            Args:
+                sort_by (str): The field to sort by.
+
+            Returns:
+                The sort field corresponding to the given sort_by parameter.
+
+            Raises:
+                HTTPException: If the sort_by field is invalid.
+            """
+            if sort_by == 'email':
+                return User.email
+            elif sort_by == 'username':
+                return User.username
+            elif sort_by == 'id':
+                return User.id
+            else:
+                raise HTTPException(status_code=400, detail="Invalid sort_by field")
 
     def build_query(self, sort_field, sort_type, start_date, end_date, username, email):
+        """
+        Builds a query to retrieve users based on the provided parameters.
+
+        Args:
+            sort_field (str): The field to sort the users by.
+            sort_type (str): The type of sorting, either 'asc' or 'desc'.
+            start_date (str): The start date for filtering users.
+            end_date (str): The end date for filtering users.
+            username (str): The username to filter users by.
+            email (str): The email to filter users by.
+
+        Returns:
+            sqlalchemy.orm.query.Query: The query object for retrieving users.
+        """
         query = self.db.query(User)
 
         if sort_type == 'asc':
@@ -124,13 +150,13 @@ class UserService:
         return query
 
     def total(self) -> int:
-        """
-        Get the total number of users.
+            """
+            Get the total number of users.
 
-        Returns:
-            int: The total number of users.
-        """
-        return self.db.query(User).count()
+            Returns:
+                int: The total number of users.
+            """
+            return self.db.query(User).count()
 
     def find(self, id: int) -> UserResponse:
         """
