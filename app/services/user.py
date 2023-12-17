@@ -140,7 +140,13 @@ class UserService:
             HTTPException: If the user is not found.
         """
         user = self.get_by_id(id)
-        return UserResponse(**user.__dict__)
+        return UserResponse(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+        )
 
     def save(self, user: UserCreateRequest) -> UserCreateResponse:
         """
