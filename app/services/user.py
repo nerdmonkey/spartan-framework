@@ -92,7 +92,13 @@ class UserService:
 
             users = query.offset(offset).limit(items_per_page).all()
 
-            responses = [UserResponse(**user.__dict__) for user in users]
+            responses = [UserResponse(
+                id=user.id,
+                username=user.username,
+                email=user.email,
+                created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+            ) for user in users]
 
             total_users = self.total()
             last_page = (total_users - 1) // items_per_page + 1
