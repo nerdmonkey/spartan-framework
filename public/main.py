@@ -33,8 +33,13 @@ tags_metadata = [
 settings = get_settings()
 
 # Define the root path based on the environment
-root_path = "/dev/"
-if settings.APP_ENVIRONMENT == "local" or settings.APP_ENVIRONMENT == "test":
+if settings.APP_ENVIRONMENT == "dev":
+    root_path = "/dev/"
+elif settings.APP_ENVIRONMENT == "uat":
+    root_path = "/uat/"
+elif settings.APP_ENVIRONMENT == "prod":
+    root_path = "/prod/"
+else:
     root_path = "/"
 
 # Create a FastAPI app instance
