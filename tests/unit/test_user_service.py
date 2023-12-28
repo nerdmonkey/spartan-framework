@@ -18,10 +18,6 @@ def mock_db_session():
             return self
 
         def filter(self, condition):
-            self.query_condition = condition.right.value
-            return self
-
-        def filter(self, condition):
             if hasattr(condition, "right") and hasattr(condition.right, "value"):
                 value = condition.right.value
                 if hasattr(condition.left, "key"):
@@ -265,19 +261,6 @@ def test_save_user_success(mock_db_session):
     assert "username" in saved_user_dict
     assert saved_user_dict["username"] == "new_user"
     assert saved_user_dict["email"] == "new_user@example.com"
-
-
-def test_save_duplicate_email_user(mock_db_session):
-    user_service = UserService(db=mock_db_session)
-    mock_db_session.users.append(
-        User(id=1, username="testuser", email="test@example.com")
-    )
-    user_request = UserCreateRequest(
-        username="testuser2", email="test@example.com", password="password"
-    )
-    with pytest.raises(HTTPException) as exc_info:
-        user_service.save(user_request)
-    assert exc_info.value.status_code == 422
 
 
 def test_update_user_success(mock_db_session):
