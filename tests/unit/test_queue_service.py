@@ -39,7 +39,7 @@ def test_send_message_to_fifo_queue():
 
     # Test sending a message to the FIFO queue
     queue_service = QueueService()  # Assuming QueueService is defined elsewhere
-    response = queue_service.send_message(
+    queue_service.send_message(
         queue_url, {"key": "value"}, "group1", "dedup1"
     )
 

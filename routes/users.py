@@ -100,6 +100,7 @@ async def get_user(id: int, db: Session = Depends(get_session)):
             raise HTTPException(status_code=404, detail="User not found")
         return {"data": user, "status_code": 200}
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -124,6 +125,7 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
         created_user = user_service.save(user)
         return {"data": created_user, "status_code": 201}
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -156,6 +158,7 @@ async def update_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
