@@ -4,7 +4,9 @@ from unittest.mock import patch
 import pytest
 
 from config.app import (  # Replace 'your_module' with the actual module name
-    Settings, get_settings)
+    Settings,
+    get_settings,
+)
 
 
 def test_settings_loads_env_vars():
