@@ -14,20 +14,20 @@ settings = get_settings()
 
 
 description = """
-Spartan, often referred to as "The swiss army knife for serverless development,"
-is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more.
-It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
+Spartan, often called "The swiss army knife for serverless development," is a tool for
+simplifying serverless application creation on popular cloud providers. It generates
+Python code, streamlines development, saves time, and ensures code consistency. 🚀
 """
 
 
 tags_metadata = [
     {
         "name": "Users",
-        "description": "This endpoint allows performing operations related to users. It provides functionality to users through a RESTful API.",
+        "description": "Operations related to users, providing functionality through a RESTful API.",
     },
     {
         "name": "Health Check",
-        "description": "This is a health check endpoint for an API serves as a method to verify the API's functional condition.",
+        "description": "A health check endpoint to verify the API's functional condition.",
     },
 ]
 
