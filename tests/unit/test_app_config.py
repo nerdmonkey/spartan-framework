@@ -1,10 +1,7 @@
 import os
 from unittest.mock import patch
 
-from config.app import (
-    Settings,
-    get_settings,
-)
+from config.app import Settings, get_settings
 
 
 def test_settings_loads_env_vars():
