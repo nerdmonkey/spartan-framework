@@ -1,9 +1,7 @@
 import os
 from unittest.mock import patch
 
-import pytest
-
-from config.app import (  # Replace 'your_module' with the actual module name
+from config.app import (
     Settings,
     get_settings,
 )

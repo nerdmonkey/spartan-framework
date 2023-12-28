@@ -1,6 +1,3 @@
-import os
-from unittest.mock import MagicMock, patch
-
 import jsonpickle
 import pytest
 from boto3.exceptions import Boto3Error

@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pytest
 from sqlalchemy.engine import Engine
 
@@ -100,14 +98,3 @@ def test_create_database_engine_mysql(mock_settings_mysql):
     """
     engine = create_database_engine()
     assert isinstance(engine, Engine)
-
-
-# def test_create_database_engine_unsupported(mock_settings_unsupported):
-#     """
-#     Given: Unsupported database type settings.
-#     When: Attempting to create a database engine.
-#     Then: A ValueError should be raised indicating an unsupported database type.
-#     """
-#     with pytest.raises(ValueError) as excinfo:
-#         create_database_engine()
-#     assert "Unsupported database type" in str(excinfo.value)
