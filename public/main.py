@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append(".")
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +9,7 @@ from mangum import Mangum
 from config.app import get_settings
 from routes import health, users
 
+sys.path.append(".")
 settings = get_settings()
 
 # Description of the FastAPI application

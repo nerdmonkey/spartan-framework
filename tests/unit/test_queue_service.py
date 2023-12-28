@@ -39,9 +39,7 @@ def test_send_message_to_fifo_queue():
 
     # Test sending a message to the FIFO queue
     queue_service = QueueService()  # Assuming QueueService is defined elsewhere
-    queue_service.send_message(
-        queue_url, {"key": "value"}, "group1", "dedup1"
-    )
+    queue_service.send_message(queue_url, {"key": "value"}, "group1", "dedup1")
 
 
 @mock_sqs
