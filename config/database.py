@@ -1,4 +1,3 @@
-from typing import Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
