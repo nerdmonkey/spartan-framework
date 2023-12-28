@@ -60,7 +60,18 @@ async def get_users(
         )
 
         if not items:
-            raise ValueError("No users found")
+            return {
+                "data": [],
+                "meta": {
+                    "current_page": 0,
+                    "last_page": 0,
+                    "first_item": 0,
+                    "last_item": 0,
+                    "items_per_page": 0,
+                    "total": 0,
+                },
+                "status_code": 404,
+            }
 
         return {
             "data": items,
@@ -99,6 +110,9 @@ async def get_user(id: int, db: Session = Depends(get_session)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         return {"data": user, "status_code": 200}
+    except HTTPException as e:
+        logging.error(e)
+        raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -155,8 +169,9 @@ async def update_user(
         if not updated_user:
             raise HTTPException(status_code=404, detail="User not found")
         return {"data": updated_user, "status_code": 200}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException as e:
+        logging.error(e)
+        raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -183,7 +198,7 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
         user = user_service.delete(id)
 
         if not user:
-            raise HTTPException(status_code=500, detail="Failed to delete user")
+            raise HTTPException(status_code=404, detail="User not found")
 
         return {"data": user, "status_code": 200}
     except HTTPException as e:
