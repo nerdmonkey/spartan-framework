@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -6,13 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import (
-    PaginatedUserResponse,
-    SingleUserResponse
-)
+from app.responses.user import PaginatedUserResponse, SingleUserResponse
 from app.services.user import UserService
 from config.database import get_session
-from datetime import date
 
 user_service = UserService(db=None)
 
@@ -25,8 +22,8 @@ route = APIRouter(
 async def get_users(
     page: Optional[int] = Query(1, description="page number", gt=0),
     items_per_page: Optional[int] = Query(10, description="items per page", gt=0),
-    sort_type: Optional[str] = Query('asc', description="sort type (asc or desc)"),
-    sort_by: Optional[str] = Query('id', description="sort by field"),
+    sort_type: Optional[str] = Query("asc", description="sort type (asc or desc)"),
+    sort_by: Optional[str] = Query("id", description="sort by field"),
     username: Optional[str] = Query(None, description="username filter"),
     email: Optional[str] = Query(None, description="email filter"),
     start_date: Optional[date] = Query(None, description="start date filter"),
@@ -53,8 +50,14 @@ async def get_users(
     try:
         user_service.db = db
         items, total, last_page, first_item, last_item = user_service.all(
-            page, items_per_page, sort_type=sort_type, sort_by=sort_by,
-            start_date=start_date, end_date=end_date, username=username, email=email
+            page,
+            items_per_page,
+            sort_type=sort_type,
+            sort_by=sort_by,
+            start_date=start_date,
+            end_date=end_date,
+            username=username,
+            email=email,
         )
 
         if not items:

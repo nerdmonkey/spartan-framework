@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
+from app.responses.user import (UserCreateResponse, UserResponse,
+                                UserUpdateResponse)
 
 
 class UserService:
@@ -42,7 +43,17 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    def all(self, page: int, items_per_page: int, sort_type: str = 'asc', sort_by: str = 'id', start_date: str = None, end_date: str = None, username: str = None, email: str = None) -> Tuple[List[UserResponse], int, int, int, int]:
+    def all(
+        self,
+        page: int,
+        items_per_page: int,
+        sort_type: str = "asc",
+        sort_by: str = "id",
+        start_date: str = None,
+        end_date: str = None,
+        username: str = None,
+        email: str = None,
+    ) -> Tuple[List[UserResponse], int, int, int, int]:
         """
         Retrieve all users with pagination and optional date, username, and email filters.
 
@@ -67,17 +78,22 @@ class UserService:
 
             sort_field = self.get_sort_field(sort_by)
 
-            query = self.build_query(sort_field, sort_type, start_date, end_date, username, email)
+            query = self.build_query(
+                sort_field, sort_type, start_date, end_date, username, email
+            )
 
             users = query.offset(offset).limit(items_per_page).all()
 
-            responses = [UserResponse(
-                id=user.id,
-                username=user.username,
-                email=user.email,
-                created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
-            ) for user in users]
+            responses = [
+                UserResponse(
+                    id=user.id,
+                    username=user.username,
+                    email=user.email,
+                    created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                )
+                for user in users
+            ]
 
             total_users = query.count()
             last_page = (total_users - 1) // items_per_page + 1
@@ -90,26 +106,26 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def get_sort_field(self, sort_by: str):
-            """
-            Returns the corresponding sort field based on the given sort_by parameter.
+        """
+        Returns the corresponding sort field based on the given sort_by parameter.
 
-            Args:
-                sort_by (str): The field to sort by.
+        Args:
+            sort_by (str): The field to sort by.
 
-            Returns:
-                The sort field corresponding to the given sort_by parameter.
+        Returns:
+            The sort field corresponding to the given sort_by parameter.
 
-            Raises:
-                HTTPException: If the sort_by field is invalid.
-            """
-            if sort_by == 'email':
-                return User.email
-            elif sort_by == 'username':
-                return User.username
-            elif sort_by == 'id':
-                return User.id
-            else:
-                raise HTTPException(status_code=400, detail="Invalid sort_by field")
+        Raises:
+            HTTPException: If the sort_by field is invalid.
+        """
+        if sort_by == "email":
+            return User.email
+        elif sort_by == "username":
+            return User.username
+        elif sort_by == "id":
+            return User.id
+        else:
+            raise HTTPException(status_code=400, detail="Invalid sort_by field")
 
     def build_query(self, sort_field, sort_type, start_date, end_date, username, email):
         """
@@ -128,35 +144,39 @@ class UserService:
         """
         query = self.db.query(User)
 
-        if sort_type == 'asc':
+        if sort_type == "asc":
             query = query.order_by(sort_field.asc())
-        elif sort_type == 'desc':
+        elif sort_type == "desc":
             query = query.order_by(sort_field.desc())
         else:
             raise HTTPException(status_code=400, detail="Invalid sort_type")
 
-        start_date = str(start_date) if start_date else ''
-        end_date = str(end_date) if end_date else ''
+        start_date = str(start_date) if start_date else ""
+        end_date = str(end_date) if end_date else ""
 
         if start_date and end_date:
-            query = query.filter(User.created_at.between(start_date + ' 00:00:00', end_date + ' 23:59:59'))
+            query = query.filter(
+                User.created_at.between(
+                    start_date + " 00:00:00", end_date + " 23:59:59"
+                )
+            )
 
         if username:
-            query = query.filter(User.username.like(f'%{username}%'))
+            query = query.filter(User.username.like(f"%{username}%"))
 
         if email:
-            query = query.filter(User.email.like(f'%{email}%'))
+            query = query.filter(User.email.like(f"%{email}%"))
 
         return query
 
     def total(self) -> int:
-            """
-            Get the total number of users.
+        """
+        Get the total number of users.
 
-            Returns:
-                int: The total number of users.
-            """
-            return self.db.query(User).count()
+        Returns:
+            int: The total number of users.
+        """
+        return self.db.query(User).count()
 
     def find(self, id: int) -> UserResponse:
         """
@@ -252,30 +272,30 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def delete(self, id: int) -> UserResponse:
-            """
-            Deletes a user by their ID.
+        """
+        Deletes a user by their ID.
 
-            Args:
-                id (int): The ID of the user to delete.
+        Args:
+            id (int): The ID of the user to delete.
 
-            Returns:
-                dict: A dictionary containing the details of the deleted user.
+        Returns:
+            dict: A dictionary containing the details of the deleted user.
 
-            Raises:
-                HTTPException: If an error occurs while deleting the user.
-            """
-            try:
-                item = self.get_by_id(id)
-                self.db.delete(item)
-                self.db.commit()
-                response_data = {
-                    "id": item.id,
-                    "username": item.username,
-                    "email": item.email,
-                    "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
-                }
-                return response_data
-            except DatabaseError as e:
-                logging.error(f"Error occurred while deleting user: {str(e)}")
-                raise HTTPException(status_code=500, detail="Internal server error")
+        Raises:
+            HTTPException: If an error occurs while deleting the user.
+        """
+        try:
+            item = self.get_by_id(id)
+            self.db.delete(item)
+            self.db.commit()
+            response_data = {
+                "id": item.id,
+                "username": item.username,
+                "email": item.email,
+                "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            return response_data
+        except DatabaseError as e:
+            logging.error(f"Error occurred while deleting user: {str(e)}")
+            raise HTTPException(status_code=500, detail="Internal server error")

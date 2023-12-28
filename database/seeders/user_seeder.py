@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
+
 from faker import Faker
 
 from app.models.user import User
 from config.database import get_session
-from datetime import datetime, timedelta
 
 
 def run():
@@ -18,8 +19,12 @@ def run():
             "username": fake.user_name(),
             "email": fake.email(),
             "password": fake.password(),
-            "created_at": fake.date_time_between(start_date=two_months_ago, end_date=one_week_ago),
-            "updated_at": fake.date_time_between(start_date=one_week_ago, end_date=current_time),
+            "created_at": fake.date_time_between(
+                start_date=two_months_ago, end_date=one_week_ago
+            ),
+            "updated_at": fake.date_time_between(
+                start_date=one_week_ago, end_date=current_time
+            ),
         }
         user = User(**user)
         db.add(user)

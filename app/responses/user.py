@@ -2,6 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
+
 class UserResponse(BaseModel):
     """
     Pydantic model representing a response for a User.
