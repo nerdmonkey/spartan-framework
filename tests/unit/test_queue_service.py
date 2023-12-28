@@ -1,5 +1,4 @@
 import boto3
-import pytest
 from moto import mock_sqs
 
 from app.services.queue import (

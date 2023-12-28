@@ -1,8 +1,6 @@
-import pytest
 from sqlalchemy import Integer, String
 
-from app.models.base import Base  # Replace 'your_module' with the actual module name
-from app.models.user import User  # Replace 'your_module' with the actual module name
+from app.models.user import User
 
 
 def test_user_model():
