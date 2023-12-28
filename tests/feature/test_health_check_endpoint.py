@@ -6,4 +6,7 @@ def test_health_check(client):
 
     assert response.status_code == status.HTTP_200_OK
 
-    assert response.json() == {"message": "OK"}
+    assert response.json() == {
+        "message": "OK",
+        "status_code": 200,
+    }
