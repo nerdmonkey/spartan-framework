@@ -12,12 +12,14 @@ from routes import health, users
 sys.path.append(".")
 settings = get_settings()
 
-# Description of the FastAPI application
+
 description = """
-Spartan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
+Spartan, often referred to as "The swiss army knife for serverless development,"
+is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more.
+It streamlines your development process, saving you time and ensuring code consistency in your serverless projects. 🚀
 """
 
-# Metadata for API tags
+
 tags_metadata = [
     {
         "name": "Users",
@@ -29,10 +31,10 @@ tags_metadata = [
     },
 ]
 
-# Get application settings
+
 settings = get_settings()
 
-# Define the root path based on the environment
+
 if settings.APP_ENVIRONMENT == "dev":
     root_path = "/dev/"
 elif settings.APP_ENVIRONMENT == "uat":
@@ -42,7 +44,7 @@ elif settings.APP_ENVIRONMENT == "prod":
 else:
     root_path = "/"
 
-# Create a FastAPI app instance
+
 app = FastAPI(
     title="Spartan",
     description=description,
@@ -58,10 +60,10 @@ app = FastAPI(
     debug=settings.APP_DEBUG,
 )
 
-# Define allowed origins for CORS
+
 allowed_origins = settings.ALLOWED_ORIGINS
 
-# Add CORS middleware to the app
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -70,15 +72,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include router for health check and users
+
 app.include_router(health.route)
 app.include_router(users.route)
 
-# Define Jinja2 templates directory
+
 templates = Jinja2Templates(directory="public")
 
 
-# Define a route for the welcome page
 @app.get("/", include_in_schema=False)
 async def read_welcome(request: Request):
     """
@@ -95,5 +96,4 @@ async def read_welcome(request: Request):
     )
 
 
-# Create a Mangum handler for AWS Lambda
 handle = Mangum(app)

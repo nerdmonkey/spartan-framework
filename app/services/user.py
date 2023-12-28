@@ -67,7 +67,8 @@ class UserService:
             email (str): The email filter.
 
         Returns:
-            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses, the total number of users, the last page number, the first item number, and the last item number.
+            Tuple[List[UserResponse], int, int, int, int]: A tuple containing the list of user responses,
+            the total number of users, the last page number, the first item number, and the last item number.
 
         Raises:
             HTTPException: If there is an internal server error.
