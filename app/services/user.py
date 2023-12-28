@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
+from app.responses.user import (UserCreateResponse, UserResponse,
+                                UserUpdateResponse)
 
 
 class UserService:

@@ -2,9 +2,8 @@ import boto3
 import pytest
 from moto import mock_sqs
 
-from app.services.queue import (
-    QueueService,
-)  # Replace 'your_module' with the actual module name
+from app.services.queue import \
+    QueueService  # Replace 'your_module' with the actual module name
 
 
 @mock_sqs
