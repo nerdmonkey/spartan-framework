@@ -8,72 +8,71 @@ from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.services.user import UserService
 
 
+class MockSession:
+    def __init__(self):
+        self.users = []
+
+    def query(self, model):
+        return self
+
+    def filter(self, condition):
+        if hasattr(condition, "right") and hasattr(condition.right, "value"):
+            value = condition.right.value
+            if hasattr(condition.left, "key"):
+                attribute = condition.left.key
+                self.filtered_users = [
+                    user for user in self.users if getattr(user, attribute) == value
+                ]
+            else:
+                self.filtered_users = [user for user in self.users if user.id == value]
+        return self
+
+    def first(self):
+        return self.filtered_users[0] if self.filtered_users else None
+
+    def offset(self, offset):
+        self.pagination_offset = offset
+        return self
+
+    def limit(self, limit):
+        self.pagination_limit = limit
+        return self
+
+    def all(self):
+        start = self.pagination_offset
+        end = start + self.pagination_limit
+        return self.users[start:end]
+
+    def count(self):
+        return len(self.users)
+
+    def add(self, item):
+        if not hasattr(item, "id") or item.id is None:
+            item.id = len(self.users) + 1
+        if not hasattr(item, "created_at") or item.created_at is None:
+            item.created_at = datetime.now()
+        if not hasattr(item, "updated_at") or item.updated_at is None:
+            item.updated_at = datetime.now()
+        self.users.append(item)
+
+    def refresh(self, item):
+        if not item.created_at:
+            item.created_at = datetime.now()
+        if not item.updated_at:
+            item.updated_at = datetime.now()
+
+    def commit(self):
+        pass
+
+    def delete(self, item):
+        self.users.remove(item)
+
+    def order_by(self, *args, **kwargs):
+        return self
+
+
 @pytest.fixture
 def mock_db_session():
-    class MockSession:
-        def __init__(self):
-            self.users = []
-
-        def query(self, model):
-            return self
-
-        def filter(self, condition):
-            if hasattr(condition, "right") and hasattr(condition.right, "value"):
-                value = condition.right.value
-                if hasattr(condition.left, "key"):
-                    attribute = condition.left.key
-                    self.filtered_users = [
-                        user for user in self.users if getattr(user, attribute) == value
-                    ]
-                else:
-                    self.filtered_users = [
-                        user for user in self.users if user.id == value
-                    ]
-            return self
-
-        def first(self):
-            return self.filtered_users[0] if self.filtered_users else None
-
-        def offset(self, offset):
-            self.pagination_offset = offset
-            return self
-
-        def limit(self, limit):
-            self.pagination_limit = limit
-            return self
-
-        def all(self):
-            start = self.pagination_offset
-            end = start + self.pagination_limit
-            return self.users[start:end]
-
-        def count(self):
-            return len(self.users)
-
-        def add(self, item):
-            if not hasattr(item, "id") or item.id is None:
-                item.id = len(self.users) + 1
-            if not hasattr(item, "created_at") or item.created_at is None:
-                item.created_at = datetime.now()
-            if not hasattr(item, "updated_at") or item.updated_at is None:
-                item.updated_at = datetime.now()
-            self.users.append(item)
-
-        def refresh(self, item):
-            if not item.created_at:
-                item.created_at = datetime.now()
-            if not item.updated_at:
-                item.updated_at = datetime.now()
-
-        def commit(self):
-            pass
-
-        def delete(self, item):
-            self.users.remove(item)
-
-        def order_by(self, *args, **kwargs):
-            return self
-
     return MockSession()
 
 
