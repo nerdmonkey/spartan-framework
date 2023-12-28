@@ -7,8 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import (UserCreateResponse, UserResponse,
-                                UserUpdateResponse)
+from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
 
 
 class UserService:
@@ -272,22 +271,8 @@ class UserService:
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def delete(self, id: int) -> UserResponse:
-        """
-        Deletes a user by their ID.
-
-        Args:
-            id (int): The ID of the user to delete.
-
-        Returns:
-            dict: A dictionary containing the details of the deleted user.
-
-        Raises:
-            HTTPException: If an error occurs while deleting the user.
-        """
         try:
             item = self.get_by_id(id)
-            self.db.delete(item)
-            self.db.commit()
             response_data = {
                 "id": item.id,
                 "username": item.username,
@@ -295,6 +280,8 @@ class UserService:
                 "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
             }
+            self.db.delete(item)
+            self.db.commit()
             return response_data
         except DatabaseError as e:
             logging.error(f"Error occurred while deleting user: {str(e)}")
