@@ -21,4 +21,7 @@ async def health_check():
     Returns:
         dict: A dictionary with a key 'message' and value 'OK', signifying the service is running.
     """
-    return {"message": "OK"}
+    return {
+        "message": "OK",
+        "status_code": 200,
+    }
