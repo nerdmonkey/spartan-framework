@@ -1,11 +1,10 @@
 import logging
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import PaginatedUserResponse, SingleUserResponse
 from app.services.user import UserService
