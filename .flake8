@@ -5,6 +5,7 @@ exclude =
     build,
     dist,
     .venv,
-    .serverless
+    .serverless,
+    node_modules,
 max-complexity = 10
 docstring_style=sphinx

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
@@ -287,3 +287,28 @@ class UserService:
         except DatabaseError as e:
             logging.error(f"Error occurred while deleting user: {str(e)}")
             raise HTTPException(status_code=500, detail="Internal server error")
+
+    def bulk_delete(self, ids: Union[int, List[int]]):
+        if isinstance(ids, int):
+            ids = [ids]
+
+        deleted_categories = []
+
+        for id in ids:
+            item = self.get_by_id(id)
+            if item:
+                self.db.delete(item)
+                response_data = {
+                    "id": item.id,
+                    "name": item.name,
+                    "color": item.color,
+                    "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+                deleted_categories.append(response_data)
+
+        self.db.commit()
+
+        response_data = deleted_categories
+
+        return response_data
