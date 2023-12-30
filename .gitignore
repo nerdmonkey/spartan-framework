@@ -165,6 +165,9 @@ alembic.ini
 
 .DS_Store
 .vscode/
+node_modules/
+.idea/
+.vscode
 
 *.db
 Dockerfile
