@@ -35,6 +35,7 @@ pytest-mock = "^3.12.0"
 pytest-asyncio = "^0.21.1"
 faker = "^20.1.0"
 mocker = "^1.1.1"
+ipykernel = "^6.28.0"
 
 [build-system]
 requires = ["poetry-core"]
