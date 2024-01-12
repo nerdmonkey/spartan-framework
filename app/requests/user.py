@@ -40,13 +40,6 @@ class UserCreateRequest(BaseModel):
 
         return value
 
-    @validator("password", pre=True, always=True)
-    def check_color(cls, value):
-        if not value.strip():
-            raise ValueError("The password field is required")
-
-        return value
-
 
 class UserUpdateRequest(BaseModel):
     """
@@ -72,8 +65,8 @@ class UserUpdateRequest(BaseModel):
         if len(value) < 3:
             raise ValueError("Name must be at least 3 characters long")
 
-        if len(value) > 10:
-            raise ValueError("Name must be at least 10 characters long")
+        if len(value) > 20:
+            raise ValueError("Name must be at maximum of 20 characters long")
 
         return value
 
@@ -81,12 +74,5 @@ class UserUpdateRequest(BaseModel):
     def check_email(cls, value):
         if not value.strip():
             raise ValueError("The email field is required")
-
-        return value
-
-    @validator("password", pre=True, always=True)
-    def check_password(cls, value):
-        if not value.strip():
-            raise ValueError("The password field is required")
 
         return value
