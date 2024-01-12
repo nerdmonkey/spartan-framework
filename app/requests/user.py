@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr,validator
+from pydantic import BaseModel, EmailStr, validator
 
 
 class UserCreateRequest(BaseModel):
@@ -19,32 +19,32 @@ class UserCreateRequest(BaseModel):
     password: str
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
-    
+
     @validator("username", pre=True, always=True)
     def check_name(cls, value):
         if not value.strip():
             raise ValueError("The name field is required")
-        
+
         if len(value) < 3:
             raise ValueError("Name must be at least 3 characters long")
-        
+
         if len(value) > 50:
             raise ValueError("Name must be at least 50 characters long")
-        
+
         return value
 
     @validator("email", pre=True, always=True)
     def check_email(cls, value):
         if not value.strip():
             raise ValueError("The email field is required")
-        
+
         return value
 
     @validator("password", pre=True, always=True)
     def check_color(cls, value):
         if not value.strip():
             raise ValueError("The password field is required")
-        
+
         return value
 
 
@@ -63,30 +63,30 @@ class UserUpdateRequest(BaseModel):
     password: Optional[str]
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
-    
+
     @validator("username", pre=True, always=True)
     def check_name(cls, value):
         if not value.strip():
             raise ValueError("The name field is required")
-        
+
         if len(value) < 3:
             raise ValueError("Name must be at least 3 characters long")
-        
+
         if len(value) > 10:
             raise ValueError("Name must be at least 10 characters long")
-        
+
         return value
 
     @validator("email", pre=True, always=True)
     def check_email(cls, value):
         if not value.strip():
             raise ValueError("The email field is required")
-        
+
         return value
 
     @validator("password", pre=True, always=True)
     def check_password(cls, value):
         if not value.strip():
             raise ValueError("The password field is required")
-        
+
         return value
