@@ -126,7 +126,7 @@ def test_total(mock_db_session):
 def test_find_user(mock_db_session):
     user = User(
         id=1,
-        username="user1",
+        username="testuser1",
         email="user1@example.com",
         created_at=datetime.now(),
         updated_at=datetime.now(),
@@ -143,14 +143,14 @@ def test_find_user(mock_db_session):
 def test_save_user(mock_db_session):
     user_service = UserService(db=mock_db_session)
     user_request = UserCreateRequest(
-        username="new_user", email="new_user@example.com", password="password"
+        username="testnewuser", email="new_user@example.com", password="password"
     )
 
     saved_user = user_service.save(user_request)
 
     assert isinstance(saved_user, dict)
     assert "id" in saved_user
-    assert saved_user["username"] == "new_user"
+    assert saved_user["username"] == "testnewuser"
     assert saved_user["email"] == "new_user@example.com"
 
 
@@ -158,7 +158,7 @@ def test_save_duplicate_email_user(mock_db_session):
     add_users_to_session(mock_db_session, 1)
     user_service = UserService(db=mock_db_session)
     user_request = UserCreateRequest(
-        username="user2", email="user1@example.com", password="password"
+        username="testuser2", email="user1@example.com", password="password"
     )
 
     with pytest.raises(HTTPException) as exc_info:
@@ -169,7 +169,7 @@ def test_save_duplicate_email_user(mock_db_session):
 def test_update_user(mock_db_session):
     user = User(
         id=1,
-        username="user1",
+        username="testuser1",
         email="user1@example.com",
         created_at=datetime.now(),
         updated_at=datetime.now(),
@@ -178,18 +178,18 @@ def test_update_user(mock_db_session):
 
     user_service = UserService(db=mock_db_session)
     user_request = UserUpdateRequest(
-        username="updated_user", email="updated_user@example.com"
+        username="testupdateduser", email="updated_user@example.com"
     )
 
     result = user_service.update(1, user_request)
 
-    assert result["username"] == "updated_user"
+    assert result["username"] == "testupdateduser"
     assert result["email"] == "updated_user@example.com"
 
 
 def test_update_nonexistent_user(mock_db_session):
     user_service = UserService(db=mock_db_session)
-    user_request = UserUpdateRequest(username="user2", email="user2@example.com")
+    user_request = UserUpdateRequest(username="testuser2", email="user2@example.com")
 
     with pytest.raises(HTTPException) as exc_info:
         user_service.update(2, user_request)
@@ -199,7 +199,7 @@ def test_update_nonexistent_user(mock_db_session):
 def test_delete_user(mock_db_session):
     user = User(
         id=1,
-        username="user1",
+        username="testuser1",
         email="user1@example.com",
         created_at=datetime.now(),
         updated_at=datetime.now(),
@@ -251,21 +251,21 @@ def test_all_success(mock_db_session):
 def test_save_user_success(mock_db_session):
     user_service = UserService(db=mock_db_session)
     user_request = UserCreateRequest(
-        username="new_user", email="new_user@example.com", password="password"
+        username="testnewuser", email="new_user@example.com", password="password"
     )
 
     saved_user_dict = user_service.save(user_request)
 
     assert isinstance(saved_user_dict, dict)
     assert "username" in saved_user_dict
-    assert saved_user_dict["username"] == "new_user"
+    assert saved_user_dict["username"] == "testnewuser"
     assert saved_user_dict["email"] == "new_user@example.com"
 
 
 def test_update_user_success(mock_db_session):
     user = User(
         id=1,
-        username="user1",
+        username="testuser1",
         email="user1@example.com",
         created_at=datetime.now(),
         updated_at=datetime.now(),
@@ -274,14 +274,14 @@ def test_update_user_success(mock_db_session):
 
     user_service = UserService(db=mock_db_session)
     user_update_request = UserUpdateRequest(
-        username="updated_user", email="updated_user@example.com"
+        username="testupdateduser", email="updated_user@example.com"
     )
 
     updated_user_dict = user_service.update(1, user_update_request)
 
     assert isinstance(updated_user_dict, dict)
     assert "username" in updated_user_dict
-    assert updated_user_dict["username"] == "updated_user"
+    assert updated_user_dict["username"] == "testupdateduser"
     assert updated_user_dict["email"] == "updated_user@example.com"
 
 
@@ -296,7 +296,7 @@ def test_update_user_not_found(mock_db_session):
 def test_delete_user_success(mock_db_session):
     user = User(
         id=1,
-        username="user1",
+        username="testuser1",
         email="user1@example.com",
         created_at=datetime.now(),
         updated_at=datetime.now(),
@@ -307,7 +307,7 @@ def test_delete_user_success(mock_db_session):
     deleted_user_response = user_service.delete(1)
 
     assert deleted_user_response["id"] == 1
-    assert deleted_user_response["username"] == "user1"
+    assert deleted_user_response["username"] == "testuser1"
     assert isinstance(deleted_user_response["created_at"], str)
     assert isinstance(deleted_user_response["updated_at"], str)
     assert len(mock_db_session.users) == 0
