@@ -205,3 +205,22 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error {e}")
+
+
+@route.delete(
+    "/users/{ids}/bulk",
+    status_code=200,
+)
+async def delete_multiple_users(
+    ids: str, db: Session = Depends(get_session),
+):
+    try:
+        id_list = [int(id) for id in ids.split(",")]
+
+        user_service.db = db
+        user_service.bulk_delete(id_list)
+
+        return {"data": {"user_deleted": len(id_list)}, "status_code": 200}
+    except Exception as e:
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
