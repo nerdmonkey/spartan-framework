@@ -292,7 +292,7 @@ class UserService:
         if isinstance(ids, int):
             ids = [ids]
 
-        deleted_categories = []
+        deleted_users = []
 
         for id in ids:
             item = self.get_by_id(id)
@@ -300,15 +300,15 @@ class UserService:
                 self.db.delete(item)
                 response_data = {
                     "id": item.id,
-                    "name": item.name,
-                    "color": item.color,
+                    "username": item.username,
+                    "email": item.email,
                     "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "updated_at": item.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
                 }
-                deleted_categories.append(response_data)
+                deleted_users.append(response_data)
 
         self.db.commit()
 
-        response_data = deleted_categories
+        response_data = deleted_users
 
         return response_data
