@@ -32,8 +32,8 @@ def create_database_engine() -> Engine:
             )
         return create_engine(
             database_url,
-            pool_size=30,
-            max_overflow=30,
+            # pool_size=30,
+            # max_overflow=30,
             connect_args={"check_same_thread": False}
             if database_type == "sqlite"
             else {},
