@@ -212,7 +212,8 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
     status_code=200,
 )
 async def delete_multiple_users(
-    ids: str, db: Session = Depends(get_session),
+    ids: str,
+    db: Session = Depends(get_session),
 ):
     try:
         id_list = [int(id) for id in ids.split(",")]
