@@ -1,12 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Spartan!</title>
+    <title>Welcome to Spartan!</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        .main {
+            font-family: 'Roboto', sans-serif;
+            max-width: 60%;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: justify;
+        }
+    </style>
 </head>
+
 <body>
-    <p>Spartan v0.2.5</p>
-    <a href="{{ root_path }}docs">Go to OpenAPI Docs</a>
+    <div class="main">
+        <h1>Spartan</h1>
+        <p>
+            The Spartan Framework, known as "The Swiss Army Knife for Serverless Development," is an essential tool for
+            developers working with serverless architectures. It significantly simplifies the creation of serverless
+            applications across major cloud providers by automatically generating Python code for classes and other
+            necessary components. This powerful framework accelerates your development process, reduces manual coding, and
+            ensures consistent, high-quality code in your serverless projects.
+        </p>
+
+        <p>
+            Spartan Framework is versatile and can be used to efficiently develop:
+        </p>
+        <ul>
+            <li>
+                API
+            </li>
+            <li>
+                Workflows or State Machines
+            </li>
+            <li>
+                ETL Pipelines
+            </li>
+        </ul>
+        <p>
+            Fully tested in AWS, Spartan Framework is also compatible with other cloud providers like Azure and GCP, making
+            it a flexible choice for a wide range of serverless applications.
+        </p>
+        <br>
+        <a href="{{ root_path }}docs">OpenAPI Docs</a>
+    </div>
 </body>
+
 </html>
