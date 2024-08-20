@@ -1,9 +1,9 @@
 <p align="center"><img src="./logo.png" alt="Social Card of Spartan"></p>
 
-# Spartan
+# Spartan Framework
 
-## About Spartan
-Spartan, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects.
+## About
+Spartan Framework, often referred to as "The swiss army knife for serverless development," is a tool that simplifies the creation of serverless applications on popular cloud providers by generating Python code for classes and more. It streamlines your development process, saving you time and ensuring code consistency in your serverless projects.
 
 ## Installation
 1. Install all the required packages
