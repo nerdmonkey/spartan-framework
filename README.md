@@ -1,3 +1,5 @@
+<p align="center"><img src="./logo.png" alt="Social Card of Spartan"></p>
+
 # Spartan
 
 ## About Spartan
