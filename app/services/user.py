@@ -102,8 +102,8 @@ class UserService:
 
             return responses, total_users, last_page, first_item, last_item
 
-        except DatabaseError:
-            raise HTTPException(status_code=500, detail="Internal server error")
+        except DatabaseError as e:
+            raise HTTPException(status_code=500, detail=f"{str(e)}")
 
     def get_sort_field(self, sort_by: str):
         """
@@ -237,7 +237,7 @@ class UserService:
             return response_data
         except DatabaseError as e:
             logging.error(f"Error occurred while saving user: {str(e)}")
-            raise HTTPException(status_code=500, detail="Internal server error")
+            raise HTTPException(status_code=500, detail=f"{str(e)}")
 
     def update(self, id: int, user: UserUpdateRequest) -> UserUpdateResponse:
         """

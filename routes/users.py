@@ -86,10 +86,10 @@ async def get_users(
             "status_code": 200,
         }
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=f"{e}")
+        raise HTTPException(status_code=404, detail=f"{str(e)}")
     except Exception as e:
         logging.error(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
 
 @route.get("/users/{id}", status_code=200, response_model=SingleUserResponse)
