@@ -1,9 +1,11 @@
 import logging
 from functools import lru_cache
 from typing import Optional
+from pydantic import validator
+from pydantic_settings import BaseSettings
 
 from dotenv import load_dotenv
-from pydantic import BaseSettings, validator
+
 
 load_dotenv(dotenv_path=".env")
 
