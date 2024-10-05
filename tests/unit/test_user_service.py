@@ -262,7 +262,7 @@ def test_save_user_success(mock_db_session):
     assert saved_user_dict["email"] == "new_user@example.com"
 
 
-def test_update_user_success(mock_db_session):
+def test_update_user(mock_db_session):
     user = User(
         id=1,
         username="testuser1",
@@ -273,16 +273,16 @@ def test_update_user_success(mock_db_session):
     mock_db_session.users.append(user)
 
     user_service = UserService(db=mock_db_session)
-    user_update_request = UserUpdateRequest(
-        username="testupdateduser", email="updated_user@example.com"
+    user_request = UserUpdateRequest(
+        username="testupdateduser",
+        email="updated_user@example.com",
+        password="newpassword",  # Add password if required
     )
 
-    updated_user_dict = user_service.update(1, user_update_request)
+    result = user_service.update(1, user_request)
 
-    assert isinstance(updated_user_dict, dict)
-    assert "username" in updated_user_dict
-    assert updated_user_dict["username"] == "testupdateduser"
-    assert updated_user_dict["email"] == "updated_user@example.com"
+    assert result["username"] == "testupdateduser"
+    assert result["email"] == "updated_user@example.com"
 
 
 def test_update_user_not_found(mock_db_session):
