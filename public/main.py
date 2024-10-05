@@ -13,9 +13,22 @@ settings = get_settings()
 
 
 description = """
-Spartan, often called "The swiss army knife for serverless development," is a tool for
-simplifying serverless application creation on popular cloud providers. It generates
-Python code, streamlines development, saves time, and ensures code consistency. 🚀
+The Spartan Framework, known as "The Swiss Army Knife for Serverless Development,"
+is an essential tool for developers working with serverless architectures.
+It significantly simplifies the creation of serverless applications across major
+cloud providers by automatically generating Python code for classes and other
+necessary components. This powerful framework accelerates your development process,
+reduces manual coding, and ensures consistent, high-quality code
+in your serverless projects. 🚀
+
+Spartan Framework is versatile and can be used to efficiently develop:
+- API
+- Workflows or State Machines
+- ETL Pipelines
+- Containerized Microservices
+
+Fully tested in AWS, Spartan Framework is also compatible with other cloud providers
+like Azure and GCP, making it a flexible choice for a wide range of serverless applications.
 """
 
 
