@@ -219,7 +219,7 @@ class UserService:
                 raise HTTPException(
                     status_code=422, detail="User with this email already exists"
                 )
-            data = user.dict(exclude_unset=True)
+            data = user.model_dump(exclude_unset=True)
             data["password"] = "hashed_" + data["password"]
             item = User(**data)
             self.db.add(item)
@@ -252,7 +252,7 @@ class UserService:
         """
         try:
             item = self.get_by_id(id)
-            data = user.dict(exclude_unset=True)
+            data = user.model_dump(exclude_unset=True)
             if "password" in data:
                 data["password"] = "hashed_" + data["password"]
             for key, value in data.items():

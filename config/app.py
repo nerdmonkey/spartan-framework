@@ -1,19 +1,21 @@
 import logging
 from functools import lru_cache
 from typing import Optional
-from pydantic import field_validator
-from pydantic_settings import BaseSettings
 
 from dotenv import load_dotenv
+from pydantic import ConfigDict, field_validator
+from pydantic_settings import BaseSettings
 
 load_dotenv(dotenv_path=".env")
 
 log = logging.getLogger("uvicorn")
 
+
 class Settings(BaseSettings):
     """
     Configuration class for application settings.
     """
+
     ALLOWED_ORIGINS: str
     APP_ENVIRONMENT: str
     APP_DEBUG: bool
@@ -25,16 +27,15 @@ class Settings(BaseSettings):
     DB_USERNAME: str
     DB_PASSWORD: str
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    @field_validator("DB_PORT", mode='before')
+    @field_validator("DB_PORT", mode="before")
     def default_db_port(cls, v):
         try:
             return int(v)
         except (TypeError, ValueError):
             return None
+
 
 @lru_cache()
 def get_settings() -> Settings:

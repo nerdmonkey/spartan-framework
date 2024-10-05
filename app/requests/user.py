@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 
 class UserCreateRequest(BaseModel):
@@ -20,7 +20,9 @@ class UserCreateRequest(BaseModel):
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
 
-    @validator("username", pre=True, always=True)
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("username", mode="before")
     def check_name(cls, value):
         if not value.strip():
             raise ValueError("The name field is required")
@@ -29,11 +31,11 @@ class UserCreateRequest(BaseModel):
             raise ValueError("Name must be at least 3 characters long")
 
         if len(value) > 50:
-            raise ValueError("Name must be at least 50 characters long")
+            raise ValueError("Name must be at most 50 characters long")
 
         return value
 
-    @validator("email", pre=True, always=True)
+    @field_validator("email", mode="before")
     def check_email(cls, value):
         if not value.strip():
             raise ValueError("The email field is required")
@@ -51,14 +53,19 @@ class UserUpdateRequest(BaseModel):
         password (Optional[str]): The new password for the user. Optional.
     """
 
-    username: Optional[str]
-    email: Optional[EmailStr]
-    password: Optional[str]
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
 
-    @validator("username", pre=True, always=True)
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("username", mode="before")
     def check_name(cls, value):
+        if value is None:
+            return value  # Allow None for optional field
+
         if not value.strip():
             raise ValueError("The name field is required")
 
@@ -66,12 +73,15 @@ class UserUpdateRequest(BaseModel):
             raise ValueError("Name must be at least 3 characters long")
 
         if len(value) > 20:
-            raise ValueError("Name must be at maximum of 20 characters long")
+            raise ValueError("Name must be at most 20 characters long")
 
         return value
 
-    @validator("email", pre=True, always=True)
+    @field_validator("email", mode="before")
     def check_email(cls, value):
+        if value is None:
+            return value  # Allow None for optional field
+
         if not value.strip():
             raise ValueError("The email field is required")
 
