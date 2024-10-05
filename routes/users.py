@@ -140,7 +140,7 @@ async def create_user(user: UserCreateRequest, db: Session = Depends(get_session
         return {"data": created_user, "status_code": 201}
     except Exception as e:
         logging.error(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Error occured {e}")
 
 
 @route.put("/users/{id}", status_code=200, response_model=SingleUserResponse)
@@ -174,7 +174,7 @@ async def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
         logging.error(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Erorr occured {e}")
 
 
 @route.delete("/users/{id}", status_code=200, response_model=SingleUserResponse)
@@ -204,7 +204,7 @@ async def delete_user(id: int, db: Session = Depends(get_session)):
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error {e}")
+        raise HTTPException(status_code=500, detail=f"Error occured {e}")
 
 
 @route.delete(
@@ -224,4 +224,4 @@ async def delete_multiple_users(
         return {"data": {"user_deleted": len(id_list)}, "status_code": 200}
     except Exception as e:
         logging.error(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Error occured {e}")

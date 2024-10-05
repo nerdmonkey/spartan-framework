@@ -6,10 +6,8 @@ from pydantic_settings import BaseSettings
 
 from dotenv import load_dotenv
 
-# Load the .env file
 load_dotenv(dotenv_path=".env")
 
-# Configure the logger
 log = logging.getLogger("uvicorn")
 
 class Settings(BaseSettings):
