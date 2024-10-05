@@ -1,15 +1,17 @@
 [tool.poetry]
 name = "spartan-framework"
 version = "0.1.8"
-description = "A micro framework for serverless development in some cloud providers"
+description = "A micro framework for serverless development in AWS"
 authors = ["Sydel Palinlin <sydel.palinlin@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "spartan_framework"}]
+package-mode = false
+
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
-alembic = "^1.12.0"
+alembic = "^1.13.3"
 uvicorn = "^0.23.2"
 httpx = "^0.25.0"
 mangum = "^0.17.0"
@@ -24,10 +26,11 @@ fastapi = "^0.115.0"
 pydantic-settings = "^2.5.2"
 moto = "^5.0.16"
 pydantic = "^2.9.2"
+pytest = "^8.3.3"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
+pytest = "^8.3.3"
 pytest-cov = "^4.1.0"
 black = "^23.9.1"
 isort = "^5.12.0"
