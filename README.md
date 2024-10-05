@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 3. Configure the migration
 ```bash
-spartan migrate init
+spartan migrate init -d sqlite
 ```
 
 4. Create all the tables
