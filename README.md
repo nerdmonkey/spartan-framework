@@ -18,6 +18,7 @@ Fully tested in AWS, Spartan Framework is also compatible with other cloud provi
 1. Install all the required packages
 ```bash
 python -m venv .venv
+source .venv/bin/activate (Linux/Mac) or source .venv/Scripts/activate (Windows)
 pip install -r requirements.txt
 ```
 2. Copy the .env.example to .env
