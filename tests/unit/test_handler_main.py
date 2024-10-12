@@ -1,5 +1,4 @@
 import pytest
-
 from handlers.main import (
     handle,
 )  # Adjust the import according to your project structure
