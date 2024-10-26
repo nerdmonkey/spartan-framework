@@ -34,8 +34,8 @@ class AppService:
         Returns:
             tuple: A tuple containing the table name and region name.
         """
-        table_name = os.environ.get("GSM_TABLE", "GlobalStateTable")
-        region_name = os.environ.get("AWS_REGION", "us-east-1")
+        table_name = "GSM_TABLE"
+        region_name = "ap-southeast-1"
         return table_name, region_name
 
     @staticmethod
