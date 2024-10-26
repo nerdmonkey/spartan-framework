@@ -1,4 +1,3 @@
-import logging
 from functools import lru_cache
 from typing import Optional
 
@@ -7,8 +6,6 @@ from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 load_dotenv(dotenv_path=".env")
-
-log = logging.getLogger("uvicorn")
 
 
 class Settings(BaseSettings):
@@ -43,5 +40,4 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    log.info("Loading config settings from the environment...")
     return Settings()
