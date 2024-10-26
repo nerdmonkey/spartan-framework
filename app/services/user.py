@@ -1,4 +1,3 @@
-import logging
 from typing import List, Tuple, Union
 
 from fastapi import HTTPException
@@ -236,7 +235,6 @@ class UserService:
             }
             return response_data
         except DatabaseError as e:
-            logging.error(f"Error occurred while saving user: {str(e)}")
             raise HTTPException(status_code=500, detail=f"{str(e)}")
 
     def update(self, id: int, user: UserUpdateRequest) -> UserUpdateResponse:
@@ -268,7 +266,6 @@ class UserService:
             }
             return response_data
         except DatabaseError as e:
-            logging.error(f"Error occurred while updating user: {str(e)}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def delete(self, id: int) -> UserResponse:
@@ -285,7 +282,6 @@ class UserService:
             self.db.commit()
             return response_data
         except DatabaseError as e:
-            logging.error(f"Error occurred while deleting user: {str(e)}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
     def bulk_delete(self, ids: Union[int, List[int]]):

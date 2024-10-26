@@ -1,4 +1,3 @@
-import logging
 import os
 
 import boto3
@@ -16,7 +15,6 @@ class AppService:
         Initializes the AppService class.
         Sets up the DynamoDB resource and table.
         """
-        self.logger = logging.getLogger(__name__)
         self.dynamodb_resource, self.table = self._setup_dynamodb()
 
     def __init__(self):
@@ -24,7 +22,6 @@ class AppService:
         Initializes the AppService class.
         Sets up the DynamoDB resource and table.
         """
-        self.logger = logging.getLogger(__name__)
         self.dynamodb_resource, self.table = self._setup_dynamodb()
 
     @staticmethod
@@ -98,7 +95,6 @@ class AppService:
             Exception: The original error that occurred during the DynamoDB operation.
 
         """
-        self.logger.error(f"Error {action} state: {error}")
         raise error
 
     def set_state(self, key, value):
