@@ -43,7 +43,7 @@ spartan serve
 ```
 
 ## Usage
-1. To install
+1. To install the spartan command line tool
 ```bash
 pip install python-spartan
 ```
