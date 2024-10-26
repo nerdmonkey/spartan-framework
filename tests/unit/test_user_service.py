@@ -1,11 +1,11 @@
 from datetime import datetime
 
 import pytest
+from fastapi import HTTPException
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.services.user import UserService
-from fastapi import HTTPException
 
 
 class MockSession:

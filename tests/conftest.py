@@ -4,6 +4,7 @@ import pytest
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from starlette.testclient import TestClient
 
 from app.models.base import Base
 from app.models.user import User

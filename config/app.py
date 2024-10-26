@@ -16,9 +16,12 @@ class Settings(BaseSettings):
     Configuration class for application settings.
     """
 
-    ALLOWED_ORIGINS: str
+    APP_NAME: str
     APP_ENVIRONMENT: str
     APP_DEBUG: bool
+    ALLOWED_ORIGINS: str
+    LOG_LEVEL: str
+    LOG_FILE: str
     DB_TYPE: str
     DB_DRIVER: str
     DB_HOST: str
@@ -26,6 +29,7 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
+    AWS_REGION: str
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
