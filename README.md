@@ -1,4 +1,4 @@
-<p align="center"><img src="./logo.png" alt="Social Card of Spartan"></p>
+<p align="center"><img src="./docs/logo.png" alt="Social Card of Spartan"></p>
 
 # Spartan Framework
 
@@ -18,7 +18,6 @@ Fully tested in AWS, Spartan Framework is also compatible with other cloud provi
 1. Install all the required packages
 ```bash
 python -m venv .venv
-source .venv/bin/activate (Linux/Mac) or source .venv/Scripts/activate (Windows)
 pip install -r requirements.txt
 ```
 2. Copy the .env.example to .env
@@ -65,7 +64,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](./docs/CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 

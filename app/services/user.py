@@ -1,13 +1,13 @@
 import logging
 from typing import List, Tuple, Union
 
+from fastapi import HTTPException
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
-from fastapi import HTTPException
 
 
 class UserService:
