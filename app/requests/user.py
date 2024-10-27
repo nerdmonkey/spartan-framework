@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
+
 class UserCreateRequest(BaseModel):
     """
     Data model for creating a new user.

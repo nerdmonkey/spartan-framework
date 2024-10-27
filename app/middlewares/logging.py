@@ -11,7 +11,6 @@ def standard_logging_middleware(handler):
             "arn": context.invoked_function_arn,
             "memory_size": context.memory_limit_in_mb,
             "aws_request_id": context.aws_request_id,
-            "cold_start": context.cold_start,
         }
 
         standard_logger.info("Input Data", input_data=event, lambda_function=buffer)
