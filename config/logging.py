@@ -4,3 +4,4 @@ settings = get_settings()
 
 APP_NAME = settings.APP_NAME.lower()
 APP_ENVIRONMENT = settings.APP_ENVIRONMENT.lower()
+LOG_LEVEL = settings.LOG_LEVEL.lower()
