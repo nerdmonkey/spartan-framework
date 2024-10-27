@@ -5,11 +5,6 @@ standard_logger = StandardLoggerService()
 
 def standard_logging_middleware(handler):
     def wrapper(event, context):
-        if not hasattr(context, "cold_start"):
-            context.cold_start = True
-        else:
-            context.cold_start = False
-
         buffer = {
             "name": context.function_name,
             "version": context.function_version,

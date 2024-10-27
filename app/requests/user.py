@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-
+# from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from aws_lambda_powertools.utilities.parser import BaseModel, ConfigDict, field_validator, EmailStr
 
 class UserCreateRequest(BaseModel):
     """
