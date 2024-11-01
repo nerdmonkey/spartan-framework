@@ -3,13 +3,13 @@ from datetime import datetime, timedelta
 from faker import Faker
 
 from app.models.user import User
-from config.database import get_session
+from config.database import db
+
+db = db()
+fake = Faker()
 
 
 def run():
-    db = get_session()
-    fake = Faker()
-
     current_time = datetime.now()
     two_months_ago = current_time - timedelta(days=60)
     one_week_ago = current_time - timedelta(days=7)
