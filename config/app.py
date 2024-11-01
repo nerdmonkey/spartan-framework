@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     APP_DEBUG: bool
     ALLOWED_ORIGINS: str
     LOG_LEVEL: str
+    LOG_CHANNEL: str
     LOG_FILE: str
     DB_TYPE: str
     DB_DRIVER: str
