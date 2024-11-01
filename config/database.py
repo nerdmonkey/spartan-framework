@@ -3,11 +3,11 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session as SQLAlchemySession
 from sqlalchemy.orm import sessionmaker
 
-from config.app import get_settings
+from config.app import env
 
 
 def create_database_engine() -> Engine:
-    settings = get_settings()
+    settings = env()
     database_type = settings.DB_TYPE
     database = settings.DB_NAME
 

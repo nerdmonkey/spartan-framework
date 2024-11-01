@@ -5,17 +5,8 @@ from logging.handlers import SocketHandler
 from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
-from config.app import get_settings
-
-settings = get_settings()
-
-APP_NAME = settings.APP_NAME.lower()
-LOG_LEVEL = settings.LOG_LEVEL
-LOG_FILE = settings.LOG_FILE
-LOG_CHANNEL = settings.LOG_CHANNEL
-APP_ENVIRONMENT = settings.APP_ENVIRONMENT.lower()
-TCP_LOG_HOST = "localhost"
-TCP_LOG_PORT = 9999
+from config.app import env
+from config.logging import handler
 
 
 class StandardLogFormatter(LambdaPowertoolsFormatter):
@@ -37,31 +28,35 @@ class ParseSocketHandler(SocketHandler):
 class StandardLoggerService:
     def __init__(self):
         try:
-            if APP_ENVIRONMENT in ["local"] and LOG_CHANNEL == "file":
+            if env().APP_ENVIRONMENT in ["local"] and env().LOG_CHANNEL == "file":
                 self.logger = Logger(
-                    service=APP_NAME,
-                    level=LOG_LEVEL,
+                    service=handler.file.name,
+                    level=handler.file.level,
                     formatter=FileLogFormatter(),
-                    logger_handler=FileHandler(LOG_FILE),
-                    json_deserializer=json.loads,
+                    logger_handler=FileHandler(handler.file.path),
+                    json_deserializer=handler.file.json_deserializer,
                 )
 
-            elif APP_ENVIRONMENT in ["local"] and LOG_CHANNEL == "server":
-                tcp_handler = ParseSocketHandler(TCP_LOG_HOST, TCP_LOG_PORT)
+            elif env().APP_ENVIRONMENT in ["local"] and env().LOG_CHANNEL == "tcp":
+                tcp_handler = ParseSocketHandler(handler.tcp.host, handler.tcp.port)
                 self.logger = Logger(
-                    service=APP_NAME,
-                    level=LOG_LEVEL,
+                    service=handler.tcp.name,
+                    level=handler.tcp.level,
                     formatter=StandardLogFormatter(),
                     logger_handler=tcp_handler,
                     json_deserializer=json.loads,
                 )
             else:
                 self.logger = Logger(
-                    service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
+                    service=env().APP_NAME,
+                    level=env().LOG_LEVEL,
+                    formatter=StandardLogFormatter(),
                 )
         except Exception as e:
             self.logger = Logger(
-                service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
+                service=env().APP_NAME,
+                level=env().LOG_LEVEL,
+                formatter=StandardLogFormatter(),
             )
 
     def debug(self, message, **kwargs):
