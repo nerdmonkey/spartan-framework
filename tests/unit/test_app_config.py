@@ -1,7 +1,7 @@
 import os
 from unittest.mock import patch
 
-from config.app import Settings, get_settings
+from config.app import Settings, env
 
 
 def test_settings_loads_env_vars():
@@ -38,7 +38,7 @@ def test_get_settings_cached():
     the same instance of Settings, indicating that the function's result is being cached.
     """
     with patch("config.app.Settings", return_value=Settings()):
-        first_call = get_settings()
-        second_call = get_settings()
+        first_call = env()
+        second_call = env()
 
     assert first_call is second_call
