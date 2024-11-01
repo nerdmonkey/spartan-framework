@@ -1,9 +1,9 @@
+from logging import FileHandler
+
 from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
 from config.app import get_settings
-from logging import FileHandler
-
 
 settings = get_settings()
 
@@ -12,6 +12,7 @@ LOG_LEVEL = settings.LOG_LEVEL
 LOG_FILE = settings.LOG_FILE
 APP_ENVIRONMENT = settings.APP_ENVIRONMENT.lower()
 
+
 class StandardLogFormatter(LambdaPowertoolsFormatter):
     def format(self, record):
         return super().format(record)
@@ -19,20 +20,19 @@ class StandardLogFormatter(LambdaPowertoolsFormatter):
 
 class StandardLoggerService:
     def __init__(self):
-
         self.logger = Logger(
             service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
         )
 
         app_environment = APP_ENVIRONMENT
 
-        if app_environment in ['local', 'test']:
-            file_handler = FileHandler('app.log')
-            self.logger.addHandler(file_handler)
-
         self.logger = Logger(
             service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
         )
+
+        if app_environment in ["local", "test"]:
+            file_handler = FileHandler(LOG_FILE)
+            self.logger.addHandler(file_handler)
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)

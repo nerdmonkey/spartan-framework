@@ -3,6 +3,7 @@ from app.services.logging import StandardLoggerService
 
 logger = StandardLoggerService()
 
+
 @standard_logging_middleware
 def main(event, context):
     """
