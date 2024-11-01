@@ -21,9 +21,7 @@ class StandardLogFormatter(LambdaPowertoolsFormatter):
 
 class FileLogFormatter(LambdaPowertoolsFormatter):
     def format(self, record):
-        log_entry = super().format(record)
-        # return json.dumps(json.loads(log_entry), indent=4)
-        return log_entry
+        return super().format(record)
 
 
 class StandardLoggerService:
