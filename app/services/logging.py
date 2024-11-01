@@ -28,36 +28,42 @@ class ParseSocketHandler(SocketHandler):
 class StandardLoggerService:
     def __init__(self):
         try:
-            if env().APP_ENVIRONMENT in ["local"] and env().LOG_CHANNEL == "file":
-                self.logger = Logger(
-                    service=handler.file.name,
-                    level=handler.file.level,
-                    formatter=FileLogFormatter(),
-                    logger_handler=FileHandler(handler.file.path),
-                    json_deserializer=handler.file.json_deserializer,
-                )
-
-            elif env().APP_ENVIRONMENT in ["local"] and env().LOG_CHANNEL == "tcp":
-                tcp_handler = ParseSocketHandler(handler.tcp.host, handler.tcp.port)
-                self.logger = Logger(
-                    service=handler.tcp.name,
-                    level=handler.tcp.level,
-                    formatter=StandardLogFormatter(),
-                    logger_handler=tcp_handler,
-                    json_deserializer=json.loads,
-                )
+            app_env = env().APP_ENVIRONMENT
+            log_channel = env().LOG_CHANNEL
+            if app_env == "local" and log_channel == "file":
+                self.logger = self._create_file_logger()
+            elif app_env == "local" and log_channel == "tcp":
+                self.logger = self._create_tcp_logger()
             else:
-                self.logger = Logger(
-                    service=env().APP_NAME,
-                    level=env().LOG_LEVEL,
-                    formatter=StandardLogFormatter(),
-                )
-        except Exception as e:
-            self.logger = Logger(
-                service=env().APP_NAME,
-                level=env().LOG_LEVEL,
-                formatter=StandardLogFormatter(),
-            )
+                self.logger = self._create_default_logger()
+        except Exception:
+            self.logger = self._create_default_logger()
+
+    def _create_file_logger(self):
+        return Logger(
+            service=handler.file.name,
+            level=handler.file.level,
+            formatter=FileLogFormatter(),
+            logger_handler=FileHandler(handler.file.path),
+            json_deserializer=handler.file.json_deserializer,
+        )
+
+    def _create_tcp_logger(self):
+        tcp_handler = ParseSocketHandler(handler.tcp.host, handler.tcp.port)
+        return Logger(
+            service=handler.tcp.name,
+            level=handler.tcp.level,
+            formatter=StandardLogFormatter(),
+            logger_handler=tcp_handler,
+            json_deserializer=json.loads,
+        )
+
+    def _create_default_logger(self):
+        return Logger(
+            service=env().APP_NAME,
+            level=env().LOG_LEVEL,
+            formatter=StandardLogFormatter(),
+        )
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)
