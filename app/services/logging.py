@@ -24,13 +24,11 @@ class StandardLoggerService:
             service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
         )
 
-        app_environment = APP_ENVIRONMENT
-
         self.logger = Logger(
             service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
         )
 
-        if app_environment in ["local", "test"]:
+        if APP_ENVIRONMENT in ["local", "test"]:
             file_handler = FileHandler(LOG_FILE)
             self.logger.addHandler(file_handler)
 
