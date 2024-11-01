@@ -1,3 +1,4 @@
+import json
 from logging import FileHandler
 
 from aws_lambda_powertools.logging import Logger
@@ -18,19 +19,27 @@ class StandardLogFormatter(LambdaPowertoolsFormatter):
         return super().format(record)
 
 
+class FileLogFormatter(LambdaPowertoolsFormatter):
+    def format(self, record):
+        log_entry = super().format(record)
+        # return json.dumps(json.loads(log_entry), indent=4)
+        return log_entry
+
+
 class StandardLoggerService:
     def __init__(self):
-        self.logger = Logger(
-            service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
-        )
-
-        self.logger = Logger(
-            service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
-        )
-
-        if APP_ENVIRONMENT in ["local", "test"]:
-            file_handler = FileHandler(LOG_FILE)
-            self.logger.addHandler(file_handler)
+        if APP_ENVIRONMENT in ["local"]:
+            self.logger = Logger(
+                service=APP_NAME,
+                level=LOG_LEVEL,
+                formatter=FileLogFormatter(),
+                logger_handler=FileHandler(LOG_FILE),
+                json_deserializer=json.loads,
+            )
+        else:
+            self.logger = Logger(
+                service=APP_NAME, level=LOG_LEVEL, formatter=StandardLogFormatter()
+            )
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)
