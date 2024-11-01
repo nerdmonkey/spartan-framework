@@ -1,6 +1,7 @@
-from app.middlewares.logging import standard_logger as logger
 from app.middlewares.logging import standard_logging_middleware
+from app.services.logging import StandardLoggerService
 
+logger = StandardLoggerService()
 
 @standard_logging_middleware
 def main(event, context):
