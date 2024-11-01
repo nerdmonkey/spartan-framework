@@ -1,6 +1,3 @@
-import json
-
-
 class MockLambdaContext:
     def __init__(self):
         self.function_name = "mock_function_name"
