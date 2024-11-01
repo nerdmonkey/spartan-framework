@@ -1,7 +1,7 @@
 import os
 from unittest.mock import patch
 
-from config.app import Settings, env
+from config.app import EnvironmentVariables, env
 
 
 def test_settings_loads_env_vars():
@@ -19,7 +19,7 @@ def test_settings_loads_env_vars():
     os.environ["DB_USERNAME"] = "user"
     os.environ["DB_PASSWORD"] = "password"
 
-    settings = Settings()
+    settings = EnvironmentVariables()
 
     assert settings.ALLOWED_ORIGINS == "http://example.com"
     assert settings.APP_ENVIRONMENT == "test"
@@ -37,7 +37,7 @@ def test_get_settings_cached():
     This test verifies that when get_settings is called multiple times, it returns
     the same instance of Settings, indicating that the function's result is being cached.
     """
-    with patch("config.app.Settings", return_value=Settings()):
+    with patch("config.app.EnvironmentVariables", return_value=EnvironmentVariables()):
         first_call = env()
         second_call = env()
 

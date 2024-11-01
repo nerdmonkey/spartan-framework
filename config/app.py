@@ -8,9 +8,9 @@ from pydantic_settings import BaseSettings
 load_dotenv(dotenv_path=".env")
 
 
-class Settings(BaseSettings):
+class EnvironmentVariables(BaseSettings):
     """
-    Configuration class for application settings.
+    Configuration class for application environment variables.
     """
 
     APP_NAME: str
@@ -39,5 +39,5 @@ class Settings(BaseSettings):
 
 
 @lru_cache()
-def env() -> Settings:
-    return Settings()
+def env() -> EnvironmentVariables:
+    return EnvironmentVariables()
