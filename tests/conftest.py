@@ -4,15 +4,14 @@ import pytest
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from starlette.testclient import TestClient
 
 from app.models.base import Base
 from app.models.user import User
-from config.database import get_session
+from config.database import db
 
 load_dotenv(dotenv_path=".env_testing")
 
-get_db = get_session()
+get_db = db()
 
 
 def construct_database_url():

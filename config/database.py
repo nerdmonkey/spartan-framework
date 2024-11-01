@@ -7,9 +7,8 @@ from config.app import env
 
 
 def create_database_engine() -> Engine:
-    settings = env()
-    database_type = settings.DB_TYPE
-    database = settings.DB_NAME
+    database_type = env().DB_TYPE
+    database = env().DB_NAME
 
     url_formats = {
         "sqlite": f"sqlite:///./database/{database}.db",
@@ -22,12 +21,12 @@ def create_database_engine() -> Engine:
         database_url = url_formats[database_type]
         if database_type != "sqlite":
             database_url = database_url.format(
-                username=settings.DB_USERNAME,
-                password=settings.DB_PASSWORD,
-                host=settings.DB_HOST,
-                port=settings.DB_PORT,
+                username=env().DB_USERNAME,
+                password=env().DB_PASSWORD,
+                host=env().DB_HOST,
+                port=env().DB_PORT,
                 database=database,
-                driver=settings.DB_DRIVER,
+                driver=env().DB_DRIVER,
             )
         return create_engine(
             database_url,
@@ -45,5 +44,5 @@ engine = create_database_engine()
 Session = sessionmaker(bind=engine)
 
 
-def get_session() -> SQLAlchemySession:
+def db() -> SQLAlchemySession:
     return Session()
