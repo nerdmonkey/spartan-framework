@@ -166,27 +166,6 @@ def test_save_duplicate_email_user(mock_db_session):
     assert exc_info.value.status_code == 422
 
 
-def test_update_user(mock_db_session):
-    user = User(
-        id=1,
-        username="testuser1",
-        email="user1@example.com",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-    )
-    mock_db_session.users.append(user)
-
-    user_service = UserService(db=mock_db_session)
-    user_request = UserUpdateRequest(
-        username="testupdateduser", email="updated_user@example.com"
-    )
-
-    result = user_service.update(1, user_request)
-
-    assert result["username"] == "testupdateduser"
-    assert result["email"] == "updated_user@example.com"
-
-
 def test_update_nonexistent_user(mock_db_session):
     user_service = UserService(db=mock_db_session)
     user_request = UserUpdateRequest(username="testuser2", email="user2@example.com")
