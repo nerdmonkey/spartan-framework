@@ -1,23 +1,25 @@
+from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class UserResponse(BaseModel):
-    """
-    Pydantic model representing a response for a User.
-
-    Attributes:
-        id (int): The unique identifier of the user.
-        username (str): The username of the user.
-        email (str): The email address of the user.
-    """
-
     id: int
     username: str
     email: str
-    created_at: str
-    updated_at: str
+    created_at: datetime = Field(alias="created_at")
+    updated_at: datetime = Field(alias="updated_at")
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("created_at")
+    def created_at(cls, v: datetime) -> str:
+        return v.strftime("%Y-%m-%d %H:%M:%S")
+
+    @field_serializer("updated_at")
+    def updated_at(cls, v: datetime) -> str:
+        return v.strftime("%Y-%m-%d %H:%M:%S")
 
 
 class SingleUserResponse(BaseModel):
