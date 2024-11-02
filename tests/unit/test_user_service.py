@@ -22,41 +22,41 @@ class MockSession:
         self.filtered_users = self.users
         return self
 
-    def filter(self, *conditions):
-        for condition in conditions:
-            attribute = condition.left.key
-            if hasattr(condition.right, "value"):
-                value = condition.right.value
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) == value
-                ]
-            elif hasattr(condition.right, "clauses"):
-                values = [clause.value for clause in condition.right.clauses]
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) in values
-                ]
-            elif hasattr(condition.right, "element") and hasattr(
-                condition.right.element, "clauses"
-            ):
-                values = [clause.value for clause in condition.right.element.clauses]
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) in values
-                ]
-            elif hasattr(condition.right, "type") and condition.right.type == "in":
-                values = condition.right.value
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) in values
-                ]
+    # def filter(self, *conditions):
+    #     for condition in conditions:
+    #         attribute = condition.left.key
+    #         if hasattr(condition.right, "value"):
+    #             value = condition.right.value
+    #             self.filtered_users = [
+    #                 user
+    #                 for user in self.filtered_users
+    #                 if getattr(user, attribute) == value
+    #             ]
+    #         elif hasattr(condition.right, "clauses"):
+    #             values = [clause.value for clause in condition.right.clauses]
+    #             self.filtered_users = [
+    #                 user
+    #                 for user in self.filtered_users
+    #                 if getattr(user, attribute) in values
+    #             ]
+    #         elif hasattr(condition.right, "element") and hasattr(
+    #             condition.right.element, "clauses"
+    #         ):
+    #             values = [clause.value for clause in condition.right.element.clauses]
+    #             self.filtered_users = [
+    #                 user
+    #                 for user in self.filtered_users
+    #                 if getattr(user, attribute) in values
+    #             ]
+    #         elif hasattr(condition.right, "type") and condition.right.type == "in":
+    #             values = condition.right.value
+    #             self.filtered_users = [
+    #                 user
+    #                 for user in self.filtered_users
+    #                 if getattr(user, attribute) in values
+    #             ]
 
-        return self
+    #     return self
 
     def filter_by_date_range(self, field, start_date, end_date):
         self.filtered_users = [

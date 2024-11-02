@@ -1,12 +1,17 @@
-from app.helpers.logs.factory import LoggerFactory
+from aws_lambda_powertools.logging import Logger
+
+from app.helpers.logs.base import BaseLogger
+from app.helpers.logs.formatter.standard import StandardLogFormatter
+from config.app import env
 
 
-class StandardLoggerService:
+class ConsoleLogger(BaseLogger):
     def __init__(self):
-        """
-        Initializes the logger service using LoggerFactory.
-        """
-        self.logger = LoggerFactory.create_logger()
+        self.logger = Logger(
+            service=env().APP_NAME,
+            level=env().LOG_LEVEL,
+            formatter=StandardLogFormatter(),
+        )
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)
