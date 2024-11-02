@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class UserResponse(BaseModel):
     id: int
     username: str
     email: str
-    created_at: datetime = Field(alias="created_at")
-    updated_at: datetime = Field(alias="updated_at")
+    created_at: datetime = str
+    updated_at: datetime = str
 
     model_config = ConfigDict(from_attributes=True)
 
