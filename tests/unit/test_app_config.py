@@ -11,7 +11,7 @@ def test_settings_loads_env_vars():
     This test sets environment variables and then creates a Settings instance to
     verify that the environment variables are correctly loaded and assigned.
     """
-    os.environ["ALLOWED_ORIGINS"] = "http://example.com"
+    os.environ["ALLOWED_ORIGINS"] = "http://localhost.lan"
     os.environ["APP_ENVIRONMENT"] = "test"
     os.environ["DB_TYPE"] = "sqlite"
     os.environ["DB_HOST"] = "localhost"
@@ -21,7 +21,7 @@ def test_settings_loads_env_vars():
 
     settings = EnvironmentVariables()
 
-    assert settings.ALLOWED_ORIGINS == "http://example.com"
+    assert settings.ALLOWED_ORIGINS == "http://localhost.lan"
     assert settings.APP_ENVIRONMENT == "test"
     assert settings.DB_TYPE == "sqlite"
     assert settings.DB_HOST == "localhost"
