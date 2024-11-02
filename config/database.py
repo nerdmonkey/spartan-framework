@@ -7,6 +7,29 @@ from config.app import env
 
 
 def create_database_engine() -> Engine:
+    """
+    Creates and returns a SQLAlchemy Engine instance based on the database configuration
+    specified in the environment variables.
+
+    The function supports multiple database types including SQLite, PostgreSQL, MySQL, and MSSQL.
+    It constructs the appropriate database URL based on the database type and other configuration
+    parameters such as username, password, host, port, and driver.
+
+    Returns:
+        Engine: A SQLAlchemy Engine instance configured for the specified database.
+
+    Raises:
+        ValueError: If the specified database type is not supported.
+
+    Environment Variables:
+        DB_TYPE (str): The type of the database (e.g., 'sqlite', 'psql', 'mysql', 'mssql').
+        DB_NAME (str): The name of the database.
+        DB_USERNAME (str): The username for the database (not required for SQLite).
+        DB_PASSWORD (str): The password for the database (not required for SQLite).
+        DB_HOST (str): The host of the database (not required for SQLite).
+        DB_PORT (str): The port of the database (not required for SQLite).
+        DB_DRIVER (str): The driver for the database (only required for MSSQL).
+    """
     database_type = env().DB_TYPE
     database = env().DB_NAME
 
@@ -45,4 +68,10 @@ Session = sessionmaker(bind=engine)
 
 
 def db() -> SQLAlchemySession:
+    """
+    Creates and returns a new SQLAlchemy session.
+
+    Returns:
+        SQLAlchemySession: A new SQLAlchemy session instance.
+    """
     return Session()
