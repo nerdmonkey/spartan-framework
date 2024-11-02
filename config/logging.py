@@ -15,6 +15,7 @@ class BaseHandlerConfig(BaseModel):
         class_ (str): The class name of the logging handler.
         formatter (str): The formatter to be used by the logging handler.
     """
+
     model_config = ConfigDict(from_attributes=True)
     class_: str
     formatter: str
@@ -28,6 +29,7 @@ class ConsoleHandlerConfig(BaseHandlerConfig):
         name (str): The name of the console handler.
         level (str): The logging level for the console handler.
     """
+
     name: str
     level: str
 
@@ -42,6 +44,7 @@ class FileHandlerConfig(BaseHandlerConfig):
         path (str): The file path where logs will be written.
         json_deserializer (Optional[Callable]): A callable for deserializing JSON data. Defaults to `json.loads`. This attribute is excluded from certain operations.
     """
+
     name: str
     level: str
     path: str
@@ -64,6 +67,7 @@ class TcpHandlerConfig(BaseHandlerConfig):
             Raises:
                 ValueError: If the port number is not within the valid range.
     """
+
     name: str
     level: str
     host: str
@@ -99,6 +103,7 @@ class Handlers:
     handlers : dict
         A dictionary containing the logging handlers.
     """
+
     _instance = None
 
     def __new__(cls):
