@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 
 import pytest
 
@@ -43,9 +43,6 @@ def test_standard_logging_middleware_logs_input_output(mock_logger, lambda_conte
     event = {"key": "value"}
 
     response = wrapped_handler(event, lambda_context)
-
-    input_data_size = len(str(event).encode("utf-8"))
-    output_data_size = len(str(response).encode("utf-8"))
 
     assert any(
         call[0][0] == "Input Data" and call[1]["input_data"] == event

@@ -1,9 +1,7 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
 
-from app.exceptions.database import DatabaseInternalError
 from app.exceptions.user import (
     DuplicateUserError,
     InvalidSortFieldError,
