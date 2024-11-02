@@ -9,10 +9,6 @@ load_dotenv(dotenv_path=".env")
 
 
 class EnvironmentVariables(BaseSettings):
-    """
-    Configuration class for application environment variables.
-    """
-
     APP_NAME: str
     APP_ENVIRONMENT: str
     APP_DEBUG: bool
