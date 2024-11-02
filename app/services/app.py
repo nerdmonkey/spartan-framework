@@ -15,13 +15,6 @@ class AppService:
         """
         self.dynamodb_resource, self.table = self._setup_dynamodb()
 
-    def __init__(self):
-        """
-        Initializes the AppService class.
-        Sets up the DynamoDB resource and table.
-        """
-        self.dynamodb_resource, self.table = self._setup_dynamodb()
-
     @staticmethod
     def _load_config():
         """Load configuration from environment variables.
