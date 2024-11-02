@@ -25,6 +25,7 @@ class StandardLogFormatter(LambdaPowertoolsFormatter):
     Returns:
         str: The formatted log record as a string.
     """
+
     def format(self, record):
         return super().format(record)
 
@@ -38,6 +39,7 @@ class FileLogFormatter(LambdaPowertoolsFormatter):
     Methods:
         format(record): Formats the specified log record as text.
     """
+
     def format(self, record):
         return super().format(record)
 
@@ -52,6 +54,7 @@ class ParseSocketHandler(SocketHandler):
             Converts a log record to a JSON string, encodes it in UTF-8, and
             returns the byte representation.
     """
+
     def makePickle(self, record):
         log_entry = json.loads(self.format(record))
         return (json.dumps(log_entry) + "\n").encode("utf-8")

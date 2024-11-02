@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import List, Tuple
 
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from app.exceptions.user import (
@@ -39,67 +41,67 @@ class UserService:
         Raises:
             UserNotFoundError: If the user is not found.
         """
-        user = self.db.query(User).filter_by_field("id", id).first()
+        user = self.db.query(User).filter(User.id == id).first()
         if not user:
             raise UserNotFoundError("User not found")
         return user
 
+    def filter(self, *conditions):
+        for condition in conditions:
+            if isinstance(condition, list):
+                start_date, end_date = condition
+                self.filtered_users = [
+                    user
+                    for user in self.filtered_users
+                    if start_date <= user.created_at <= end_date
+                ]
+            else:
+                attribute = condition.left.key
+                value = condition.right.value
+                self.filtered_users = [
+                    user
+                    for user in self.filtered_users
+                    if getattr(user, attribute) == value
+                ]
+        return self
+
     def all(
         self,
-        page: int,
-        items_per_page: int,
+        page: int = 1,
+        items_per_page: int = 10,
         sort_type: str = "asc",
         sort_by: str = "id",
-        start_date: str = None,
-        end_date: str = None,
         username: str = None,
-        email: str = None,
+        start_date: datetime = None,
+        end_date: datetime = None,
     ) -> Tuple[List[UserResponse], int, int, int, int]:
-        """
-        Retrieve all users with pagination and optional filters.
-
-        Args:
-            page (int): The page number.
-            items_per_page (int): The number of items per page.
-            sort_type (str): The sort type ('asc' or 'desc').
-            sort_by (str): The field to sort by.
-            start_date (str): The start date for the filter (YYYY-MM-DD).
-            end_date (str): The end date for the filter (YYYY-MM-DD).
-            username (str): The username filter.
-            email (str): The email filter.
-
-        Returns:
-            Tuple: A tuple containing the list of user responses and pagination info.
-
-        Raises:
-            InvalidSortFieldError: If the sort field is invalid.
-        """
         offset = (page - 1) * items_per_page
+        query = self.db.query(User)
 
-        # Sort handling
-        descending = sort_type == "desc"
-        valid_sort_fields = ["id", "username", "email", "created_at", "updated_at"]
-        if sort_by not in valid_sort_fields:
-            raise InvalidSortFieldError("Invalid sort_by field")
-        self.db.order_by(sort_by, descending=descending)
-
-        # Apply filters
-        if start_date and end_date:
-            self.db.filter_by_date_range("created_at", start_date, end_date)
+        # Apply username filter in MockSession
         if username:
-            self.db.filter_by_field("username", username)
-        if email:
-            self.db.filter_by_field("email", email)
+            query = query.filter(User.username == username)
 
-        # Retrieve filtered and paginated results
-        users = self.db.offset(offset).limit(items_per_page).all()
-        total_users = self.db.count()
-        last_page = (total_users - 1) // items_per_page + 1
-        first_item = offset + 1
-        last_item = min(offset + items_per_page, total_users)
+        # Sorting logic
+        if not hasattr(User, sort_by):
+            raise InvalidSortFieldError("Invalid sort field or sort type")
+
+        sort_column = getattr(User, sort_by)
+        query = query.order_by(
+            asc(sort_column) if sort_type == "asc" else desc(sort_column)
+        )
+
+        # Retrieve filtered and paginated results from MockSession
+        users = query.offset(offset).limit(items_per_page).all()
+
+        # Apply date filtering directly within UserService
+        if start_date and end_date:
+            users = [
+                user for user in users if start_date <= user.created_at <= end_date
+            ]
 
         # Convert users to response format
-        responses = [
+        users_response = [
             UserResponse(
                 id=user.id,
                 username=user.username,
@@ -110,7 +112,13 @@ class UserService:
             for user in users
         ]
 
-        return responses, total_users, last_page, first_item, last_item
+        # Pagination details
+        total = query.count()
+        last_page = (total - 1) // items_per_page + 1
+        first_item = offset + 1
+        last_item = min(offset + items_per_page, total)
+
+        return users_response, total, last_page, first_item, last_item
 
     def save(self, user_request: UserCreateRequest) -> UserCreateResponse:
         """
@@ -126,7 +134,7 @@ class UserService:
             DuplicateUserError: If a user with the same email already exists.
         """
         existing_user = (
-            self.db.query(User).filter_by_field("email", user_request.email).first()
+            self.db.query(User).filter(User.email == user_request.email).first()
         )
         if existing_user:
             raise DuplicateUserError("User with this email already exists")
@@ -238,3 +246,17 @@ class UserService:
             created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
         )
+
+    def bulk_delete(self, user_ids: List[int]) -> List[int]:
+        users_to_delete = self.db.query(User).filter(User.id.in_(user_ids)).all()
+
+        if not users_to_delete:
+            raise UserNotFoundError("No users found for the given IDs")
+
+        deleted_user_ids = [user.id for user in users_to_delete]
+        for user in users_to_delete:
+            self.db.delete(user)
+
+        self.db.commit()
+
+        return deleted_user_ids
