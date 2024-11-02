@@ -7,7 +7,7 @@ from app.services.logging import StandardLoggerService
 
 @pytest.fixture
 def mock_logger():
-    with patch("app.services.logging.Logger") as MockLogger:
+    with patch("app.services.logging.LoggerFactory.create_logger") as MockLogger:
         mock_instance = MockLogger.return_value
         yield mock_instance
 

@@ -1,12 +1,21 @@
-from app.helpers.logs.factory import LoggerFactory
+from logging import FileHandler
+
+from aws_lambda_powertools.logging import Logger
+
+from app.helpers.logs.base import BaseLogger
+from app.helpers.logs.formatter.file import FileLogFormatter
+from config.logging import handler
 
 
-class StandardLoggerService:
+class FileLogger(BaseLogger):
     def __init__(self):
-        """
-        Initializes the logger service using LoggerFactory.
-        """
-        self.logger = LoggerFactory.create_logger()
+        self.logger = Logger(
+            service=handler.file.name,
+            level=handler.file.level,
+            formatter=FileLogFormatter(),
+            logger_handler=FileHandler(handler.file.path),
+            json_deserializer=handler.file.json_deserializer,
+        )
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)

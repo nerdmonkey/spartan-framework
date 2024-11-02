@@ -11,7 +11,8 @@ class BaseHandlerConfig(BaseModel):
     BaseHandlerConfig is a configuration class for logging handlers.
 
     Attributes:
-        model_config (ConfigDict): Configuration dictionary for the model, allowing attributes to be set from the dictionary.
+        model_config (ConfigDict): Configuration dictionary for the model,
+        allowing attributes to be set from the dictionary.
         class_ (str): The class name of the logging handler.
         formatter (str): The formatter to be used by the logging handler.
     """
@@ -42,7 +43,8 @@ class FileHandlerConfig(BaseHandlerConfig):
         name (str): The name of the handler.
         level (str): The logging level for the handler.
         path (str): The file path where logs will be written.
-        json_deserializer (Optional[Callable]): A callable for deserializing JSON data. Defaults to `json.loads`. This attribute is excluded from certain operations.
+        json_deserializer (Optional[Callable]): A callable for deserializing JSON data.
+        Defaults to `json.loads`. This attribute is excluded from certain operations.
     """
 
     name: str
@@ -136,7 +138,8 @@ class Handlers:
         - LOG_LEVEL: The logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL).
         - LOG_FILE: The file path for the file handler.
 
-        The handlers are configured with a JSON formatter and are stored in the `self.handlers` dictionary.
+        The handlers are configured with a JSON formatter and are stored in the
+        `self.handlers` dictionary.
         """
         app_name = env().APP_NAME
         log_level = env().LOG_LEVEL
