@@ -15,6 +15,17 @@ Fully tested in AWS, Spartan Framework is also compatible with other cloud provi
 
 
 ## Installation
+1. To install the spartan command line tool
+```bash
+pip install python-spartan
+```
+
+2. Try
+```bash
+spartan --help
+```
+
+## Usage
 1. Install all the required packages
 ```bash
 python -m venv .venv
@@ -40,17 +51,6 @@ spartan db seed
 6. Then run it using the following command
 ```bash
 spartan serve
-```
-
-## Usage
-1. To install the spartan command line tool
-```bash
-pip install python-spartan
-```
-
-2. Try
-```bash
-spartan --help
 ```
 
 ## Testing
