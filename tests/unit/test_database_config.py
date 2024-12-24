@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.engine import Engine
 
-from config.database import create_database_engine
+from app.helpers.database import create_database_engine
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def mock_settings_sqlite(monkeypatch):
         DB_TYPE = "sqlite"
         DB_NAME = "test_db"
 
-    monkeypatch.setattr("config.app.env", lambda: MockSettings())
+    monkeypatch.setattr("app.helpers.environment.env", lambda: MockSettings())
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def mock_settings_psql(monkeypatch):
         DB_HOST = "localhost"
         DB_PORT = 5432
 
-    monkeypatch.setattr("config.app.env", lambda: MockSettings())
+    monkeypatch.setattr("app.helpers.environment.env", lambda: MockSettings())
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def mock_settings_mysql(monkeypatch):
         DB_HOST = "localhost"
         DB_PORT = 3306
 
-    monkeypatch.setattr("config.app.env", lambda: MockSettings())
+    monkeypatch.setattr("app.helpers.environment.env", lambda: MockSettings())
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def mock_settings_unsupported(monkeypatch):
     class MockSettings:
         DB_TYPE = "unsupported_db_type"
 
-    monkeypatch.setattr("config.app.env", lambda: MockSettings())
+    monkeypatch.setattr("app.helpers.environment.env", lambda: MockSettings())
 
 
 def test_create_database_engine_sqlite(mock_settings_sqlite):

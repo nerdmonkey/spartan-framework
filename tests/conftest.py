@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.models.base import Base
 from app.models.user import User
-from config.database import db
+from app.helpers.database import db
 
 load_dotenv(dotenv_path=".env_testing")
 

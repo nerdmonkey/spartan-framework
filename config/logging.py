@@ -3,7 +3,7 @@ from typing import Callable, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from config.app import env
+from app.helpers.environment import env
 
 
 class BaseHandlerConfig(BaseModel):

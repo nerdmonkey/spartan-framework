@@ -3,7 +3,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session as SQLAlchemySession
 from sqlalchemy.orm import sessionmaker
 
-from config.app import env
+from app.helpers.environment import env
 
 
 def create_database_engine() -> Engine:

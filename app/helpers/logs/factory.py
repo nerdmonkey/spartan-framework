@@ -1,7 +1,7 @@
 from app.helpers.logs.logger.console import ConsoleLogger
 from app.helpers.logs.logger.file import FileLogger
 from app.helpers.logs.logger.tcp import TCPLogger
-from config.app import env
+from app.helpers.environment import env
 
 
 class LoggerFactory:
