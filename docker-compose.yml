@@ -4,7 +4,6 @@ services:
     image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
     container_name: spartan_spark_submit
     ports:
-      # - "4040:4040"
       - "18080:18080"
     volumes:
       - ~/.aws:/home/glue_user/.aws
@@ -15,23 +14,4 @@ services:
     env_file:
       - .env
     command: spark-submit /home/glue_user/workspace/${SCRIPT_FILE_NAME}
-    restart: "no"
-
-  spartan_jupyter_lab:
-    image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
-    container_name: spartan_jupyter_lab
-    ports:
-      - "4040:4040"
-      # - "18080:18080"
-      - "8998:8998"
-      - "8888:8888"
-    volumes:
-      - ~/.aws:/home/glue_user/.aws
-      - ${JUPYTER_WORKSPACE_LOCATION}:/home/glue_user/workspace/jupyter_workspace/
-    environment:
-      AWS_PROFILE: ${PROFILE_NAME}
-      DISABLE_SSL: "true"
-    env_file:
-      - .env
-    command: /home/glue_user/jupyter/jupyter_start.sh
     restart: "no"
