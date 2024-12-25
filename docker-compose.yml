@@ -1,4 +1,5 @@
 
+
 services:
   spartan_spark_submit:
     image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
@@ -8,6 +9,7 @@ services:
     volumes:
       - ~/.aws:/home/glue_user/.aws
       - ${WORKSPACE_LOCATION}:/home/glue_user/workspace/
+      - ${STORAGE_LOCATION}:/home/glue_user/workspace/storage/core/
     environment:
       AWS_PROFILE: ${PROFILE_NAME}
       DISABLE_SSL: "true"
