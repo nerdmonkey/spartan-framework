@@ -166,6 +166,7 @@ alembic.ini
 .DS_Store
 .vscode/
 node_modules/
+notebooks/
 .idea/
 .vscode
 
