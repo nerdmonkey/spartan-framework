@@ -170,9 +170,7 @@ node_modules/
 .vscode
 
 *.db
-Dockerfile
 build.sql
-docker-compose.yml
 
 serverless.yml
 tinker.py
