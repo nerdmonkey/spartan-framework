@@ -13,7 +13,7 @@ services:
       DISABLE_SSL: "true"
     env_file:
       - .env
-    command: spark-submit /home/glue_user/workspace/${SCRIPT_FILE_NAME} --JOB_NAME ${JOB_NAME}
+    command: spark-submit --jars ./storage/drivers/mysql-connector-j-9.1.0.jar /home/glue_user/workspace/${SCRIPT_FILE_NAME} --JOB_NAME ${JOB_NAME}
     restart: "no"
 
   spartan_test:

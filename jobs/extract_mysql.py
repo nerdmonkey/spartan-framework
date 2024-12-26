@@ -15,15 +15,15 @@ if os.getenv("APP_ENVIRONMENT") == "test" or os.getenv("APP_ENVIRONMENT") == "lo
     DB_USERNAME = os.getenv("DB_USERNAME")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-    connection_postgresql_options = {
-        "url": f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}",
+    connection_mysql_options = {
+        "url": f"jdbc:mysql://{DB_HOST}:{DB_PORT}/{DB_NAME}",
         "driver": DB_DRIVER,
         "user": DB_USERNAME,
         "password": DB_PASSWORD,
         "dbtable": "users"
     }
 
-    df = spark.read.format("jdbc").options(**connection_postgresql_options).load()
+    df = spark.read.format("jdbc").options(**connection_mysql_options).load()
     df.show()
     df.coalesce(1).write.csv("./storage/core/users_temp", header=True, mode="overwrite")
 
@@ -35,21 +35,10 @@ if os.getenv("APP_ENVIRONMENT") == "test" or os.getenv("APP_ENVIRONMENT") == "lo
     shutil.rmtree(temp_dir)
 
 else:
-    connection_postgresql_options = {
-        "url": "jdbc:postgresql://postgres:5432/spartan",
-        "driver": "org.postgresql.Driver",
+    connection_mysql_options = {
+        "url": "jdbc:mysql://mysql:3306/spartan",
+        "driver": "com.mysql.cj.jdbc.Driver",
         "user": "root",
         "password": "root",
         "dbtable": "users"
     }
-
-    df = spark.read.format("jdbc").options(**connection_postgresql_options).load()
-    df.show()
-    df.coalesce(1).write.csv("./storage/core/users_temp", header=True, mode="overwrite")
-
-    temp_dir = "./storage/core/users_temp"
-    for filename in os.listdir(temp_dir):
-        if filename.endswith(".csv"):
-            os.rename(os.path.join(temp_dir, filename), "./storage/core/users.csv")
-
-    shutil.rmtree(temp_dir)

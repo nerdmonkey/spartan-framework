@@ -23,7 +23,7 @@ sys.modules["awsglue.utils"].getResolvedOptions = mock.Mock(
     return_value={"JOB_NAME": "test_job"}
 )
 
-from jobs.extract import args, glueContext, job, logger
+from jobs.hello import args, glueContext, job, logger
 
 
 @pytest.fixture

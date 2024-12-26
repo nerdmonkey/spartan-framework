@@ -50,6 +50,7 @@ class EnvironmentVariables(BaseSettings):
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
+    JOB_NAME: str
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
