@@ -20,7 +20,7 @@ services:
 
   spartan_test:
     image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
-    container_name: spartan_pytest
+    container_name: spartan_test
     volumes:
       - ~/.aws:/home/glue_user/.aws
       - ${WORKSPACE_LOCATION}:/home/glue_user/workspace/
