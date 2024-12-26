@@ -6,4 +6,4 @@ RUN pip install pytest-cov
 EXPOSE 4040
 EXPOSE 18080
 
-CMD ["spark-submit", "/home/glue_user/workspace/${SCRIPT_FILE_NAME}"]
+CMD ["spark-submit", "--JOB_NAME", "${JOB_NAME}", "/home/glue_user/workspace/${SCRIPT_FILE_NAME}"]
