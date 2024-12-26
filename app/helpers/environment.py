@@ -51,6 +51,11 @@ class EnvironmentVariables(BaseSettings):
     DB_USERNAME: str
     DB_PASSWORD: str
     JOB_NAME: str
+    WORKSPACE_LOCATION: str
+    STORAGE_LOCATION: str
+    SCRIPT_FILE_NAME: str
+    PROFILE_NAME: str
+    JUPYTER_WORKSPACE_LOCATION: str
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
