@@ -6,10 +6,11 @@
 Spartan Framework—"the Swiss Army knife for serverless development"—is a powerful scaffold that simplifies the creation of serverless applications on AWS. It streamlines your development process and ensures code consistency, allowing you to build scalable and efficient applications on AWS with ease.
 
 #### Spartan Framework is versatile and can be used to efficiently develop:
-- API
+- Rest API
 - Workflows or State Machines
-- ETL Pipelines
-- Containerized Microservices
+- Small ETL Pipelines
+- Containerized Microservices (AWS ECS)
+- AWS Glue Jobs
 
 Fully tested in AWS, Spartan Framework is also compatible with other cloud providers like Azure and GCP, making it a flexible choice for a wide range of serverless applications.
 
@@ -55,7 +56,7 @@ spartan serve
 
 ## Testing
 ```bash
-pytest
+pytest -vv
 ```
 
 ## Changelog

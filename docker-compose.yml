@@ -4,8 +4,6 @@ services:
   spartan_spark_submit:
     image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
     container_name: spartan_spark_submit
-    ports:
-      - "18080:18080"
     volumes:
       - ~/.aws:/home/glue_user/.aws
       - ${WORKSPACE_LOCATION}:/home/glue_user/workspace/
