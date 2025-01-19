@@ -14,9 +14,7 @@ def mock_event():
 def mock_context():
     class Context:
         memory_limit_in_mb = 512
-        invoked_function_arn = (
-            "arn:aws:lambda:us-west-2:123456789012:function:test_lambda_function"
-        )
+        invoked_function_arn = "arn:aws:lambda:us-west-2:123456789012:function:test_lambda_function"
         aws_request_id = "mock_aws_request_id"
         log_group_name = "/aws/lambda/test_lambda_function"
         log_stream_name = "2024/10/20/[$LATEST]mock_log_stream"

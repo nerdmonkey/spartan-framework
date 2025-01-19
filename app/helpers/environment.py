@@ -30,6 +30,8 @@ class EnvironmentVariables(BaseSettings):
         DB_NAME (str): The name of the database.
         DB_USERNAME (str): The username for the database connection.
         DB_PASSWORD (str): The password for the database connection.
+        DB_SSL_CA (Optional[str]): The SSL CA certificate for the database connection. Defaults to None.
+        DB_SSL_VERIFY_CERT (Optional[bool]): Flag to enable or disable SSL certificate verification. Defaults to None.
 
     Methods:
         default_db_port(cls, v): Validates and converts the database port to an integer.
@@ -50,6 +52,8 @@ class EnvironmentVariables(BaseSettings):
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
+    DB_SSL_CA: Optional[str] = None
+    DB_SSL_VERIFY_CERT: Optional[bool] = None
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
@@ -62,14 +66,22 @@ class EnvironmentVariables(BaseSettings):
 
 
 @lru_cache()
-def env() -> EnvironmentVariables:
+def env(var_name: Optional[str] = None) -> Optional[str]:
     """
-    Create and return an instance of EnvironmentVariables.
+    Create and return an instance of EnvironmentVariables or a specific environment variable.
 
     This function initializes and returns an EnvironmentVariables object,
     which is used to manage and access environment variables for the application.
+    If a variable name is provided, it returns the value of that specific environment variable.
+
+    Args:
+        var_name (Optional[str]): The name of the environment variable to retrieve. Defaults to None.
 
     Returns:
-        EnvironmentVariables: An instance of the EnvironmentVariables class.
+        EnvironmentVariables or Optional[str]: An instance of the EnvironmentVariables class or the value of the
+        specified environment variable.
     """
-    return EnvironmentVariables()
+    env_vars = EnvironmentVariables()
+    if var_name:
+        return getattr(env_vars, var_name, None)
+    return env_vars

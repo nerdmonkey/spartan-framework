@@ -14,6 +14,7 @@ class TCPLogFormatter(SocketHandler):
             Formats the log record as a JSON string, appends a newline,
             and encodes it as UTF-8 bytes.
     """
+
     def makePickle(self, record):
         log_entry = json.loads(self.format(record))
         return (json.dumps(log_entry) + "\n").encode("utf-8")

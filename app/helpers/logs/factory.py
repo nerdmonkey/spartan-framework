@@ -1,7 +1,7 @@
+from app.helpers.environment import env
 from app.helpers.logs.logger.console import ConsoleLogger
 from app.helpers.logs.logger.file import FileLogger
 from app.helpers.logs.logger.tcp import TCPLogger
-from app.helpers.environment import env
 
 
 class LoggerFactory:
@@ -19,6 +19,7 @@ class LoggerFactory:
                 TCPLogger: If the environment is 'local' and the logging channel is 'tcp'.
                 ConsoleLogger: For all other configurations.
     """
+
     @staticmethod
     def create_logger():
         app_env = env().APP_ENVIRONMENT

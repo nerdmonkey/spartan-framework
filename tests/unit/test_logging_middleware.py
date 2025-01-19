@@ -37,8 +37,12 @@ def lambda_context():
     return MockContext()
 
 
-def test_standard_logging_middleware_logs_input_output(mock_logger, lambda_context):
-    wrapped_handler = standard_logging_middleware(sample_handler, logger=mock_logger)
+def test_standard_logging_middleware_logs_input_output(
+    mock_logger, lambda_context
+):
+    wrapped_handler = standard_logging_middleware(
+        sample_handler, logger=mock_logger
+    )
 
     event = {"key": "value"}
 
@@ -80,7 +84,9 @@ def test_standard_logging_middleware_logs_error(mock_logger, lambda_context):
 def test_standard_logging_middleware_logs_request_and_response_sizes(
     mock_logger, lambda_context
 ):
-    wrapped_handler = standard_logging_middleware(sample_handler, logger=mock_logger)
+    wrapped_handler = standard_logging_middleware(
+        sample_handler, logger=mock_logger
+    )
 
     event = {"key": "value" * 100}
 
@@ -99,8 +105,12 @@ def test_standard_logging_middleware_logs_request_and_response_sizes(
     ), f"Output data size log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
 
 
-def test_standard_logging_middleware_metadata_in_logs(mock_logger, lambda_context):
-    wrapped_handler = standard_logging_middleware(sample_handler, logger=mock_logger)
+def test_standard_logging_middleware_metadata_in_logs(
+    mock_logger, lambda_context
+):
+    wrapped_handler = standard_logging_middleware(
+        sample_handler, logger=mock_logger
+    )
 
     event = {"key": "value"}
 

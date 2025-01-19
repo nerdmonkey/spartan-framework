@@ -7,7 +7,9 @@ from app.services.logging import StandardLoggerService
 
 @pytest.fixture
 def mock_logger():
-    with patch("app.services.logging.LoggerFactory.create_logger") as MockLogger:
+    with patch(
+        "app.services.logging.LoggerFactory.create_logger"
+    ) as MockLogger:
         mock_instance = MockLogger.return_value
         yield mock_instance
 
@@ -42,11 +44,15 @@ def test_logger_critical_called(logging, mock_logger):
     message = "Test critical message"
     logging.critical(message, critical_data="urgent")
 
-    mock_logger.critical.assert_called_once_with(message, critical_data="urgent")
+    mock_logger.critical.assert_called_once_with(
+        message, critical_data="urgent"
+    )
 
 
 def test_logger_exception_called(logging, mock_logger):
     message = "Test exception message"
     logging.exception(message, exception="ExampleException")
 
-    mock_logger.exception.assert_called_once_with(message, exception="ExampleException")
+    mock_logger.exception.assert_called_once_with(
+        message, exception="ExampleException"
+    )

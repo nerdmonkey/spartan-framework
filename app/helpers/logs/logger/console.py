@@ -1,8 +1,8 @@
 from aws_lambda_powertools.logging import Logger
 
+from app.helpers.environment import env
 from app.helpers.logs.base import BaseLogger
 from app.helpers.logs.formatter.standard import StandardLogFormatter
-from app.helpers.environment import env
 
 
 class ConsoleLogger(BaseLogger):

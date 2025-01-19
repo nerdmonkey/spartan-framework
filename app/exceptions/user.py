@@ -9,8 +9,6 @@ class UserNotFoundError(Exception):
         message (str): Explanation of the error.
     """
 
-    pass
-
 
 class DuplicateUserError(Exception):
     """
@@ -24,8 +22,6 @@ class DuplicateUserError(Exception):
         message (str): Explanation of the error.
     """
 
-    pass
-
 
 class InvalidSortFieldError(Exception):
     """
@@ -34,5 +30,3 @@ class InvalidSortFieldError(Exception):
     Attributes:
         message -- explanation of the error
     """
-
-    pass

@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.helpers.database import db
 from app.models.base import Base
 from app.models.user import User
-from app.helpers.database import db
 
 load_dotenv(dotenv_path=".env_testing")
 
@@ -42,7 +42,9 @@ def test_db_session():
 
     engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(bind=engine)
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=engine
+    )
 
     db = TestingSessionLocal()
 

@@ -55,7 +55,10 @@ class QueueService:
         Returns:
             dict: The response from the SQS service after sending the message.
         """
-        send_params = {"QueueUrl": queue_url, "MessageBody": json.dumps(message)}
+        send_params = {
+            "QueueUrl": queue_url,
+            "MessageBody": json.dumps(message),
+        }
 
         # Check if the queue is a FIFO queue
         if queue_url.endswith(".fifo"):
@@ -77,7 +80,9 @@ class QueueService:
             Dict[str, Any]: The response from the SQS service containing the message(s) received.
         """
         return self.sqs_client.receive_message(
-            QueueUrl=queue_url, AttributeNames=["All"], MessageAttributeNames=["All"]
+            QueueUrl=queue_url,
+            AttributeNames=["All"],
+            MessageAttributeNames=["All"],
         )
 
     def delete_message(self, queue_url: str, receipt_handle: str) -> dict:

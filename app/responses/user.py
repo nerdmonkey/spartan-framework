@@ -8,8 +8,8 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
-    created_at: datetime = str
-    updated_at: datetime = str
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
