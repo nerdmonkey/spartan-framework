@@ -37,7 +37,10 @@ def test_get_settings_cached():
     This test verifies that when get_settings is called multiple times, it returns
     the same instance of Settings, indicating that the function's result is being cached.
     """
-    with patch("app.helpers.environment.EnvironmentVariables", return_value=EnvironmentVariables()):
+    with patch(
+        "app.helpers.environment.EnvironmentVariables",
+        return_value=EnvironmentVariables(),
+    ):
         first_call = env()
         second_call = env()
 

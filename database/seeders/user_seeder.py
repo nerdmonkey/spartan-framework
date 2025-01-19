@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 from faker import Faker
 
-from app.models.user import User
 from app.helpers.database import db
+from app.models.user import User
 
 db = db()
 fake = Faker()

@@ -22,5 +22,9 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
-    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp())
+    created_at = Column(
+        DateTime, nullable=False, default=func.current_timestamp()
+    )
+    updated_at = Column(
+        DateTime, nullable=False, default=func.current_timestamp()
+    )

@@ -15,5 +15,6 @@ class FileLogFormatter(LambdaPowertoolsFormatter):
             Returns:
                 str: The formatted log record as a string.
     """
+
     def format(self, record):
         return super().format(record)

@@ -50,7 +50,9 @@ class FileHandlerConfig(BaseHandlerConfig):
     name: str
     level: str
     path: str
-    json_deserializer: Optional[Callable] = Field(default=json.loads, exclude=True)
+    json_deserializer: Optional[Callable] = Field(
+        default=json.loads, exclude=True
+    )
 
 
 class TcpHandlerConfig(BaseHandlerConfig):
