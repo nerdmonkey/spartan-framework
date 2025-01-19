@@ -1,3 +1,5 @@
+from typing import Dict
+
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session as SQLAlchemySession
@@ -7,54 +9,44 @@ from app.helpers.environment import env
 
 
 def create_database_engine() -> Engine:
-    """
-    Creates and returns a SQLAlchemy Engine instance based on the database configuration
-    specified in the environment variables.
+    settings = env()
+    database_type = settings.DB_TYPE
+    database = settings.DB_NAME
 
-    The function supports multiple database types including SQLite, PostgreSQL, MySQL, and MSSQL.
-    It constructs the appropriate database URL based on the database type and other configuration
-    parameters such as username, password, host, port, and driver.
+    if settings.DB_SSL_CA is None:
+        mysql_url_format = "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+    else:
+        mysql_url_format = (
+            "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+            "?ssl_ca={ssl_ca}&ssl_verify_cert={ssl_verify_cert}"
+        )
 
-    Returns:
-        Engine: A SQLAlchemy Engine instance configured for the specified database.
-
-    Raises:
-        ValueError: If the specified database type is not supported.
-
-    Environment Variables:
-        DB_TYPE (str): The type of the database (e.g., 'sqlite', 'psql', 'mysql', 'mssql').
-        DB_NAME (str): The name of the database.
-        DB_USERNAME (str): The username for the database (not required for SQLite).
-        DB_PASSWORD (str): The password for the database (not required for SQLite).
-        DB_HOST (str): The host of the database (not required for SQLite).
-        DB_PORT (str): The port of the database (not required for SQLite).
-        DB_DRIVER (str): The driver for the database (only required for MSSQL).
-    """
-    database_type = env().DB_TYPE
-    database = env().DB_NAME
-
-    url_formats = {
+    # Mapping for different database types to their URL formats
+    url_formats: Dict[str, str] = {
         "sqlite": f"sqlite:///./database/{database}.db",
         "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
-        "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
         "mssql": "mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}",
+        "mysql": mysql_url_format,
     }
 
     if database_type in url_formats:
         database_url = url_formats[database_type]
         if database_type != "sqlite":
             database_url = database_url.format(
-                username=env().DB_USERNAME,
-                password=env().DB_PASSWORD,
-                host=env().DB_HOST,
-                port=env().DB_PORT,
+                username=settings.DB_USERNAME,
+                password=settings.DB_PASSWORD,
+                host=settings.DB_HOST,
+                port=settings.DB_PORT,
                 database=database,
-                driver=env().DB_DRIVER,
+                driver=settings.DB_DRIVER,
+                ssl_ca=settings.DB_SSL_CA,
+                ssl_verify_cert=settings.DB_SSL_VERIFY_CERT,
             )
         return create_engine(
             database_url,
-            # pool_size=30,
-            # max_overflow=30,
+            pool_size=30,  # Adjust pool size
+            max_overflow=20,  # Adjust max overflow
+            pool_timeout=30,  # Adjust pool timeout
             connect_args={"check_same_thread": False} if database_type == "sqlite" else {},
         )
 
@@ -66,10 +58,4 @@ Session = sessionmaker(bind=engine)
 
 
 def db() -> SQLAlchemySession:
-    """
-    Creates and returns a new SQLAlchemy session.
-
-    Returns:
-        SQLAlchemySession: A new SQLAlchemy session instance.
-    """
     return Session()

@@ -68,14 +68,22 @@ class EnvironmentVariables(BaseSettings):
 
 
 @lru_cache()
-def env() -> EnvironmentVariables:
+def env(var_name: Optional[str] = None) -> Optional[str]:
     """
-    Create and return an instance of EnvironmentVariables.
+    Create and return an instance of EnvironmentVariables or a specific environment variable.
 
     This function initializes and returns an EnvironmentVariables object,
     which is used to manage and access environment variables for the application.
+    If a variable name is provided, it returns the value of that specific environment variable.
+
+    Args:
+        var_name (Optional[str]): The name of the environment variable to retrieve. Defaults to None.
 
     Returns:
-        EnvironmentVariables: An instance of the EnvironmentVariables class.
+        EnvironmentVariables or Optional[str]: An instance of the EnvironmentVariables class or the value
+        of the specified environment variable.
     """
-    return EnvironmentVariables()
+    env_vars = EnvironmentVariables()
+    if var_name:
+        return getattr(env_vars, var_name, None)
+    return env_vars
