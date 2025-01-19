@@ -7,7 +7,7 @@ Spartan Framework—"the Swiss Army knife for serverless development"—is a pow
 
 #### Spartan Framework is versatile and can be used to efficiently develop:
 - Rest API
-- Workflows or State Machines
+- Workflows or State Machines (AWS Step Function)
 - Small ETL Pipelines
 - Containerized Microservices (AWS ECS)
 - AWS Glue Jobs
