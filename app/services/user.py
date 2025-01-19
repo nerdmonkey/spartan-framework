@@ -4,11 +4,7 @@ from typing import List, Tuple
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
-from app.exceptions.user import (
-    DuplicateUserError,
-    InvalidSortFieldError,
-    UserNotFoundError,
-)
+from app.exceptions.user import DuplicateUserError, InvalidSortFieldError, UserNotFoundError
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
@@ -51,18 +47,12 @@ class UserService:
             if isinstance(condition, list):
                 start_date, end_date = condition
                 self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if start_date <= user.created_at <= end_date
+                    user for user in self.filtered_users if start_date <= user.created_at <= end_date
                 ]
             else:
                 attribute = condition.left.key
                 value = condition.right.value
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) == value
-                ]
+                self.filtered_users = [user for user in self.filtered_users if getattr(user, attribute) == value]
         return self
 
     def all(
@@ -87,18 +77,14 @@ class UserService:
             raise InvalidSortFieldError("Invalid sort field or sort type")
 
         sort_column = getattr(User, sort_by)
-        query = query.order_by(
-            asc(sort_column) if sort_type == "asc" else desc(sort_column)
-        )
+        query = query.order_by(asc(sort_column) if sort_type == "asc" else desc(sort_column))
 
         # Retrieve filtered and paginated results from MockSession
         users = query.offset(offset).limit(items_per_page).all()
 
         # Apply date filtering directly within UserService
         if start_date and end_date:
-            users = [
-                user for user in users if start_date <= user.created_at <= end_date
-            ]
+            users = [user for user in users if start_date <= user.created_at <= end_date]
 
         # Convert users to response format
         users_response = [
@@ -133,9 +119,7 @@ class UserService:
         Raises:
             DuplicateUserError: If a user with the same email already exists.
         """
-        existing_user = (
-            self.db.query(User).filter(User.email == user_request.email).first()
-        )
+        existing_user = self.db.query(User).filter(User.email == user_request.email).first()
         if existing_user:
             raise DuplicateUserError("User with this email already exists")
 

@@ -19,11 +19,10 @@ sys.modules["awsglue.context"] = mock.Mock()
 sys.modules["awsglue.job"] = mock.Mock()
 sys.modules["awsglue.dynamicframe"] = mock.Mock()
 
-sys.modules["awsglue.utils"].getResolvedOptions = mock.Mock(
-    return_value={"JOB_NAME": "test_job"}
-)
+sys.modules["awsglue.utils"].getResolvedOptions = mock.Mock(return_value={"JOB_NAME": "test_job"})
 
-from jobs.hello import args, glueContext, job, logger
+# Remove unused imports
+# from jobs.hello import args, glueContext, job, logger
 
 
 @pytest.fixture
