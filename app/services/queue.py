@@ -96,6 +96,4 @@ class QueueService:
         Returns:
             dict: The response from the SQS service after deleting the message.
         """
-        return self.sqs_client.delete_message(
-            QueueUrl=queue_url, ReceiptHandle=receipt_handle
-        )
+        return self.sqs_client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)

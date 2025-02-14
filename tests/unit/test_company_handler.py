@@ -33,16 +33,8 @@ def test_main_logging_with_mocked_logger(mock_event, mock_context):
             "body": "Company lambda executed successfully!",
         }
 
-        mock_logger.debug.assert_called_once_with(
-            "Debug message: Company details fetched."
-        )
+        mock_logger.debug.assert_called_once_with("Debug message: Company details fetched.")
         mock_logger.info.assert_any_call("Info message: Company logged in.")
-        mock_logger.warning.assert_called_once_with(
-            "Warning message: Company account nearing expiration."
-        )
-        mock_logger.error.assert_called_once_with(
-            "Error message: Failed to update company details."
-        )
-        mock_logger.critical.assert_called_once_with(
-            "Critical message: System failure!"
-        )
+        mock_logger.warning.assert_called_once_with("Warning message: Company account nearing expiration.")
+        mock_logger.error.assert_called_once_with("Error message: Failed to update company details.")
+        mock_logger.critical.assert_called_once_with("Critical message: System failure!")
