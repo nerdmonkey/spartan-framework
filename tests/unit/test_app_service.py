@@ -21,7 +21,9 @@ def app_service(mock_dynamodb_resource):
 
 def test_set_state_success(app_service, mock_dynamodb_resource):
     _, mock_table = mock_dynamodb_resource
-    mock_table.update_item.return_value = {"Attributes": {"Attr_Data": jsonpickle.encode("some value")}}
+    mock_table.update_item.return_value = {
+        "Attributes": {"Attr_Data": jsonpickle.encode("some value")}
+    }
     returned_value = app_service.set_state("test_key", "some value")
     assert jsonpickle.decode(returned_value) == "some value"
     mock_table.update_item.assert_called()
@@ -29,14 +31,18 @@ def test_set_state_success(app_service, mock_dynamodb_resource):
 
 def test_get_state_success(app_service, mock_dynamodb_resource):
     _, mock_table = mock_dynamodb_resource
-    mock_table.get_item.return_value = {"Item": {"Attr_Data": jsonpickle.encode("some value")}}
+    mock_table.get_item.return_value = {
+        "Item": {"Attr_Data": jsonpickle.encode("some value")}
+    }
     assert app_service.get_state("test_key") == "some value"
     mock_table.get_item.assert_called()
 
 
 def test_remove_state_success(app_service, mock_dynamodb_resource):
     _, mock_table = mock_dynamodb_resource
-    mock_table.delete_item.return_value = {"Attributes": {"Attr_Data": jsonpickle.encode("some value")}}
+    mock_table.delete_item.return_value = {
+        "Attributes": {"Attr_Data": jsonpickle.encode("some value")}
+    }
     returned_value = app_service.remove_state("test_key")
     assert jsonpickle.decode(returned_value) == "some value"
 

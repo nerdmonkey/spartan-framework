@@ -2,10 +2,18 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from app.exceptions.user import DuplicateUserError, InvalidSortFieldError, UserNotFoundError
+from app.exceptions.user import (
+    DuplicateUserError,
+    InvalidSortFieldError,
+    UserNotFoundError,
+)
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.responses.user import UserCreateResponse, UserResponse, UserUpdateResponse
+from app.responses.user import (
+    UserCreateResponse,
+    UserResponse,
+    UserUpdateResponse,
+)
 from app.services.user import UserService
 
 
@@ -55,20 +63,36 @@ class MockSession:
     #     return self
 
     def filter_by_date_range(self, field, start_date, end_date):
-        self.filtered_users = [user for user in self.filtered_users if start_date <= getattr(user, field) <= end_date]
+        self.filtered_users = [
+            user
+            for user in self.filtered_users
+            if start_date <= getattr(user, field) <= end_date
+        ]
         return self
 
     def filter(self, *conditions):
         for condition in conditions:
             # Check if we're filtering by a list of IDs (for the `in_` clause)
-            if hasattr(condition, "right") and isinstance(condition.right.value, list):
-                ids_to_match = condition.right.value  # Assume it's a list of IDs
-                self.filtered_users = [user for user in self.filtered_users if user.id in ids_to_match]
+            if hasattr(condition, "right") and isinstance(
+                condition.right.value, list
+            ):
+                ids_to_match = (
+                    condition.right.value
+                )  # Assume it's a list of IDs
+                self.filtered_users = [
+                    user
+                    for user in self.filtered_users
+                    if user.id in ids_to_match
+                ]
             elif hasattr(condition, "left") and hasattr(condition, "right"):
                 # Handle other attribute-value filters
                 attribute = condition.left.key
                 value = condition.right.value
-                self.filtered_users = [user for user in self.filtered_users if getattr(user, attribute) == value]
+                self.filtered_users = [
+                    user
+                    for user in self.filtered_users
+                    if getattr(user, attribute) == value
+                ]
         return self
 
     def first(self):
@@ -84,14 +108,20 @@ class MockSession:
 
     def all(self):
         start = getattr(self, "pagination_offset", 0)
-        end = start + getattr(self, "pagination_limit", len(self.filtered_users))
+        end = start + getattr(
+            self, "pagination_limit", len(self.filtered_users)
+        )
         return self.filtered_users[start:end]
 
     def count(self):
         return len(self.filtered_users)
 
     def add(self, item):
-        item.id = len(self.users) + 1 if not hasattr(item, "id") or item.id is None else item.id
+        item.id = (
+            len(self.users) + 1
+            if not hasattr(item, "id") or item.id is None
+            else item.id
+        )
         item.created_at = item.created_at or datetime.now() - timedelta(days=1)
         item.updated_at = item.updated_at or datetime.now()
         self.users.append(item)
@@ -176,8 +206,12 @@ def test_filter_users_by_username(mock_db_session):
 
 
 def test_filter_users_by_date(mock_db_session):
-    user_older = create_test_user(id=1, username="olduser", created_at=datetime.now() - timedelta(days=10))
-    user_newer = create_test_user(id=2, username="newuser", created_at=datetime.now())
+    user_older = create_test_user(
+        id=1, username="olduser", created_at=datetime.now() - timedelta(days=10)
+    )
+    user_newer = create_test_user(
+        id=2, username="newuser", created_at=datetime.now()
+    )
 
     mock_db_session.add(user_older)
     mock_db_session.add(user_newer)
@@ -186,7 +220,9 @@ def test_filter_users_by_date(mock_db_session):
     start_date = datetime.now() - timedelta(days=5)
     end_date = datetime.now()
 
-    users, _, _, _, _ = user_service.all(1, 10, start_date=start_date, end_date=end_date)
+    users, _, _, _, _ = user_service.all(
+        1, 10, start_date=start_date, end_date=end_date
+    )
     assert len(users) == 1
     assert users[0].username == "newuser"
 
@@ -228,7 +264,9 @@ def test_save_duplicate_user(mock_db_session):
 def test_update_user(mock_db_session):
     mock_db_session.add(create_test_user())
     user_service = UserService(db=mock_db_session)
-    user_request = UserUpdateRequest(username="updateduser", email="updated_user@example.com")
+    user_request = UserUpdateRequest(
+        username="updateduser", email="updated_user@example.com"
+    )
     updated_user = user_service.update(1, user_request)
 
     assert isinstance(updated_user, UserUpdateResponse)
@@ -238,7 +276,9 @@ def test_update_user(mock_db_session):
 
 def test_update_user_not_found(mock_db_session):
     user_service = UserService(db=mock_db_session)
-    user_request = UserUpdateRequest(username="updateduser", email="updated_user@example.com")
+    user_request = UserUpdateRequest(
+        username="updateduser", email="updated_user@example.com"
+    )
 
     with pytest.raises(UserNotFoundError):
         user_service.update(999, user_request)
