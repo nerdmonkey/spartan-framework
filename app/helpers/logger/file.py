@@ -17,10 +17,17 @@ class FileLogger(BaseLogger):
         backup_count: int = 5,
     ):
         self.service_name = service_name
-        self.logger = self._setup_logger(service_name, level, log_dir, max_bytes, backup_count)
+        self.logger = self._setup_logger(
+            service_name, level, log_dir, max_bytes, backup_count
+        )
 
     def _setup_logger(
-        self, service_name: str, level: str, log_dir: str, max_bytes: int, backup_count: int
+        self,
+        service_name: str,
+        level: str,
+        log_dir: str,
+        max_bytes: int,
+        backup_count: int,
     ) -> logging.Logger:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
@@ -31,12 +38,13 @@ class FileLogger(BaseLogger):
         logger.handlers = []
 
         file_handler = RotatingFileHandler(
-            f"{log_dir}/spartan.log", maxBytes=max_bytes, backupCount=backup_count
+            f"{log_dir}/spartan.log",
+            maxBytes=max_bytes,
+            backupCount=backup_count,
         )
 
         class JsonFormatter(logging.Formatter):
             def format(self, record):
-
                 log_entry = {
                     "timestamp": datetime.utcnow().isoformat(),
                     "level": record.levelname,
@@ -46,7 +54,9 @@ class FileLogger(BaseLogger):
                 }
 
                 if record.exc_info:
-                    log_entry["exception"] = self.formatException(record.exc_info)
+                    log_entry["exception"] = self.formatException(
+                        record.exc_info
+                    )
 
                 if hasattr(record, "extra"):
                     log_entry.update(record.extra)
@@ -79,4 +89,5 @@ class FileLogger(BaseLogger):
     def inject_lambda_context(self, func):
         def wrapper(event, context):
             return func(event, context)
+
         return wrapper

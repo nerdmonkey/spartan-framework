@@ -9,7 +9,11 @@ from .base import BaseLogger
 
 class LoggerFactory:
     @staticmethod
-    def create_logger(service_name: str, environment: Optional[str] = None, level: str = "INFO") -> BaseLogger:
+    def create_logger(
+        service_name: str,
+        environment: Optional[str] = None,
+        level: str = "INFO",
+    ) -> BaseLogger:
         env = environment or os.getenv("ENVIRONMENT", "local").lower()
 
         if env == "local":

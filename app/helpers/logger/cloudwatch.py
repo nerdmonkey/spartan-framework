@@ -7,7 +7,10 @@ from .base import BaseLogger
 class CloudWatchLogger(BaseLogger):
     def __init__(self, service_name: str, level: str = "INFO"):
         self.logger = Logger(
-            service=service_name, level=level, correlation_id_path=correlation_paths.API_GATEWAY_REST, use_rfc3339=True
+            service=service_name,
+            level=level,
+            correlation_id_path=correlation_paths.API_GATEWAY_REST,
+            use_rfc3339=True,
         )
 
     def info(self, message: str, **kwargs):
