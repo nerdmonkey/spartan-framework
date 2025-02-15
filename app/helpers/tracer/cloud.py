@@ -1,7 +1,7 @@
 from contextlib import contextmanager
+from functools import wraps
 from time import time
 from typing import Any, Dict, Optional
-from functools import wraps
 
 from aws_lambda_powertools import Tracer
 
