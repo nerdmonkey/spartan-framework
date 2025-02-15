@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
@@ -17,30 +16,20 @@ class UserCreateRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("username", mode="before")
-    def check_name(cls, value):
-        if not value.strip():
-            raise ValueError("The name field is required")
+    @field_validator("username", "email", "password")
+    def not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("must not be empty")
+        return v
 
-        if len(value) < 3:
-            raise ValueError("Name must be at least 3 characters long")
-
-        if len(value) > 50:
-            raise ValueError("Name must be at most 50 characters long")
-
-        return value
-
-    @field_validator("email", mode="before")
-    def check_email(cls, value):
-        if not value.strip():
-            raise ValueError("The email field is required")
-
-        return value
+    @field_validator("email")
+    def valid_email(cls, v):
+        if "@" not in v:
+            raise ValueError("invalid email format")
+        return v
 
 
 class UserUpdateRequest(BaseModel):
@@ -56,33 +45,17 @@ class UserUpdateRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("username", mode="before")
-    def check_name(cls, value):
-        if value is None:
-            return value  # Allow None for optional field
+    @field_validator("username", "email", "password")
+    def not_empty(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError("must not be empty")
+        return v
 
-        if not value.strip():
-            raise ValueError("The name field is required")
-
-        if len(value) < 3:
-            raise ValueError("Name must be at least 3 characters long")
-
-        if len(value) > 20:
-            raise ValueError("Name must be at most 20 characters long")
-
-        return value
-
-    @field_validator("email", mode="before")
-    def check_email(cls, value):
-        if value is None:
-            return value  # Allow None for optional field
-
-        if not value.strip():
-            raise ValueError("The email field is required")
-
-        return value
+    @field_validator("email")
+    def valid_email(cls, v):
+        if v is not None and "@" not in v:
+            raise ValueError("invalid email format")
+        return v
