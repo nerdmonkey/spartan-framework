@@ -8,6 +8,7 @@ from jsonschema import validate
 
 from app.helpers.logger import get_logger
 from app.helpers.tracer import trace_function, trace_segment
+from app.middlewares.logging import standard_logger
 
 logger = get_logger("spartan-framework")
 
@@ -80,7 +81,7 @@ def process_company_data(company_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @logger.inject_lambda_context
-@trace_function("main_handler")
+@standard_logger
 def main(
     event: Dict[str, Any], context: LambdaContext = None
 ) -> Dict[str, Any]:
@@ -98,12 +99,14 @@ def main(
                 "path": event.get("path"),
                 "http_method": event.get("httpMethod"),
                 "remaining_time": context.get_remaining_time_in_millis(),
+                "context": context.__dict__,
             },
         )
 
         try:
             body = json.loads(event.get("body", "{}"))
             logger.debug("Request body parsed", extra={"body": body})
+            logger.info("Input Data", extra={"input_data": json.dumps(event)})
         except json.JSONDecodeError as e:
             logger.error(
                 "Invalid JSON in request body",
@@ -156,14 +159,17 @@ def main(
             },
         )
 
-        return {
+        response = {
             "statusCode": 201,
-            "body": result,
+            "body": json.dumps(result),
             "headers": {
                 "Content-Type": "application/json",
                 "X-Request-ID": request_id,
             },
         }
+
+        logger.info("Output Data", extra={"output_data": json.dumps(result)})
+        return response
 
     except Exception as e:
         logger.exception(

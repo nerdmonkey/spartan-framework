@@ -1,12 +1,12 @@
-from app.helpers.logs.factory import LoggerFactory
+from app.helpers.logger.factory import LoggerFactory
 
 
 class StandardLoggerService:
-    def __init__(self):
+    def __init__(self, service_name="default_service", log_level="INFO"):
         """
         Initializes the logger service using LoggerFactory.
         """
-        self.logger = LoggerFactory.create_logger()
+        self.logger = LoggerFactory.create_logger(service_name, level=log_level)
 
     def debug(self, message, **kwargs):
         self.logger.debug(message, **kwargs)

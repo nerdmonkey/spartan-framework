@@ -14,7 +14,7 @@ class LoggerFactory:
         environment: Optional[str] = None,
         level: str = "INFO",
     ) -> BaseLogger:
-        env = environment or os.getenv("ENVIRONMENT", "local").lower()
+        env = environment or os.getenv("APP_ENVIRONMENT", "local").lower()
 
         if env == "local":
             return FileLogger(service_name=service_name, level=level)

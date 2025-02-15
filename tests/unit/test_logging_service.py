@@ -56,3 +56,10 @@ def test_logger_exception_called(logging, mock_logger):
     mock_logger.exception.assert_called_once_with(
         message, exception="ExampleException"
     )
+
+
+def test_logger_warning_called(logging, mock_logger):
+    message = "Test warning message"
+    logging.warning(message, warning="TestWarning")
+
+    mock_logger.warning.assert_called_once_with(message, warning="TestWarning")
