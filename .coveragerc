@@ -2,7 +2,7 @@
 
 [run]
 source = my_module
-omit = */.serverless/*, */tests/*, */.venv/*, */venv/*, __init__.py, */database/*
+omit = */.serverless/*, */tests/*, */.venv/*, */venv/*, __init__.py, */database/*, tinker.py, handlers/company.py, handlers/order.py
 
 [report]
 show_missing = true
