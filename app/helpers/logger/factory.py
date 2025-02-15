@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from app.helpers.logger.cloudwatch import CloudWatchLogger
+from app.helpers.logger.cloud import CloudWatchLogger
 from app.helpers.logger.file import FileLogger
 
 from .base import BaseLogger
