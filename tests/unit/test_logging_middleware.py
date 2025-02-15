@@ -38,9 +38,7 @@ def lambda_context():
 
 
 def test_standard_logger_logs_input_output(mock_logger, lambda_context):
-    wrapped_handler = standard_logger(
-        sample_handler, logger=mock_logger
-    )
+    wrapped_handler = standard_logger(sample_handler, logger=mock_logger)
 
     event = {"key": "value"}
 
@@ -81,10 +79,10 @@ def test_standard_logger_logs_error(mock_logger, lambda_context):
     ), "Expected error log with 'Intentional Error' not found"
 
 
-def test_standard_logger_logs_request_and_response_sizes(mock_logger, lambda_context):
-    wrapped_handler = standard_logger(
-        sample_handler, logger=mock_logger
-    )
+def test_standard_logger_logs_request_and_response_sizes(
+    mock_logger, lambda_context
+):
+    wrapped_handler = standard_logger(sample_handler, logger=mock_logger)
 
     event = {"key": "value" * 100}
 
@@ -94,19 +92,19 @@ def test_standard_logger_logs_request_and_response_sizes(mock_logger, lambda_con
     output_data_size = len(str(response).encode("utf-8"))
 
     assert any(
-        "extra" in call[1] and call[1]["extra"].get("input_data_size") == input_data_size
+        "extra" in call[1]
+        and call[1]["extra"].get("input_data_size") == input_data_size
         for call in mock_logger.info.call_args_list
     ), f"Input data size log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
     assert any(
-        "extra" in call[1] and call[1]["extra"].get("output_data_size") == output_data_size
+        "extra" in call[1]
+        and call[1]["extra"].get("output_data_size") == output_data_size
         for call in mock_logger.info.call_args_list
     ), f"Output data size log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
 
 
 def test_standard_logger_metadata_in_logs(mock_logger, lambda_context):
-    wrapped_handler = standard_logger(
-        sample_handler, logger=mock_logger
-    )
+    wrapped_handler = standard_logger(sample_handler, logger=mock_logger)
 
     event = {"key": "value"}
 
@@ -121,6 +119,7 @@ def test_standard_logger_metadata_in_logs(mock_logger, lambda_context):
     }
 
     assert any(
-        "extra" in call[1] and call[1]["extra"].get("lambda_function") == lambda_metadata
+        "extra" in call[1]
+        and call[1]["extra"].get("lambda_function") == lambda_metadata
         for call in mock_logger.info.call_args_list
     ), f"Lambda metadata log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"

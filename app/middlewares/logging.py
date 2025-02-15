@@ -1,7 +1,8 @@
-from app.helpers.logger import get_logger
-from app.helpers.environment import env
-
 import json
+
+from app.helpers.environment import env
+from app.helpers.logger import get_logger
+
 
 def standard_logger(handler, logger=None):
     logger = logger or get_logger("spartan-framework")
@@ -26,11 +27,16 @@ def standard_logger(handler, logger=None):
             )
 
             if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
-                print(json.dumps({
-                    "input_data": event,
-                    "input_data_size": input_data_size,
-                    "lambda_function": lambda_function,
-                }, indent=4))
+                print(
+                    json.dumps(
+                        {
+                            "input_data": event,
+                            "input_data_size": input_data_size,
+                            "lambda_function": lambda_function,
+                        },
+                        indent=4,
+                    )
+                )
 
             response = handler(event, context)
 
@@ -45,16 +51,24 @@ def standard_logger(handler, logger=None):
             )
 
             if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
-                print(json.dumps({
-                    "output_data": response,
-                    "output_data_size": output_data_size,
-                    "lambda_function": lambda_function,
-                }, indent=4))
+                print(
+                    json.dumps(
+                        {
+                            "output_data": response,
+                            "output_data_size": output_data_size,
+                            "lambda_function": lambda_function,
+                        },
+                        indent=4,
+                    )
+                )
 
             return response
 
         except Exception as e:
-            logger.error("Error in Lambda function", extra={"error": str(e), "lambda_function": lambda_function})
+            logger.error(
+                "Error in Lambda function",
+                extra={"error": str(e), "lambda_function": lambda_function},
+            )
             raise
 
     return wrapped_handler
