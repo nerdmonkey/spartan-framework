@@ -4,15 +4,15 @@ def standard_logger(handler, logger=None):
     logger = logger or get_logger(service_name="standard_logger")
 
     def wrapped_handler(event, context):
+        lambda_function = {
+            "name": context.function_name,
+            "version": context.function_version,
+            "arn": context.invoked_function_arn,
+            "memory_size": context.memory_limit_in_mb,
+            "aws_request_id": context.aws_request_id,
+        }
         try:
             input_data_size = len(str(event).encode("utf-8"))
-            lambda_function = {
-                "name": context.function_name,
-                "version": context.function_version,
-                "arn": context.invoked_function_arn,
-                "memory_size": context.memory_limit_in_mb,
-                "aws_request_id": context.aws_request_id,
-            }
             logger.info(
                 "Input Data",
                 extra={
