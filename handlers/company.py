@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime
 from typing import Any, Dict
 
@@ -140,7 +139,10 @@ def main(
             except Exception as e:
                 logger.exception(
                     "Unexpected error in business logic",
-                    extra={"error_type": type(e).__name__, "company_data": body},
+                    extra={
+                        "error_type": type(e).__name__,
+                        "company_data": body,
+                    },
                 )
                 return create_error_response(
                     500, "Internal server error", "INTERNAL_ERROR"

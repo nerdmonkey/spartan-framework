@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
 from contextlib import contextmanager
+from typing import Any, Dict, Optional
+
 
 class BaseTracer(ABC):
     @abstractmethod
@@ -13,5 +14,7 @@ class BaseTracer(ABC):
 
     @abstractmethod
     @contextmanager
-    def create_segment(self, name: str, metadata: Optional[Dict[str, Any]] = None):
+    def create_segment(
+        self, name: str, metadata: Optional[Dict[str, Any]] = None
+    ):
         pass
