@@ -1,8 +1,7 @@
-from app.services.logging import StandardLoggerService
+from app.helpers.logger import get_logger
 
-
-def standard_logging_middleware(handler, logger=None):
-    logger = logger or StandardLoggerService()
+def standard_logger(handler, logger=None):
+    logger = logger or get_logger(service_name="standard_logger")
 
     def wrapped_handler(event, context):
         try:
@@ -16,9 +15,11 @@ def standard_logging_middleware(handler, logger=None):
             }
             logger.info(
                 "Input Data",
-                input_data=event,
-                lambda_function=lambda_function,
-                input_data_size=input_data_size,
+                extra={
+                    "input_data": event,
+                    "lambda_function": lambda_function,
+                    "input_data_size": input_data_size,
+                },
             )
 
             response = handler(event, context)
@@ -26,13 +27,16 @@ def standard_logging_middleware(handler, logger=None):
             output_data_size = len(str(response).encode("utf-8"))
             logger.info(
                 "Output Data",
-                output_data=response,
-                output_data_size=output_data_size,
+                extra={
+                    "output_data": response,
+                    "output_data_size": output_data_size,
+                    "lambda_function": lambda_function,
+                },
             )
             return response
 
         except Exception as e:
-            logger.error("Error in Lambda function", error=str(e))
+            logger.error("Error in Lambda function", extra={"error": str(e), "lambda_function": lambda_function})
             raise
 
     return wrapped_handler
