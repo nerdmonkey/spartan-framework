@@ -1,5 +1,7 @@
 import os
+
 from app.helpers.logger.factory import LoggerFactory
+
 
 def get_logger(service_name: str):
     environment = os.getenv("APP_ENVIRONMENT", "local").lower()
