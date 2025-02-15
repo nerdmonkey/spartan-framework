@@ -81,7 +81,7 @@ def process_company_data(company_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @logger.inject_lambda_context
-@standard_logger
+# @standard_logger
 def main(
     event: Dict[str, Any], context: LambdaContext = None
 ) -> Dict[str, Any]:
@@ -161,7 +161,7 @@ def main(
 
         response = {
             "statusCode": 201,
-            "body": json.dumps(result),
+            "body": result,
             "headers": {
                 "Content-Type": "application/json",
                 "X-Request-ID": request_id,
