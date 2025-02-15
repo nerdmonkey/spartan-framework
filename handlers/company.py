@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict
 
-from aws_lambda_powertools.utilities.parser import ValidationError, parse
+from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from jsonschema import validate
 
@@ -80,7 +80,6 @@ def process_company_data(company_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-@logger.inject_lambda_context
 @standard_logger
 def main(
     event: Dict[str, Any], context: LambdaContext = None
@@ -106,7 +105,6 @@ def main(
         try:
             body = json.loads(event.get("body", "{}"))
             logger.debug("Request body parsed", extra={"body": body})
-            logger.info("Input Data", extra={"input_data": json.dumps(event)})
         except json.JSONDecodeError as e:
             logger.error(
                 "Invalid JSON in request body",
@@ -168,7 +166,6 @@ def main(
             },
         }
 
-        logger.info("Output Data", extra={"output_data": json.dumps(result)})
         return response
 
     except Exception as e:
