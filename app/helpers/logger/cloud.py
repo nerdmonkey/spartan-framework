@@ -28,6 +28,9 @@ class CloudWatchLogger(BaseLogger):
     def exception(self, message: str, **kwargs):
         self.logger.exception(message, extra=kwargs)
 
+    def critical(self, message: str, **kwargs):
+        self.logger.critical(message, extra=kwargs)
+
     def inject_lambda_context(self, *args, **kwargs):
         """Decorator to inject lambda context"""
         return self.logger.inject_lambda_context(*args, **kwargs)
