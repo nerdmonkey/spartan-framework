@@ -86,6 +86,9 @@ class FileLogger(BaseLogger):
     def exception(self, message: str, **kwargs):
         self.logger.exception(message, extra=kwargs)
 
+    def critical(self, message: str, **kwargs):
+        self._log("critical", message, **kwargs)
+
     def inject_lambda_context(self, func):
         def wrapper(event, context):
             return func(event, context)
