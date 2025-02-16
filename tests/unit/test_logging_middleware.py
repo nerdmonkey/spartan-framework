@@ -71,7 +71,7 @@ def test_standard_logger_logs_error(mock_logger, lambda_context):
 
     assert (
         mock_logger.error.called
-    ), f"Expected logger.error to be called but it wasn't. Error call_args_list: {mock_logger.error.call_args_list}"
+    ), f"Expected logger.error but it wasn't: {mock_logger.error.call_args_list}"
     assert any(
         "Error in Lambda function" in call[0][0]
         and "Intentional Error" in call[1]["extra"]["error"]
