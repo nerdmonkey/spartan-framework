@@ -1,10 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-from app.models.base import Base
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
 

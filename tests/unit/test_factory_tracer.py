@@ -1,10 +1,11 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.helpers.tracer.cloud import CloudTracer
 from app.helpers.tracer.factory import TracerFactory, get_tracer
 from app.helpers.tracer.local import LocalTracer
+
+# Remove unused import
+# import pytest
 
 
 def test_create_tracer_local():
