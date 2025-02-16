@@ -11,5 +11,6 @@ exclude =
     .vscode,
     .pytest_cache,
     __pycache__,
+    tinker.py
 max-complexity = 10
 docstring_style=sphinx
