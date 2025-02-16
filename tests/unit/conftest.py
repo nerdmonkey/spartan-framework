@@ -1,7 +1,9 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
+
 from app.models.base import Base
+
 
 @pytest.fixture(scope="module")
 def db_engine():
@@ -9,11 +11,14 @@ def db_engine():
     Base.metadata.create_all(engine)
     return engine
 
+
 @pytest.fixture(scope="function")
 def db_session(db_engine):
     connection = db_engine.connect()
     transaction = connection.begin()
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
+    SessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_engine
+    )
     session = SessionLocal()
 
     yield session
@@ -21,6 +26,7 @@ def db_session(db_engine):
     session.close()
     transaction.rollback()
     connection.close()
+
 
 @pytest.fixture
 def user_request_data():
