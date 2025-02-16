@@ -1,5 +1,5 @@
 [flake8]
-max-line-length = 80
+max-line-length = 100
 exclude =
     app/exceptions/__init__.py,
     .git,
@@ -11,5 +11,6 @@ exclude =
     .vscode,
     .pytest_cache,
     __pycache__,
+    tinker.py,
 max-complexity = 10
 docstring_style=sphinx

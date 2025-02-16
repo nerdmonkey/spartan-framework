@@ -95,12 +95,18 @@ def test_standard_logger_logs_request_and_response_sizes(
         "extra" in call[1]
         and call[1]["extra"].get("input_data_size") == input_data_size
         for call in mock_logger.info.call_args_list
-    ), f"Input data size log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
+    ), (
+        f"Input data size log missing or incorrect, call_args_list: "
+        f"{mock_logger.info.call_args_list}"
+    )
     assert any(
         "extra" in call[1]
         and call[1]["extra"].get("output_data_size") == output_data_size
         for call in mock_logger.info.call_args_list
-    ), f"Output data size log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
+    ), (
+        f"Output data size log missing or incorrect, call_args_list: "
+        f"{mock_logger.info.call_args_list}"
+    )
 
 
 def test_standard_logger_metadata_in_logs(mock_logger, lambda_context):
@@ -122,4 +128,7 @@ def test_standard_logger_metadata_in_logs(mock_logger, lambda_context):
         "extra" in call[1]
         and call[1]["extra"].get("lambda_function") == lambda_metadata
         for call in mock_logger.info.call_args_list
-    ), f"Lambda metadata log missing or incorrect, call_args_list: {mock_logger.info.call_args_list}"
+    ), (
+        f"Lambda metadata log missing or incorrect, call_args_list: "
+        f"{mock_logger.info.call_args_list}"
+    )
