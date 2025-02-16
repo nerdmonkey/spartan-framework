@@ -50,25 +50,6 @@ class UserService:
             raise UserNotFoundError("User not found")
         return user
 
-    def filter(self, *conditions):
-        for condition in conditions:
-            if isinstance(condition, list):
-                start_date, end_date = condition
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if start_date <= user.created_at <= end_date
-                ]
-            else:
-                attribute = condition.left.key
-                value = condition.right.value
-                self.filtered_users = [
-                    user
-                    for user in self.filtered_users
-                    if getattr(user, attribute) == value
-                ]
-        return self
-
     def all(
         self,
         page: int = 1,
@@ -82,11 +63,9 @@ class UserService:
         offset = (page - 1) * items_per_page
         query = self.db.query(User)
 
-        # Apply username filter in MockSession
         if username:
             query = query.filter(User.username == username)
 
-        # Sorting logic
         if not hasattr(User, sort_by):
             raise InvalidSortFieldError("Invalid sort field or sort type")
 
@@ -95,10 +74,8 @@ class UserService:
             asc(sort_column) if sort_type == "asc" else desc(sort_column)
         )
 
-        # Retrieve filtered and paginated results from MockSession
         users = query.offset(offset).limit(items_per_page).all()
 
-        # Apply date filtering directly within UserService
         if start_date and end_date:
             users = [
                 user
@@ -106,7 +83,6 @@ class UserService:
                 if start_date <= user.created_at <= end_date
             ]
 
-        # Convert users to response format
         users_response = [
             UserResponse(
                 id=user.id,
@@ -118,7 +94,6 @@ class UserService:
             for user in users
         ]
 
-        # Pagination details
         total = query.count()
         last_page = (total - 1) // items_per_page + 1
         first_item = offset + 1
