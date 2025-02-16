@@ -50,7 +50,8 @@ class QueueService:
             queue_url (str): The URL of the SQS queue.
             message (dict): The message to send.
             group_id (str, optional): The group ID of the message, used for FIFO queues.
-            deduplication_id (str, optional): The deduplication ID of the message, used for FIFO queues.
+            deduplication_id (str, optional): The deduplication ID of the message,
+            used for FIFO queues.
 
         Returns:
             dict: The response from the SQS service after sending the message.

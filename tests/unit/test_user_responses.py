@@ -1,5 +1,3 @@
-import pytest
-
 from app.responses.user import (
     PaginatedUserResponse,
     Pagination,

@@ -17,7 +17,8 @@ class EnvironmentVariables(BaseSettings):
 
     Attributes:
         APP_NAME (str): The name of the application.
-        APP_ENVIRONMENT (str): The environment in which the application is running (e.g., development, production).
+        APP_ENVIRONMENT (str): The environment in which the application is running
+        (e.g., development, production).
         APP_DEBUG (bool): Flag to enable or disable debug mode.
         ALLOWED_ORIGINS (str): Comma-separated list of allowed origins for CORS.
         LOG_LEVEL (str): The logging level (e.g., DEBUG, INFO, WARNING, ERROR).
@@ -30,8 +31,10 @@ class EnvironmentVariables(BaseSettings):
         DB_NAME (str): The name of the database.
         DB_USERNAME (str): The username for the database connection.
         DB_PASSWORD (str): The password for the database connection.
-        DB_SSL_CA (Optional[str]): The SSL CA certificate for the database connection. Defaults to None.
-        DB_SSL_VERIFY_CERT (Optional[bool]): Flag to enable or disable SSL certificate verification. Defaults to None.
+        DB_SSL_CA (Optional[str]): The SSL CA certificate for the database connection.
+        Defaults to None.
+        DB_SSL_VERIFY_CERT (Optional[bool]): Flag to enable or disable SSL certificate
+        verification. Defaults to None.
 
     Methods:
         default_db_port(cls, v): Validates and converts the database port to an integer.
@@ -75,11 +78,12 @@ def env(var_name: Optional[str] = None) -> Optional[str]:
     If a variable name is provided, it returns the value of that specific environment variable.
 
     Args:
-        var_name (Optional[str]): The name of the environment variable to retrieve. Defaults to None.
+        var_name (Optional[str]): The name of the environment variable to retrieve.
+        Defaults to None.
 
     Returns:
-        EnvironmentVariables or Optional[str]: An instance of the EnvironmentVariables class or the value of the
-        specified environment variable.
+        EnvironmentVariables or Optional[str]: An instance of the EnvironmentVariables
+        class or the value of the specified environment variable.
     """
     env_vars = EnvironmentVariables()
     if var_name:
