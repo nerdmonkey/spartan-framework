@@ -1,10 +1,10 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.helpers.tracer.cloud import CloudTracer
 from app.helpers.tracer.factory import TracerFactory, get_tracer
 from app.helpers.tracer.local import LocalTracer
-from app.helpers.tracer.cloud import CloudTracer
 
 
 def test_create_tracer_local():
@@ -15,7 +15,10 @@ def test_create_tracer_local():
 
 
 def test_create_tracer_cloud():
-    with patch("app.helpers.tracer.factory.os.getenv", side_effect=["cloud", "test_service"]):
+    with patch(
+        "app.helpers.tracer.factory.os.getenv",
+        side_effect=["cloud", "test_service"],
+    ):
         with patch("app.helpers.tracer.cloud.Tracer") as MockTracer:
             mock_tracer_instance = MagicMock()
             MockTracer.return_value = mock_tracer_instance
@@ -33,7 +36,10 @@ def test_get_tracer_local():
 
 
 def test_get_tracer_cloud():
-    with patch("app.helpers.tracer.factory.os.getenv", side_effect=["cloud", "test_service"]):
+    with patch(
+        "app.helpers.tracer.factory.os.getenv",
+        side_effect=["cloud", "test_service"],
+    ):
         with patch("app.helpers.tracer.cloud.Tracer") as MockTracer:
             mock_tracer_instance = MagicMock()
             MockTracer.return_value = mock_tracer_instance
