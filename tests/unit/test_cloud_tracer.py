@@ -40,7 +40,9 @@ def test_capture_method(tracer):
 
 
 def test_create_segment(tracer):
-    with patch.object(tracer.tracer.provider, "in_subsegment") as mock_in_subsegment:
+    with patch.object(
+        tracer.tracer.provider, "in_subsegment"
+    ) as mock_in_subsegment:
         with tracer.create_segment("test_segment"):
             pass
         assert mock_in_subsegment.call_count == 1

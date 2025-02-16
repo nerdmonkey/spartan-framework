@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -9,12 +9,24 @@ from app.helpers.tracer.local import LocalTracer
 
 @pytest.fixture
 def tracer():
-    with patch.object(LocalTracer, "_get_trace_file_path", return_value=Path(__file__).parent.parent.parent.parent / "storage" / "traces" / "spartan.trace"):
+    with patch.object(
+        LocalTracer,
+        "_get_trace_file_path",
+        return_value=Path(__file__).parent.parent.parent.parent
+        / "storage"
+        / "traces"
+        / "spartan.trace",
+    ):
         return LocalTracer(service_name="test_service")
 
 
 def test_trace_file_path(tracer):
-    expected_path = Path(__file__).parent.parent.parent.parent / "storage" / "traces" / "spartan.trace"
+    expected_path = (
+        Path(__file__).parent.parent.parent.parent
+        / "storage"
+        / "traces"
+        / "spartan.trace"
+    )
     assert tracer.trace_file == expected_path
 
 
@@ -33,8 +45,12 @@ def test_write_trace(tracer):
     }
     trace_message = json.dumps(trace_entry, default=str)
 
-    with patch("builtins.open", mock_open()) as mock_file, patch("app.helpers.tracer.local.datetime") as mock_datetime:
-        mock_datetime.now.return_value.strftime.return_value = "2023-01-01 00:00:00"
+    with patch("builtins.open", mock_open()) as mock_file, patch(
+        "app.helpers.tracer.local.datetime"
+    ) as mock_datetime:
+        mock_datetime.now.return_value.strftime.return_value = (
+            "2023-01-01 00:00:00"
+        )
         tracer._write_trace("test_segment", {"key": "value"})
         mock_file().write.assert_called_once_with(trace_message + "\n")
 
