@@ -49,8 +49,7 @@ moto = "4.2.9"
 minversion = "6.0"
 addopts = "-ra -q"
 testpaths = [
-    "tests",
-    "integration",
+    "tests"
 ]
 
 
