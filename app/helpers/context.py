@@ -1,5 +1,6 @@
 import json
 
+
 class MockLambdaContext:
     """
     MockLambdaContext is a mock implementation of the AWS Lambda context object.
