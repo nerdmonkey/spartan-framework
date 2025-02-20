@@ -1,3 +1,5 @@
+import json
+
 class MockLambdaContext:
     """
     MockLambdaContext is a mock implementation of the AWS Lambda context object.
@@ -45,3 +47,21 @@ class MockLambdaEvent:
             "key2": "value2",
             "key3": "value3",
         }
+
+    def to_dict(self):
+        """
+        Convert the MockLambdaEvent to a dictionary.
+
+        Returns:
+            dict: The dictionary representation of the event.
+        """
+        return self.event
+
+    def to_json(self):
+        """
+        Convert the MockLambdaEvent to a JSON string.
+
+        Returns:
+            str: The JSON string representation of the event.
+        """
+        return json.dumps(self.event)
