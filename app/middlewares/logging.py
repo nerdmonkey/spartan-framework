@@ -1,6 +1,3 @@
-import json
-
-from app.helpers.environment import env
 from app.helpers.logger import get_logger
 
 
@@ -26,18 +23,6 @@ def standard_logger(handler, logger=None):
                 },
             )
 
-            if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
-                print(
-                    json.dumps(
-                        {
-                            "input_data": event,
-                            "input_data_size": input_data_size,
-                            "lambda_function": lambda_function,
-                        },
-                        indent=4,
-                    )
-                )
-
             response = handler(event, context)
 
             output_data_size = len(str(response).encode("utf-8"))
@@ -49,18 +34,6 @@ def standard_logger(handler, logger=None):
                     "lambda_function": lambda_function,
                 },
             )
-
-            if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
-                print(
-                    json.dumps(
-                        {
-                            "output_data": response,
-                            "output_data_size": output_data_size,
-                            "lambda_function": lambda_function,
-                        },
-                        indent=4,
-                    )
-                )
 
             return response
 
