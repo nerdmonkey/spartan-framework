@@ -1,9 +1,9 @@
 from app.helpers.logger import get_logger
 
+logger = get_logger("spartan-framework")
 
-def standard_logger(handler, logger=None):
-    logger = logger or get_logger("spartan-framework")
 
+def standard_logger(handler):
     def wrapped_handler(event, context):
         lambda_function = {
             "name": context.function_name,
