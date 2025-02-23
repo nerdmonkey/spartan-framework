@@ -38,7 +38,7 @@ class FileLogger(BaseLogger):
         logger.handlers = []
 
         file_handler = RotatingFileHandler(
-            f"{log_dir}/spartan.log",
+            f"{log_dir}/{service_name}.log",
             maxBytes=max_bytes,
             backupCount=backup_count,
         )
@@ -59,7 +59,7 @@ class FileLogger(BaseLogger):
                     )
 
                 if hasattr(record, "extra"):
-                    log_entry.update(record.extra)
+                    log_entry.update(record.extra.get("extra", {}))
 
                 return json.dumps(log_entry)
 
@@ -69,7 +69,8 @@ class FileLogger(BaseLogger):
 
     def _log(self, level: str, message: str, **kwargs):
         log_method = getattr(self.logger, level.lower())
-        log_method(message, extra=kwargs)
+        extra = kwargs.pop("extra", {})
+        log_method(message, extra={"extra": extra})
 
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
