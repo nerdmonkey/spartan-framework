@@ -13,9 +13,18 @@ class TracerFactory:
         environment = os.getenv("APP_ENVIRONMENT", "local").lower()
         service = service_name or os.getenv("APP_NAME", "default-service")
 
+        service = validate_service_name(service)
+
         if environment == "local":
             return LocalTracer(service)
         return CloudTracer(service)
+
+
+def validate_service_name(service_name):
+    """Validate service name"""
+    if not service_name or not service_name.strip():
+        raise ValueError("Invalid service name")
+    return service_name.strip()
 
 
 @lru_cache
