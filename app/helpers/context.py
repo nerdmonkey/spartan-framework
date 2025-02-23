@@ -1,6 +1,5 @@
 import json
 
-
 class MockLambdaContext:
     """
     MockLambdaContext is a mock implementation of the AWS Lambda context object.
@@ -42,13 +41,12 @@ class MockLambdaEvent:
         event (dict): A dictionary representing the mock event data with predefined key-value pairs.
     """
 
-    def __init__(self, event=None):
-        default_event = {
+    def __init__(self):
+        self.event = {
             "key1": "value1",
             "key2": "value2",
             "key3": "value3",
         }
-        self.event = event if event is not None else default_event
 
     def to_dict(self):
         """

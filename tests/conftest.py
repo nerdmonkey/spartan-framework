@@ -1,10 +1,16 @@
 import os
+import pytest
+from unittest.mock import Mock, patch
+import logging
+import tempfile
+from datetime import datetime
 
 import pytest
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.helpers.logger.file import FileLogger
 from app.helpers.database import db
 from app.models.base import Base
 from app.models.user import User
@@ -74,3 +80,38 @@ def test_data(test_db_session):
     for user in users:
         test_db_session.delete(user)
     test_db_session.commit()
+
+
+@pytest.fixture
+def temp_log_dir():
+    """Create a temporary directory for log files"""
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        yield tmpdirname
+
+@pytest.fixture
+def mock_datetime():
+    """Mock datetime to return a fixed value"""
+    fixed_datetime = datetime(2023, 12, 20, 10, 30, 0)
+    with patch('app.helpers.logger.file.datetime') as mock_dt:
+        mock_dt.utcnow.return_value = fixed_datetime
+        yield mock_dt
+
+@pytest.fixture
+def file_logger(temp_log_dir):
+    """Create a FileLogger instance with temporary directory"""
+    logger = FileLogger(
+        service_name="test-service",
+        level="DEBUG",
+        log_dir=temp_log_dir,
+        max_bytes=1024,  # Small size for testing rotation
+        backup_count=2
+    )
+    return logger
+
+@pytest.fixture
+def mock_logger():
+    """Mock the underlying logger object"""
+    with patch('logging.getLogger') as mock_get_logger:
+        mock_logger = Mock(spec=logging.Logger)
+        mock_get_logger.return_value = mock_logger
+        yield mock_logger
