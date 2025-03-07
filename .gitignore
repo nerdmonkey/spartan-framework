@@ -174,5 +174,5 @@ Dockerfile
 build.sql
 docker-compose.yml
 
-serverless.yml
+*.yml
 tinker.py
