@@ -55,9 +55,11 @@ def create_database_engine() -> Engine:
             database_url,
             # pool_size=30,
             # max_overflow=30,
-            connect_args={"check_same_thread": False}
-            if database_type == "sqlite"
-            else {},
+            connect_args=(
+                {"check_same_thread": False}
+                if database_type == "sqlite"
+                else {}
+            ),
         )
 
     raise ValueError(f"Unsupported database type: {database_type}")

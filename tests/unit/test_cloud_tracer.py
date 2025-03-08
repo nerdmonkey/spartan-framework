@@ -7,7 +7,15 @@ from app.helpers.tracer.cloud import CloudTracer
 
 @pytest.fixture
 def tracer():
-    with patch("app.helpers.tracer.cloud.Tracer"):
+    with patch("app.helpers.tracer.cloud.xray_recorder") as mock_recorder:
+        # Set up the mock recorder with required methods
+        mock_recorder.put_annotation = lambda key, value: None
+        mock_recorder.begin_segment = lambda name: None
+        mock_recorder.end_segment = lambda: None
+        mock_recorder.begin_subsegment = lambda name: None
+        mock_recorder.end_subsegment = lambda: None
+        mock_recorder.context_manager.context.return_value = mock_recorder
+
         return CloudTracer(service_name="test_service")
 
 

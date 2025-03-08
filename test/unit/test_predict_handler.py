@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from handlers.predict import main
+
 
 @patch("handlers.predict.get_logger")
 @patch("handlers.predict.standard_logger")
@@ -16,11 +17,7 @@ def test_main(mock_standard_logger, mock_get_logger):
 
     # Assert
     mock_logger.info.assert_any_call("Predicting...")
-    mock_logger.info.assert_any_call("Event", extra={
-        "event": event,
-        "context": context
-    })
-    assert response == {
-        "statusCode": 200,
-        "body": "Hello World"
-    }
+    mock_logger.info.assert_any_call(
+        "Event", extra={"event": event, "context": context}
+    )
+    assert response == {"statusCode": 200, "body": "Hello World"}
