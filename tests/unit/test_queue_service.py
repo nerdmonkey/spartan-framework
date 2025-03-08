@@ -1,10 +1,10 @@
 import boto3
-from moto import mock_sqs
+from moto import mock_aws
 
 from app.services.queue import QueueService
 
 
-@mock_sqs
+@mock_aws
 def test_send_message_to_standard_queue():
     # Setup
     sqs = boto3.resource("sqs", region_name="us-east-1")
@@ -20,7 +20,7 @@ def test_send_message_to_standard_queue():
     assert "MessageId" in response
 
 
-@mock_sqs
+@mock_aws
 def test_send_message_to_fifo_queue():
     # Mock the SQS service
     sqs = boto3.resource("sqs", region_name="us-east-1")
@@ -30,17 +30,17 @@ def test_send_message_to_fifo_queue():
         QueueName="TestQueue.fifo",
         Attributes={
             "FifoQueue": "true",
-            "ContentBasedDeduplication": "true",  # Enable if you want automatic deduplication
+            "ContentBasedDeduplication": "true",
         },
     )
     queue_url = queue.url
 
     # Test sending a message to the FIFO queue
-    queue_service = QueueService()  # Assuming QueueService is defined elsewhere
+    queue_service = QueueService()
     queue_service.send_message(queue_url, {"key": "value"}, "group1", "dedup1")
 
 
-@mock_sqs
+@mock_aws
 def test_receive_message():
     # Setup
     sqs = boto3.resource("sqs", region_name="us-east-1")
@@ -58,7 +58,7 @@ def test_receive_message():
     assert response["Messages"][0]["Body"] == '{"key": "value"}'
 
 
-@mock_sqs
+@mock_aws
 def test_delete_message():
     # Setup
     sqs = boto3.resource("sqs", region_name="us-east-1")
@@ -77,6 +77,3 @@ def test_delete_message():
 
     # Assert
     assert delete_response["ResponseMetadata"]["HTTPStatusCode"] == 200
-
-
-0
