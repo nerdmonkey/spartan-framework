@@ -185,79 +185,104 @@ class QueueService:
         except ClientError as e:
             raise Exception(f"Failed to get queue attributes: {str(e)}")
 
-    def send_message(
-        self,
-        queue_url: str,
-        message: Dict[str, Any],
-        group_id: Optional[str] = None,
-        deduplication_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def send_message(self, queue_url: str, message: Dict, group_id: str, dedup_id: str) -> Dict[str, Any]:
         """
         Sends a single message to an SQS queue.
 
         Args:
             queue_url (str): The URL of the SQS queue
-            message (Dict[str, Any]): The message to send
-            group_id (str, optional): Message group ID for FIFO queues
-            deduplication_id (str, optional): Message deduplication ID for FIFO queues
+            message (Dict): Message to send
+            group_id (str): Message group ID for FIFO queues
+            dedup_id (str): Deduplication ID for FIFO queues
 
         Returns:
-            Dict[str, Any]: Response from SQS
+            Dict[str, Any]: Response containing MessageId if successful
         """
-        params = {"QueueUrl": queue_url, "MessageBody": json.dumps(message)}
+        try:
+            message_body = json.dumps(message)
+            params = {
+                'QueueUrl': queue_url,
+                'MessageBody': message_body
+            }
 
-        if queue_url.endswith(".fifo"):
-            params["MessageGroupId"] = group_id or "default"
-            params["MessageDeduplicationId"] = deduplication_id or str(
-                datetime.utcnow().timestamp()
-            )
+            if queue_url.endswith('.fifo'):
+                params['MessageGroupId'] = group_id
+                params['MessageDeduplicationId'] = dedup_id
 
-        return self.sqs_client.send_message(**params)
+            return self.sqs_client.send_message(**params)
+        except ClientError as e:
+            raise Exception(f"Failed to send message: {str(e)}")
 
-    def receive_message(
-        self, queue_url: str, wait_time: int = 20, visibility_timeout: int = 30
-    ) -> Dict[str, Any]:
+    def receive_message(self, queue_url: str) -> Dict[str, Any]:
         """
         Receives a single message from an SQS queue.
 
         Args:
             queue_url (str): The URL of the SQS queue
-            wait_time (int): Long polling wait time in seconds (0-20)
-            visibility_timeout (int): Message visibility timeout in seconds
 
         Returns:
-            Dict[str, Any]: Response from SQS
+            Dict[str, Any]: Response containing received messages
         """
         try:
-            response = self.sqs_client.receive_message(
+            return self.sqs_client.receive_message(
                 QueueUrl=queue_url,
                 MaxNumberOfMessages=1,
-                WaitTimeSeconds=min(max(0, wait_time), 20),
-                VisibilityTimeout=visibility_timeout,
-                AttributeNames=["All"],
-                MessageAttributeNames=["All"],
+                AttributeNames=['All'],
+                MessageAttributeNames=['All']
             )
-            return response
         except ClientError as e:
             raise Exception(f"Failed to receive message: {str(e)}")
 
-    def delete_message(
-        self, queue_url: str, receipt_handle: str
-    ) -> Dict[str, Any]:
+    def delete_message(self, queue_url: str, receipt_handle: str) -> Dict[str, Any]:
         """
-        Deletes a single message from an SQS queue.
+        Deletes a message from an SQS queue using its receipt handle.
 
         Args:
             queue_url (str): The URL of the SQS queue
-            receipt_handle (str): Receipt handle of the message to delete
+            receipt_handle (str): The receipt handle of the message to delete
 
         Returns:
-            Dict[str, Any]: Response from SQS
+            Dict[str, Any]: Response containing deletion status
         """
         try:
-            response = self.sqs_client.delete_message(
-                QueueUrl=queue_url, ReceiptHandle=receipt_handle
+            return self.sqs_client.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
             )
-            return response
         except ClientError as e:
             raise Exception(f"Failed to delete message: {str(e)}")
+
+    def list_queues(self, prefix: Optional[str] = None) -> List[str]:
+        """
+        Lists all queues in the account.
+
+        Args:
+            prefix (str, optional): Queue name prefix to filter the list
+
+        Returns:
+            List[str]: List of queue URLs
+        """
+        try:
+            if prefix:
+                response = self.sqs_client.list_queues(QueueNamePrefix=prefix)
+            else:
+                response = self.sqs_client.list_queues()
+            return response.get("QueueUrls", [])
+        except ClientError as e:
+            raise Exception(f"Failed to list queues: {str(e)}")
+
+    def get_queue_url(self, queue_name: str) -> str:
+        """
+        Gets the URL of a queue by its name.
+
+        Args:
+            queue_name (str): Name of the queue
+
+        Returns:
+            str: URL of the queue
+        """
+        try:
+            response = self.sqs_client.get_queue_url(QueueName=queue_name)
+            return response["QueueUrl"]
+        except ClientError as e:
+            raise Exception(f"Failed to get queue URL: {str(e)}")
