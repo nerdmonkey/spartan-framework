@@ -1,11 +1,22 @@
-from app.helpers.logger import get_logger
-from app.middlewares.logging import standard_logger
+# handlers/predict.py
+from typing import Dict, Any
+from aws_lambda_powertools import Logger
 
-logger = get_logger("spartan-predict")
+logger = Logger()
 
+def get_logger():
+    return logger
 
-@standard_logger
-def main(event, context):
+def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    logger = get_logger()
+
+    # Log the event and context
+    logger.info("Event", extra={"event": event, "context": context.__dict__})
+
+    # Add the missing log message
     logger.info("Predicting...")
-    logger.info("Event", extra={"event": event, "context": context})
-    return {"statusCode": 200, "body": "Hello World"}
+
+    return {
+        "statusCode": 200,
+        "body": "Hello World"
+    }
