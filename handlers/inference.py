@@ -3,6 +3,7 @@ from app.helpers.logger import get_logger
 
 logger = get_logger("spartan-framework")
 
+
 def main():
     environment = env().APP_ENVIRONMENT
     logger.info(f"Currently in {environment} environment")
@@ -11,6 +12,7 @@ def main():
     return {
         "status_code": 200,
     }
+
 
 if __name__ == "__main__":
     result = main()

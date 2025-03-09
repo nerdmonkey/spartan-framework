@@ -114,26 +114,29 @@ class QueueService:
             raise Exception(f"Failed to receive messages: {str(e)}")
 
     def delete_message_batch(
-        self, queue_url: str, messages: List[Dict]
+        self, queue_url: str, receipt_handles: List[str]
     ) -> Dict[str, Any]:
         """
         Deletes multiple messages from an SQS queue in a single request.
 
         Args:
             queue_url (str): The URL of the SQS queue
-            messages (List[Dict]): List of messages to delete
+            receipt_handles (List[str]): List of receipt handles of the messages to delete
 
         Returns:
             Dict[str, Any]: Response containing successful and failed deletions
         """
         entries = [
-            {"Id": str(i), "ReceiptHandle": msg["ReceiptHandle"]}
-            for i, msg in enumerate(messages)
+            {"Id": str(i), "ReceiptHandle": rh}
+            for i, rh in enumerate(receipt_handles)
         ]
-
-        return self.sqs_client.delete_message_batch(
-            QueueUrl=queue_url, Entries=entries
-        )
+        try:
+            response = self.sqs_client.delete_message_batch(
+                QueueUrl=queue_url, Entries=entries
+            )
+            return response
+        except ClientError as e:
+            raise Exception(f"Failed to delete messages: {str(e)}")
 
     def change_message_visibility(
         self, queue_url: str, receipt_handle: str, visibility_timeout: int
@@ -152,15 +155,19 @@ class QueueService:
             VisibilityTimeout=visibility_timeout,
         )
 
-    def purge_queue(self, queue_url: str) -> None:
+    def purge_queue(self, queue_url: str) -> Dict[str, Any]:
         """
         Deletes all messages from the queue.
 
         Args:
             queue_url (str): The URL of the SQS queue
+
+        Returns:
+            Dict[str, Any]: Response containing the purge status
         """
         try:
-            self.sqs_client.purge_queue(QueueUrl=queue_url)
+            response = self.sqs_client.purge_queue(QueueUrl=queue_url)
+            return response
         except ClientError as e:
             raise Exception(f"Failed to purge queue: {str(e)}")
 
@@ -186,7 +193,13 @@ class QueueService:
             raise Exception(f"Failed to get queue attributes: {str(e)}")
 
     def send_message(
-        self, queue_url: str, message: Dict, group_id: str, dedup_id: str
+        self,
+        queue_url: str,
+        message: Dict,
+        group_id: str,
+        dedup_id: str,
+        delay_seconds: int = 0,
+        message_attributes: Dict = None,
     ) -> Dict[str, Any]:
         """
         Sends a single message to an SQS queue.
@@ -196,6 +209,8 @@ class QueueService:
             message (Dict): Message to send
             group_id (str): Message group ID for FIFO queues
             dedup_id (str): Deduplication ID for FIFO queues
+            delay_seconds (int): Delay in seconds for the message
+            message_attributes (Dict): Additional message attributes
 
         Returns:
             Dict[str, Any]: Response containing MessageId if successful
@@ -208,16 +223,22 @@ class QueueService:
                 params["MessageGroupId"] = group_id
                 params["MessageDeduplicationId"] = dedup_id
 
+            params["DelaySeconds"] = delay_seconds
+            params["MessageAttributes"] = message_attributes or {}
+
             return self.sqs_client.send_message(**params)
         except ClientError as e:
             raise Exception(f"Failed to send message: {str(e)}")
 
-    def receive_message(self, queue_url: str) -> Dict[str, Any]:
+    def receive_message(
+        self, queue_url: str, message_attribute_names: List[str] = ["All"]
+    ) -> Dict[str, Any]:
         """
         Receives a single message from an SQS queue.
 
         Args:
             queue_url (str): The URL of the SQS queue
+            message_attribute_names (List[str]): List of message attribute names to retrieve
 
         Returns:
             Dict[str, Any]: Response containing received messages
@@ -227,7 +248,7 @@ class QueueService:
                 QueueUrl=queue_url,
                 MaxNumberOfMessages=1,
                 AttributeNames=["All"],
-                MessageAttributeNames=["All"],
+                MessageAttributeNames=message_attribute_names,
             )
         except ClientError as e:
             raise Exception(f"Failed to receive message: {str(e)}")
