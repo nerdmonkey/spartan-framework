@@ -2,8 +2,8 @@ from typing import Any, Dict
 
 import torch
 
-from app.helpers.logger import get_logger
 from app.helpers.context import MockLambdaContext
+from app.helpers.logger import get_logger
 
 context = MockLambdaContext()
 
