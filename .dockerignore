@@ -1,0 +1,12 @@
+.venv
+.vscode
+.pytest_cache
+.serverless
+.coverage
+.coveragerc
+.tox
+docs
+serverless.yml
+docker-compose.yml
+Dockerfile
+tinker.py

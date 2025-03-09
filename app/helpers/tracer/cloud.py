@@ -1,41 +1,70 @@
 from contextlib import contextmanager
+from functools import wraps
+from time import time
+from typing import Any, Dict, Optional
 
-from aws_xray_sdk.core import xray_recorder
+from aws_lambda_powertools import Tracer
+
+from .base import BaseTracer
 
 
-class CloudTracer:
-    def __init__(self, service_name):
-        self.service_name = service_name
-        self.tracer = xray_recorder
+class CloudTracer(BaseTracer):
+    def __init__(self, service_name: str):
+        self.tracer = Tracer(service=service_name)
 
-    def capture_lambda_handler(self, func):
+    def capture_lambda_handler(self, handler):
+        @wraps(handler)
         def wrapper(event, context):
-            self.tracer.put_annotation("service", self.service_name)
-            self.tracer.put_annotation("handler", func.__name__)
-            return func(event, context)
+            start_time = time()
+            try:
+                result = handler(event, context)
+                end_time = time()
+                processing_time = end_time - start_time
+                self.tracer.put_annotation("processing_time", processing_time)
+                return result
+            except Exception as e:
+                end_time = time()
+                processing_time = end_time - start_time
+                self.tracer.put_annotation("processing_time", processing_time)
+                raise e
 
         return wrapper
 
-    def capture_method(self, func):
-        def wrapper(instance, *args, **kwargs):
-            self.tracer.put_annotation("service", self.service_name)
-            self.tracer.put_annotation("method", func.__name__)
-            return func(instance, *args, **kwargs)
+    def capture_method(self, method):
+        @wraps(method)
+        def wrapper(*args, **kwargs):
+            start_time = time()
+            try:
+                result = method(*args, **kwargs)
+                end_time = time()
+                processing_time = end_time - start_time
+                self.tracer.put_annotation("processing_time", processing_time)
+                return result
+            except Exception as e:
+                end_time = time()
+                processing_time = end_time - start_time
+                self.tracer.put_annotation("processing_time", processing_time)
+                raise e
 
         return wrapper
 
     @contextmanager
-    def create_segment(self, name):
-        try:
-            self.tracer.begin_segment(name)
-            yield
-        finally:
-            self.tracer.end_segment()
-
-    @contextmanager
-    def create_subsegment(self, name):
-        try:
-            self.tracer.begin_subsegment(name)
-            yield
-        finally:
-            self.tracer.end_subsegment()
+    def create_segment(
+        self, name: str, metadata: Optional[Dict[str, Any]] = None
+    ):
+        start_time = time()
+        with self.tracer.provider.in_subsegment(name=name) as subsegment:
+            if metadata:
+                subsegment.put_metadata("metadata", metadata)
+            try:
+                yield subsegment
+            except Exception as e:
+                end_time = time()
+                processing_time = end_time - start_time
+                subsegment.put_annotation("error", str(e))
+                subsegment.put_annotation("processing_time", processing_time)
+                raise
+            else:
+                end_time = time()
+                processing_time = end_time - start_time
+                subsegment.put_annotation("processing_time", processing_time)

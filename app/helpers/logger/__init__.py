@@ -3,6 +3,7 @@ from app.helpers.logger.factory import LoggerFactory
 
 
 def get_logger(service_name: str = None):
+
     if not service_name:
         service_name = "spartan-framework"
 
