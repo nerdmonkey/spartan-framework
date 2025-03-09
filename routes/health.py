@@ -7,13 +7,13 @@ logger = get_logger("spartan-framework")
 
 route = APIRouter(
     prefix="/api",
-    tags=["Health Check"],
+    tags=["Health"],
     responses={404: {"description": "Not found"}},
 )
 
 
 @route.get("/health", response_model=dict)
-async def health_check():
+async def health():
     """
     Endpoint for checking the health of the API service.
 

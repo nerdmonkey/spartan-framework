@@ -13,7 +13,7 @@ the creation of serverless applications on AWS. It streamlines your development 
 consistency, allowing you to build scalable and efficient applications on AWS with ease. 🚀
 
 Spartan Framework is versatile and can be used to efficiently develop:
-- API
+- REST API
 - Workflows or State Machines
 - ETL Pipelines
 - Containerized Microservices
@@ -29,7 +29,7 @@ tags_metadata = [
         "description": "Operations related to inference or prediction, providing functionality through a RESTful API.",
     },
     {
-        "name": "Health Check",
+        "name": "Health",
         "description": "A health check endpoint to verify the API's functional condition.",
     },
 ]
