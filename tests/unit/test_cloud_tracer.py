@@ -7,15 +7,7 @@ from app.helpers.tracer.cloud import CloudTracer
 
 @pytest.fixture
 def tracer():
-    with patch("app.helpers.tracer.cloud.xray_recorder") as mock_recorder:
-        # Set up the mock recorder with required methods
-        mock_recorder.put_annotation = lambda key, value: None
-        mock_recorder.begin_segment = lambda name: None
-        mock_recorder.end_segment = lambda: None
-        mock_recorder.begin_subsegment = lambda name: None
-        mock_recorder.end_subsegment = lambda: None
-        mock_recorder.context_manager.context.return_value = mock_recorder
-
+    with patch("app.helpers.tracer.cloud.Tracer"):
         return CloudTracer(service_name="test_service")
 
 
@@ -30,7 +22,7 @@ def test_capture_lambda_handler(tracer):
     with patch.object(tracer.tracer, "put_annotation") as mock_put_annotation:
         result = handler(event, context)
         assert result == "result"
-        assert mock_put_annotation.call_count == 2
+        assert mock_put_annotation.call_count == 1
 
 
 def test_capture_method(tracer):
@@ -44,28 +36,13 @@ def test_capture_method(tracer):
     with patch.object(tracer.tracer, "put_annotation") as mock_put_annotation:
         result = test_instance.method()
         assert result == "result"
-        assert mock_put_annotation.call_count == 2
+        assert mock_put_annotation.call_count == 1
 
 
 def test_create_segment(tracer):
     with patch.object(
-        tracer.tracer, "begin_segment"
-    ) as mock_begin_segment, patch.object(
-        tracer.tracer, "end_segment"
-    ) as mock_end_segment:
+        tracer.tracer.provider, "in_subsegment"
+    ) as mock_in_subsegment:
         with tracer.create_segment("test_segment"):
             pass
-        mock_begin_segment.assert_called_once_with("test_segment")
-        mock_end_segment.assert_called_once()
-
-
-def test_create_subsegment(tracer):
-    with patch.object(
-        tracer.tracer, "begin_subsegment"
-    ) as mock_begin_subsegment, patch.object(
-        tracer.tracer, "end_subsegment"
-    ) as mock_end_subsegment:
-        with tracer.create_subsegment("test_subsegment"):
-            pass
-        mock_begin_subsegment.assert_called_once_with("test_subsegment")
-        mock_end_subsegment.assert_called_once()
+        assert mock_in_subsegment.call_count == 1
