@@ -1,13 +1,18 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from handlers.inference import main
 
 
-@patch("handlers.inference.logger")  # Patch the logger directly in your module
-@patch("app.helpers.environment.env")
+@patch("handlers.inference.logger")
+@patch("handlers.inference.env")  # Change the patch path to match where env is imported
 def test_main(mock_env, mock_logger):
-    # Mock the environment
-    mock_env.return_value.APP_ENVIRONMENT = "local"
+    # Create a mock environment with the correct structure
+    mock_env_instance = MagicMock()
+    mock_env_instance.APP_ENVIRONMENT = "local"
+    mock_env.return_value = mock_env_instance
+
+    # Print debug information
+    print("Mock env value:", mock_env_instance.APP_ENVIRONMENT)
 
     # Call the main function
     result = main()
@@ -15,9 +20,14 @@ def test_main(mock_env, mock_logger):
     # Print actual calls for debugging
     print("Actual calls:", mock_logger.info.call_args_list)
 
-    # Assertions using f-string format to match exactly what the code produces
-    mock_logger.info.assert_any_call(
-        f"Currently in {mock_env.return_value.APP_ENVIRONMENT} environment"
-    )
-    mock_logger.info.assert_any_call("Hello, from Spartan")
+    # Check the calls in order
+    calls = [args[0] for args, _ in mock_logger.info.call_args_list]
+    print("Actual log messages:", calls)
+
+    assert calls == [
+        "Currently in local environment",
+        "Hello, from Spartan"
+    ]
+
+    # Check the return value
     assert result == {"status_code": 200}
