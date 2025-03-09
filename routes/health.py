@@ -10,12 +10,6 @@ route = APIRouter(
     tags=["Health Check"],
     responses={404: {"description": "Not found"}},
 )
-"""
-Defines the routing for the Health Check API.
-
-The APIRouter instance 'route' is configured with a prefix '/api' and a tag 'Health Check'.
-It also includes a standard response for 404 errors, indicating that a requested resource was not found.
-"""
 
 
 @route.get("/health", response_model=dict)
