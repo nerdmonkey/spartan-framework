@@ -14,9 +14,48 @@ from app.helpers.logger.file import FileLogger
 from app.models.base import Base
 from app.models.user import User
 
+import pytest
+from fastapi.testclient import TestClient
+from routes.health import route
+
 load_dotenv(dotenv_path=".env_testing")
 
 get_db = db()
+
+
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from routes.health import route
+import asyncio
+from unittest.mock import patch
+
+@pytest.fixture(scope="module")
+def test_app():
+    app = FastAPI()
+    app.include_router(route)
+    return app
+
+@pytest.fixture(scope="module")
+def test_client(test_app):
+    with patch("httpx._client.AsyncClient.send") as mock_send:
+        # Configure the mock to prevent actual HTTP requests
+        async def mock_async_send(*args, **kwargs):
+            raise RuntimeError("External calls are not allowed during testing")
+        mock_send.side_effect = mock_async_send
+
+        with TestClient(test_app) as client:
+            yield client
+
+@pytest.fixture(autouse=True)
+def _prevent_external_calls(monkeypatch):
+    """Prevent any accidental external calls during testing"""
+    def mock_socket(*args, **kwargs):
+        raise RuntimeError("External calls are not allowed during testing")
+
+    monkeypatch.setattr("socket.socket", mock_socket)
+    monkeypatch.setattr("http.client.HTTPConnection", mock_socket)
+    monkeypatch.setattr("http.client.HTTPSConnection", mock_socket)
 
 
 def construct_database_url():
@@ -123,17 +162,6 @@ def mock_logger():
 def _setup_testing_environment():
     """Setup any necessary test environment variables"""
     yield
-
-
-@pytest.fixture(autouse=True)
-def _prevent_external_calls(monkeypatch):
-    """Prevent any accidental external calls during testing"""
-
-    def mock_external_call(*args, **kwargs):
-        raise RuntimeError("External calls are not allowed during testing")
-
-    # Add any external calls you want to prevent
-    monkeypatch.setattr("socket.socket", mock_external_call)
 
 
 @pytest.fixture
