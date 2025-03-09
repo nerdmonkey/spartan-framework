@@ -4,24 +4,21 @@ from app.helpers.logger import get_logger
 
 logger = get_logger("spartan-framework")
 
-
 route = APIRouter(
     prefix="/api",
     tags=["Inference"],
     responses={404: {"description": "Not found"}},
 )
 
-
 @route.get("/inference", response_model=dict)
 async def inference():
     """
-    Handles the inference endpoint.
+    Endpoint for performing inference.
 
-    Logs the call to the inference endpoint and returns a JSON response
-    indicating success.
+    When accessed, it returns a simple JSON response indicating that the inference service is operational.
 
     Returns:
-        dict: A dictionary containing a message and a status code.
+        dict: A dictionary with a key 'message' and value 'OK', signifying the service is running.
     """
 
     logger.info("Inference endpoint called")

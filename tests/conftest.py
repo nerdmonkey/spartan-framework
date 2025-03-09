@@ -17,6 +17,7 @@ from app.models.user import User
 import pytest
 from fastapi.testclient import TestClient
 from routes.health import route
+from routes.inference import route as inference_route
 
 load_dotenv(dotenv_path=".env_testing")
 
@@ -34,6 +35,7 @@ from unittest.mock import patch
 def test_app():
     app = FastAPI()
     app.include_router(route)
+    app.include_router(inference_route)
     return app
 
 @pytest.fixture(scope="module")
