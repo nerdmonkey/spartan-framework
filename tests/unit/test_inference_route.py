@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch, Mock
+import torch
 
 def test_inference_endpoint(test_client):
     """Test the inference endpoint returns expected response"""
@@ -11,11 +12,13 @@ def test_inference_endpoint(test_client):
         response = test_client.get("/api/inference")
 
         assert response.status_code == 200
-        assert response.json() == {
-            "message": "OK",
-            "status_code": 200
-        }
-        mock_logger.info.assert_called_once_with("Inference endpoint called")
+        response_json = response.json()
+        assert response_json["statusCode"] == 200
+        assert response_json["body"]["message"] == "Hello World from PyTorch"
+        assert response_json["body"]["tensor_result"] == [[2.0, 3.0], [6.0, 7.0]]
+        assert response_json["body"]["device"] == "cpu"
+        assert response_json["body"]["pytorch_version"] == torch.__version__
+        mock_logger.info.assert_any_call("Inference endpoint called")
 
 def test_inference_logging(test_client):
     """Test that the inference endpoint logs the expected message"""
@@ -27,14 +30,16 @@ def test_inference_logging(test_client):
         response = test_client.get("/api/inference")
 
         # Verify the logger was called with the expected message
-        mock_logger.info.assert_called_once_with("Inference endpoint called")
+        mock_logger.info.assert_any_call("Inference endpoint called")
 
         # Verify the response is still correct
         assert response.status_code == 200
-        assert response.json() == {
-            "message": "OK",
-            "status_code": 200
-        }
+        response_json = response.json()
+        assert response_json["statusCode"] == 200
+        assert response_json["body"]["message"] == "Hello World from PyTorch"
+        assert response_json["body"]["tensor_result"] == [[2.0, 3.0], [6.0, 7.0]]
+        assert response_json["body"]["device"] == "cpu"
+        assert response_json["body"]["pytorch_version"] == torch.__version__
 
 def test_inference_wrong_method(test_client):
     """Test that using incorrect HTTP method returns 405"""
