@@ -19,7 +19,9 @@ sys.modules["awsglue.context"] = mock.Mock()
 sys.modules["awsglue.job"] = mock.Mock()
 sys.modules["awsglue.dynamicframe"] = mock.Mock()
 
-sys.modules["awsglue.utils"].getResolvedOptions = mock.Mock(return_value={"JOB_NAME": "test_job"})
+sys.modules["awsglue.utils"].getResolvedOptions = mock.Mock(
+    return_value={"JOB_NAME": "test_job"}
+)
 
 # Remove unused imports
 # from jobs.hello import args, glueContext, job, logger
@@ -75,7 +77,9 @@ def test_environment_variable(mock_environment):
 
 
 def test_getResolvedOptions(mock_getResolvedOptions, mock_sys_argv):
-    options = sys.modules["awsglue.utils"].getResolvedOptions(sys.argv, ["JOB_NAME"])
+    options = sys.modules["awsglue.utils"].getResolvedOptions(
+        sys.argv, ["JOB_NAME"]
+    )
     assert options == {"JOB_NAME": "test_job"}
 
 
@@ -106,7 +110,9 @@ def test_job_commit(mock_job):
 
 
 def test_missing_job_name():
-    original_getResolvedOptions = sys.modules["awsglue.utils"].getResolvedOptions
+    original_getResolvedOptions = sys.modules[
+        "awsglue.utils"
+    ].getResolvedOptions
 
     def mock_getResolvedOptions(argv, options):
         raise KeyError("JOB_NAME")
@@ -115,6 +121,10 @@ def test_missing_job_name():
 
     try:
         with pytest.raises(KeyError, match="JOB_NAME"):
-            sys.modules["awsglue.utils"].getResolvedOptions(sys.argv, ["JOB_NAME"])
+            sys.modules["awsglue.utils"].getResolvedOptions(
+                sys.argv, ["JOB_NAME"]
+            )
     finally:
-        sys.modules["awsglue.utils"].getResolvedOptions = original_getResolvedOptions
+        sys.modules["awsglue.utils"].getResolvedOptions = (
+            original_getResolvedOptions
+        )

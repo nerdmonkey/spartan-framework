@@ -6,7 +6,10 @@ from pyspark.sql import SparkSession
 spark = SparkSession.builder.appName("Spartan DB to CSV - Local").getOrCreate()
 
 
-if os.getenv("APP_ENVIRONMENT") == "test" or os.getenv("APP_ENVIRONMENT") == "local":
+if (
+    os.getenv("APP_ENVIRONMENT") == "test"
+    or os.getenv("APP_ENVIRONMENT") == "local"
+):
     DB_DRIVER = os.getenv("DB_DRIVER")
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
@@ -24,12 +27,16 @@ if os.getenv("APP_ENVIRONMENT") == "test" or os.getenv("APP_ENVIRONMENT") == "lo
 
     df = spark.read.format("jdbc").options(**connection_mysql_options).load()
     df.show()
-    df.coalesce(1).write.csv("./storage/core/users_temp", header=True, mode="overwrite")
+    df.coalesce(1).write.csv(
+        "./storage/core/users_temp", header=True, mode="overwrite"
+    )
 
     temp_dir = "./storage/core/users_temp"
     for filename in os.listdir(temp_dir):
         if filename.endswith(".csv"):
-            os.rename(os.path.join(temp_dir, filename), "./storage/core/users.csv")
+            os.rename(
+                os.path.join(temp_dir, filename), "./storage/core/users.csv"
+            )
 
     shutil.rmtree(temp_dir)
 

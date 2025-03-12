@@ -24,7 +24,11 @@ def standard_logging_middleware(handler, logger=None):
             response = handler(event, context)
 
             output_data_size = len(str(response).encode("utf-8"))
-            logger.info("Output Data", output_data=response, output_data_size=output_data_size)
+            logger.info(
+                "Output Data",
+                output_data=response,
+                output_data_size=output_data_size,
+            )
             return response
 
         except Exception as e:
@@ -49,7 +53,11 @@ def task_logging_middleware(handler, logger=None):
             response = handler(**kwargs)
 
             output_data_size = len(str(response).encode("utf-8"))
-            logger.info("Output Data", output_data=response, output_data_size=output_data_size)
+            logger.info(
+                "Output Data",
+                output_data=response,
+                output_data_size=output_data_size,
+            )
             return response
 
         except Exception as e:

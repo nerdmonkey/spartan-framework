@@ -14,7 +14,9 @@ def create_database_engine() -> Engine:
     database = settings.DB_NAME
 
     if settings.DB_SSL_CA is None:
-        mysql_url_format = "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+        mysql_url_format = (
+            "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+        )
     else:
         mysql_url_format = (
             "mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
@@ -47,7 +49,11 @@ def create_database_engine() -> Engine:
             pool_size=30,  # Adjust pool size
             max_overflow=20,  # Adjust max overflow
             pool_timeout=30,  # Adjust pool timeout
-            connect_args={"check_same_thread": False} if database_type == "sqlite" else {},
+            connect_args=(
+                {"check_same_thread": False}
+                if database_type == "sqlite"
+                else {}
+            ),
         )
 
     raise ValueError(f"Unsupported database type: {database_type}")
