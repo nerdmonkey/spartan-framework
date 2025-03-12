@@ -45,6 +45,6 @@ else:
         "url": "jdbc:mysql://mysql:3306/spartan",
         "driver": "com.mysql.cj.jdbc.Driver",
         "user": "root",
-        "password": "root",
+        "password": "",
         "dbtable": "users",
     }

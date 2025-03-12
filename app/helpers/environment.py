@@ -50,6 +50,8 @@ class EnvironmentVariables(BaseSettings):
     DB_NAME: str
     DB_USERNAME: str
     DB_PASSWORD: str
+    DB_SSL_CA: Optional[str] = None
+    DB_SSL_VERIFY_CERT: Optional[str] = None
     JOB_NAME: str
     WORKSPACE_LOCATION: str
     STORAGE_LOCATION: str
