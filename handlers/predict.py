@@ -1,14 +1,10 @@
 # handlers/predict.py
 from typing import Dict, Any
-from aws_lambda_powertools import Logger
+from app.helpers.logger import get_logger
 
-logger = Logger()
-
-def get_logger():
-    return logger
+logger = get_logger("spartan-framework")
 
 def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    logger = get_logger()
 
     # Log the event and context
     logger.info("Event", extra={"event": event, "context": context.__dict__})
