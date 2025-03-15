@@ -1,23 +1,34 @@
-from unittest.mock import patch
-
+import sys
+from unittest.mock import MagicMock, patch
 import pytest
 
-from app.helpers.tracer.cloud import CloudTracer
+# Set up mocks before any imports
+mock_xray_recorder = MagicMock()
+mock_xray_core = MagicMock()
+mock_xray_core.xray_recorder = mock_xray_recorder
+mock_xray_sdk = MagicMock()
+mock_xray_sdk.core = mock_xray_core
 
+# Mock the modules
+sys.modules['aws_xray_sdk'] = mock_xray_sdk
+sys.modules['aws_xray_sdk.core'] = mock_xray_core
+sys.modules['aws_xray_sdk.core.xray_recorder'] = mock_xray_recorder
+
+# Now we can safely import CloudTracer
+from app.helpers.tracer.cloud import CloudTracer
 
 @pytest.fixture
 def tracer():
-    with patch("app.helpers.tracer.cloud.xray_recorder") as mock_recorder:
-        # Set up the mock recorder with required methods
-        mock_recorder.put_annotation = lambda key, value: None
-        mock_recorder.begin_segment = lambda name: None
-        mock_recorder.end_segment = lambda: None
-        mock_recorder.begin_subsegment = lambda name: None
-        mock_recorder.end_subsegment = lambda: None
-        mock_recorder.context_manager.context.return_value = mock_recorder
+    mock_recorder = MagicMock()
+    mock_recorder.put_annotation = lambda key, value: None
+    mock_recorder.begin_segment = lambda name: None
+    mock_recorder.end_segment = lambda: None
+    mock_recorder.begin_subsegment = lambda name: None
+    mock_recorder.end_subsegment = lambda: None
+    mock_recorder.context_manager.context.return_value = mock_recorder
 
+    with patch("app.helpers.tracer.cloud.xray_recorder", mock_recorder):
         return CloudTracer(service_name="test_service")
-
 
 def test_capture_lambda_handler(tracer):
     @tracer.capture_lambda_handler
@@ -32,7 +43,6 @@ def test_capture_lambda_handler(tracer):
         assert result == "result"
         assert mock_put_annotation.call_count == 2
 
-
 def test_capture_method(tracer):
     class TestClass:
         @tracer.capture_method
@@ -46,7 +56,6 @@ def test_capture_method(tracer):
         assert result == "result"
         assert mock_put_annotation.call_count == 2
 
-
 def test_create_segment(tracer):
     with patch.object(
         tracer.tracer, "begin_segment"
@@ -58,7 +67,6 @@ def test_create_segment(tracer):
         mock_begin_segment.assert_called_once_with("test_segment")
         mock_end_segment.assert_called_once()
 
-
 def test_create_subsegment(tracer):
     with patch.object(
         tracer.tracer, "begin_subsegment"
@@ -69,3 +77,17 @@ def test_create_subsegment(tracer):
             pass
         mock_begin_subsegment.assert_called_once_with("test_subsegment")
         mock_end_subsegment.assert_called_once()
+
+def test_put_annotation(tracer):
+    with patch.object(tracer.tracer, "put_annotation") as mock_put_annotation:
+        tracer.put_annotation("test_key", "test_value")
+        mock_put_annotation.assert_called_once_with("test_key", "test_value")
+
+def test_context_missing(tracer):
+    mock_recorder = MagicMock()
+    mock_recorder.context_manager.context.return_value = None
+
+    with patch("app.helpers.tracer.cloud.xray_recorder", mock_recorder):
+        tracer = CloudTracer(service_name="test_service")
+        # Should not raise an error when context is missing
+        tracer.put_annotation("test_key", "test_value")

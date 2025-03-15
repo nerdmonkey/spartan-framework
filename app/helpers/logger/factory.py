@@ -1,6 +1,6 @@
-import os
 from typing import Optional
 
+from app.helpers.environment import env
 from app.helpers.logger.cloud import CloudWatchLogger
 from app.helpers.logger.file import FileLogger
 
@@ -14,9 +14,8 @@ class LoggerFactory:
         environment: Optional[str] = None,
         level: str = "INFO",
     ) -> BaseLogger:
-        env = environment or os.getenv("APP_ENVIRONMENT", "local").lower()
 
-        if env == "local":
+        if env("APP_ENVIRONMENT") == "local":
             return FileLogger(service_name=service_name, level=level)
         else:
             return CloudWatchLogger(service_name=service_name, level=level)

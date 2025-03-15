@@ -24,6 +24,9 @@ class CloudTracer:
 
         return wrapper
 
+    def put_annotation(self, key, value):
+        self.tracer.put_annotation(key, value)
+
     @contextmanager
     def create_segment(self, name):
         try:

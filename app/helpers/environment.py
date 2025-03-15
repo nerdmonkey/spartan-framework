@@ -57,6 +57,11 @@ class EnvironmentVariables(BaseSettings):
     DB_PASSWORD: str
     DB_SSL_CA: Optional[str] = None
     DB_SSL_VERIFY_CERT: Optional[bool] = None
+    AZURE_OPENAI_API_KEY: str
+    AZURE_OPENAI_ENDPOINT: str
+    AZURE_OPENAI_DEPLOYMENT_NAME: str
+    AZURE_OPENAI_API_VERSION: str
+    TEMPERATURE: Optional[float] = 0.0
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 

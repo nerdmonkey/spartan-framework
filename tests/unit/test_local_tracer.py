@@ -1,11 +1,28 @@
+import sys
+from unittest.mock import MagicMock
+import pytest
+
+# First, mock all the required modules
+mock_xray_recorder = MagicMock()
+mock_xray_core = MagicMock()
+mock_xray_core.xray_recorder = mock_xray_recorder
+mock_xray_sdk = MagicMock()
+mock_xray_sdk.core = mock_xray_core
+
+# Create the mock for CloudTracer
+mock_cloud_tracer = MagicMock()
+
+# Set up all the mocks in sys.modules
+sys.modules['aws_xray_sdk'] = mock_xray_sdk
+sys.modules['aws_xray_sdk.core'] = mock_xray_core
+sys.modules['aws_xray_sdk.core.xray_recorder'] = mock_xray_recorder
+sys.modules['app.helpers.tracer.cloud'] = mock_cloud_tracer
+
+# Now we can safely import our modules
 import json
 from pathlib import Path
 from unittest.mock import mock_open, patch
-
-import pytest
-
 from app.helpers.tracer.local import LocalTracer
-
 
 @pytest.fixture
 def tracer():
@@ -19,7 +36,6 @@ def tracer():
     ):
         return LocalTracer(service_name="test_service")
 
-
 def test_trace_file_path(tracer):
     expected_path = (
         Path(__file__).parent.parent.parent.parent
@@ -29,12 +45,10 @@ def test_trace_file_path(tracer):
     )
     assert tracer.trace_file == expected_path
 
-
 def test_ensure_trace_directory_exists(tracer):
     with patch("pathlib.Path.mkdir") as mock_mkdir:
         tracer._ensure_trace_directory_exists()
         mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
-
 
 def test_write_trace(tracer):
     trace_entry = {
@@ -54,7 +68,6 @@ def test_write_trace(tracer):
         tracer._write_trace("test_segment", {"key": "value"})
         mock_file().write.assert_called_once_with(trace_message + "\n")
 
-
 def test_capture_lambda_handler(tracer):
     @tracer.capture_lambda_handler
     def handler(event, context):
@@ -68,7 +81,6 @@ def test_capture_lambda_handler(tracer):
         assert result == "result"
         assert mock_write_trace.call_count == 2
 
-
 def test_capture_method(tracer):
     class TestClass:
         @tracer.capture_method
@@ -81,7 +93,6 @@ def test_capture_method(tracer):
         result = test_instance.method()
         assert result == "result"
         assert mock_write_trace.call_count == 2
-
 
 def test_create_segment(tracer):
     with patch.object(tracer, "_write_trace") as mock_write_trace:
