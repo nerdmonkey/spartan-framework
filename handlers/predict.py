@@ -4,8 +4,8 @@ from app.helpers.logger import get_logger
 
 logger = get_logger("spartan-framework")
 
-def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
+def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     # Log the event and context
     logger.info("Event", extra={"event": event, "context": context.__dict__})
 
