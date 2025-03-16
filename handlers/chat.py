@@ -4,8 +4,8 @@ from langchain_openai import AzureChatOpenAI
 
 from app.helpers.context import MockLambdaContext
 from app.helpers.environment import env
-from app.middlewares.logging import standard_logger
 from app.helpers.logger import get_logger
+from app.middlewares.logging import standard_logger
 
 logger = get_logger("spartan-framework")
 context = MockLambdaContext()
