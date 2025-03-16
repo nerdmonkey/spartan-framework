@@ -1,20 +1,25 @@
 import json
-import pytest
 from unittest.mock import Mock, patch
-from handlers.chat import main
+
+import pytest
+
 from app.helpers.context import MockLambdaContext
+from handlers.chat import main
+
 
 @pytest.fixture
 def lambda_context():
     return MockLambdaContext()
 
+
 @pytest.fixture
 def mock_azure_chat():
-    with patch('handlers.chat.AzureChatOpenAI') as mock:
+    with patch("handlers.chat.AzureChatOpenAI") as mock:
         mock_instance = Mock()
         mock_instance.invoke.return_value = "Test response"
         mock.return_value = mock_instance
         yield mock
+
 
 @pytest.fixture
 def mock_env():
@@ -22,10 +27,11 @@ def mock_env():
         "AZURE_OPENAI_API_KEY": "test-key",
         "AZURE_OPENAI_ENDPOINT": "test-endpoint",
         "AZURE_OPENAI_DEPLOYMENT_NAME": "test-deployment",
-        "AZURE_OPENAI_API_VERSION": "test-version"
+        "AZURE_OPENAI_API_VERSION": "test-version",
     }
-    with patch('handlers.chat.env', side_effect=lambda x: env_values.get(x)):
+    with patch("handlers.chat.env", side_effect=lambda x: env_values.get(x)):
         yield env_values
+
 
 def test_successful_chat_response(lambda_context, mock_azure_chat, mock_env):
     # Arrange
@@ -50,8 +56,9 @@ def test_successful_chat_response(lambda_context, mock_azure_chat, mock_env):
         azure_endpoint=mock_env["AZURE_OPENAI_ENDPOINT"],
         deployment_name=mock_env["AZURE_OPENAI_DEPLOYMENT_NAME"],
         api_version=mock_env["AZURE_OPENAI_API_VERSION"],
-        temperature=0
+        temperature=0,
     )
+
 
 def test_empty_prompt(lambda_context, mock_azure_chat, mock_env):
     # Test with empty prompt
@@ -65,6 +72,7 @@ def test_empty_prompt(lambda_context, mock_azure_chat, mock_env):
     # Verify default "Hello World" was used
     mock_azure_chat.return_value.invoke.assert_called_once_with("Hello World")
 
+
 def test_missing_prompt(lambda_context, mock_azure_chat, mock_env):
     # Test with no prompt in event
     event = {}
@@ -77,9 +85,12 @@ def test_missing_prompt(lambda_context, mock_azure_chat, mock_env):
     # Verify default "Hello World" was used
     mock_azure_chat.return_value.invoke.assert_called_once_with("Hello World")
 
+
 def test_azure_api_error(lambda_context, mock_azure_chat, mock_env):
     # Arrange
-    mock_azure_chat.return_value.invoke.side_effect = Exception("Azure API Error")
+    mock_azure_chat.return_value.invoke.side_effect = Exception(
+        "Azure API Error"
+    )
     event = {"prompt": json.dumps({"text": "Test prompt"})}
 
     # Act
@@ -92,6 +103,7 @@ def test_azure_api_error(lambda_context, mock_azure_chat, mock_env):
     assert "error" in body
     assert body["error"] == "Azure API Error"
 
+
 def test_invalid_json_prompt(lambda_context, mock_azure_chat, mock_env):
     # Test with invalid JSON in prompt
     event = {"prompt": "invalid json"}
@@ -100,6 +112,7 @@ def test_invalid_json_prompt(lambda_context, mock_azure_chat, mock_env):
     assert response["statusCode"] == 500
     body = json.loads(response["body"])
     assert "error" in body
+
 
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
