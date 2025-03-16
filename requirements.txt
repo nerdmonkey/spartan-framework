@@ -34,3 +34,6 @@ typing_extensions==4.12.2
 urllib3==2.3.0
 zstandard==0.23.0
 aws-xray-sdk==2.14.0
+fastapi==0.115.11
+mangum==0.17.0
+starlette==0.46.1
