@@ -18,7 +18,7 @@ def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     )
     logger.warning("This is a warning message")
 
-    return {"statusCode": 200, "body": "Hello World"}
+    return {"statusCode": 200, "body": "Hello Spartan!"}
 
 
 if __name__ == "__main__":
