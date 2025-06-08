@@ -2,8 +2,9 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-from app.helpers.environment import env
 from logging.handlers import RotatingFileHandler
+
+from app.helpers.environment import env
 
 from .base import BaseLogger
 

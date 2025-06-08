@@ -69,7 +69,9 @@ class EnvironmentVariables(BaseSettings):
 
 
 @lru_cache()
-def env(var_name: Optional[str] = None, default: Optional[str] = None) -> Optional[str]:
+def env(
+    var_name: Optional[str] = None, default: Optional[str] = None
+) -> Optional[str]:
     """
     Create and return an instance of EnvironmentVariables or a specific environment variable.
 

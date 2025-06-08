@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from app.helpers.logger import get_logger
 
-logger = get_logger("sample-service")
+logger = get_logger("spartan-framework")
 
 
 def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
