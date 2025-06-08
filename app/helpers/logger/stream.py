@@ -1,9 +1,12 @@
-from .base import BaseLogger
 import logging
 import sys
 from datetime import datetime
+
+from .base import BaseLogger
+
 try:
-    from colorama import init, Fore, Style
+    from colorama import Fore, Style, init
+
     init(autoreset=True)
     COLORAMA_AVAILABLE = True
 except ImportError:
@@ -18,13 +21,16 @@ LEVEL_COLORS = {
 }
 RESET = Style.RESET_ALL if COLORAMA_AVAILABLE else ""
 
+
 class StreamLogger(BaseLogger):
     def __init__(self, service_name: str, level: str = "INFO"):
         self.service_name = service_name
         self.level = level
         self.logger = logging.getLogger(f"{service_name}-stream")
         handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(f"%(message)s")  # We'll handle formatting ourselves
+        formatter = logging.Formatter(
+            f"%(message)s"
+        )  # We'll handle formatting ourselves
         handler.setFormatter(formatter)
         self.logger.handlers = []  # Remove any existing handlers
         self.logger.addHandler(handler)

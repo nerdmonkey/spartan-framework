@@ -1,6 +1,6 @@
 import boto3
-from moto import mock_aws
 import pytest
+from moto import mock_aws
 
 from app.services.queue import QueueService
 
@@ -38,7 +38,9 @@ def test_send_message_to_fifo_queue():
 
     # Test sending a message to the FIFO queue
     queue_service = QueueService()
-    response = queue_service.send_message(queue_url, {"key": "value"}, "group1", "dedup1")
+    response = queue_service.send_message(
+        queue_url, {"key": "value"}, "group1", "dedup1"
+    )
 
     # Assert
     assert "MessageId" in response
@@ -88,7 +90,9 @@ def test_send_message_with_invalid_queue_url():
     # Setup
     queue_service = QueueService()
     message = {"key": "value"}
-    invalid_queue_url = "https://sqs.us-east-1.amazonaws.com/123456789012/InvalidQueue"
+    invalid_queue_url = (
+        "https://sqs.us-east-1.amazonaws.com/123456789012/InvalidQueue"
+    )
 
     # Test and Assert
     with pytest.raises(Exception):
