@@ -55,12 +55,15 @@ def test_log_levels(mock_logger, file_logger, log_level):
     test_message = "Test message"
     extra_args = {"extra_field": "value"}
 
+    # Patch the logger inside file_logger to use the mock_logger
+    setattr(file_logger, "logger", mock_logger)
+
     # Call the log method
     getattr(file_logger, log_level)(test_message, extra=extra_args)
 
     # Verify the corresponding method was called on the mock
     getattr(mock_logger, log_level).assert_called_once_with(
-        test_message, extra={"extra": extra_args}
+        test_message, extra={"extra": extra_args}, stacklevel=3
     )
 
 
