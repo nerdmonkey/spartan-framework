@@ -7,7 +7,7 @@ logger = get_logger("spartan-framework")
 
 def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     # Log the event and context
-    logger.info("Event", extra={"event": event, "context": context.__dict__})
+    logger.info(f"Event: {event}, Context: {getattr(context, '__dict__', str(context))}")
 
     # Add the missing log message
     logger.info("Predicting...")
@@ -16,3 +16,12 @@ def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         "statusCode": 200,
         "body": "Hello World"
     }
+
+
+if __name__ == "__main__":
+    from app.helpers.context import MockLambdaContext, MockLambdaEvent
+
+    event = MockLambdaEvent()
+    context = MockLambdaContext()
+
+    print(main(event, context))
