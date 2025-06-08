@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from app.helpers.environment import env
 from logging.handlers import RotatingFileHandler
 
 from .base import BaseLogger
@@ -12,7 +13,7 @@ class FileLogger(BaseLogger):
         self,
         service_name: str,
         level: str = "INFO",
-        log_dir: str = "storage/logs",
+        log_dir: str = env("LOG_DIR", "storage/logs"),
         max_bytes: int = 10485760,  # 10MB
         backup_count: int = 5,
     ):

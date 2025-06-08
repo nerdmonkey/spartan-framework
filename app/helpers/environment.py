@@ -47,7 +47,7 @@ class EnvironmentVariables(BaseSettings):
     ALLOWED_ORIGINS: str
     LOG_LEVEL: str
     LOG_CHANNEL: str
-    LOG_FILE: str
+    LOG_DIR: str
     DB_TYPE: str
     DB_DRIVER: str
     DB_HOST: str
@@ -69,23 +69,25 @@ class EnvironmentVariables(BaseSettings):
 
 
 @lru_cache()
-def env(var_name: Optional[str] = None) -> Optional[str]:
+def env(var_name: Optional[str] = None, default: Optional[str] = None) -> Optional[str]:
     """
     Create and return an instance of EnvironmentVariables or a specific environment variable.
 
     This function initializes and returns an EnvironmentVariables object,
     which is used to manage and access environment variables for the application.
     If a variable name is provided, it returns the value of that specific environment variable.
+    If the variable is not found, it returns the provided default value.
 
     Args:
         var_name (Optional[str]): The name of the environment variable to retrieve.
+        default (Optional[str]): The default value to return if the variable is not found.
         Defaults to None.
 
     Returns:
         EnvironmentVariables or Optional[str]: An instance of the EnvironmentVariables
-        class or the value of the specified environment variable.
+        class or the value of the specified environment variable, or the default value if not found.
     """
     env_vars = EnvironmentVariables()
     if var_name:
-        return getattr(env_vars, var_name, None)
+        return getattr(env_vars, var_name, default)
     return env_vars
