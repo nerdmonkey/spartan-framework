@@ -1,16 +1,16 @@
-# handlers/predict.py
 from typing import Dict, Any
 from app.helpers.logger import get_logger
 
-logger = get_logger("spartan-framework")
+logger = get_logger("sample-service")
 
 
 def main(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    # Log the event and context
     logger.info(f"Event: {event}, Context: {getattr(context, '__dict__', str(context))}")
 
-    # Add the missing log message
-    logger.info("Predicting...")
+    logger.info("This is an info message")
+    logger.debug("This is a debug message")
+    logger.error("This is an error message", extra={"error_code": 500, "details": "An error occurred"})
+    logger.warning("This is a warning message")
 
     return {
         "statusCode": 200,
@@ -24,4 +24,7 @@ if __name__ == "__main__":
     event = MockLambdaEvent()
     context = MockLambdaContext()
 
-    print(main(event, context))
+    try:
+        print(main(event, context))
+    except Exception as e:
+        logger.exception("Unhandled exception in main", extra={"error": str(e)})
