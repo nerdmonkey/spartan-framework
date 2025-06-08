@@ -76,9 +76,9 @@ class QueueService:
 
             if queue_url.endswith(".fifo"):
                 entry["MessageGroupId"] = group_id or "default"
-                entry["MessageDeduplicationId"] = (
-                    f"{datetime.utcnow().timestamp()}-{i}"
-                )
+                entry[
+                    "MessageDeduplicationId"
+                ] = f"{datetime.utcnow().timestamp()}-{i}"
 
             entries.append(entry)
 
@@ -185,7 +185,9 @@ class QueueService:
         except ClientError as e:
             raise Exception(f"Failed to get queue attributes: {str(e)}")
 
-    def send_message(self, queue_url: str, message: Dict, group_id: str, dedup_id: str) -> Dict[str, Any]:
+    def send_message(
+        self, queue_url: str, message: Dict, group_id: str, dedup_id: str
+    ) -> Dict[str, Any]:
         """
         Sends a single message to an SQS queue.
 
@@ -200,14 +202,11 @@ class QueueService:
         """
         try:
             message_body = json.dumps(message)
-            params = {
-                'QueueUrl': queue_url,
-                'MessageBody': message_body
-            }
+            params = {"QueueUrl": queue_url, "MessageBody": message_body}
 
-            if queue_url.endswith('.fifo'):
-                params['MessageGroupId'] = group_id
-                params['MessageDeduplicationId'] = dedup_id
+            if queue_url.endswith(".fifo"):
+                params["MessageGroupId"] = group_id
+                params["MessageDeduplicationId"] = dedup_id
 
             return self.sqs_client.send_message(**params)
         except ClientError as e:
@@ -227,13 +226,15 @@ class QueueService:
             return self.sqs_client.receive_message(
                 QueueUrl=queue_url,
                 MaxNumberOfMessages=1,
-                AttributeNames=['All'],
-                MessageAttributeNames=['All']
+                AttributeNames=["All"],
+                MessageAttributeNames=["All"],
             )
         except ClientError as e:
             raise Exception(f"Failed to receive message: {str(e)}")
 
-    def delete_message(self, queue_url: str, receipt_handle: str) -> Dict[str, Any]:
+    def delete_message(
+        self, queue_url: str, receipt_handle: str
+    ) -> Dict[str, Any]:
         """
         Deletes a message from an SQS queue using its receipt handle.
 
@@ -246,8 +247,7 @@ class QueueService:
         """
         try:
             return self.sqs_client.delete_message(
-                QueueUrl=queue_url,
-                ReceiptHandle=receipt_handle
+                QueueUrl=queue_url, ReceiptHandle=receipt_handle
             )
         except ClientError as e:
             raise Exception(f"Failed to delete message: {str(e)}")

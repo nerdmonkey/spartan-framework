@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 
 from .base import BaseLogger
@@ -46,7 +46,7 @@ class FileLogger(BaseLogger):
         class JsonFormatter(logging.Formatter):
             def format(self, record):
                 log_entry = {
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "level": record.levelname,
                     "service": service_name,
                     "message": record.getMessage(),
