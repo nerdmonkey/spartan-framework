@@ -72,7 +72,8 @@ class FileLogger(BaseLogger):
     def _log(self, level: str, message: str, **kwargs):
         log_method = getattr(self.logger, level.lower())
         extra = kwargs.pop("extra", {})
-        log_method(message, extra={"extra": extra})
+        # Use stacklevel=3 to get the caller's file/line (Python 3.8+)
+        log_method(message, extra={"extra": extra}, stacklevel=3)
 
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
@@ -87,7 +88,8 @@ class FileLogger(BaseLogger):
         self._log("debug", message, **kwargs)
 
     def exception(self, message: str, **kwargs):
-        self.logger.exception(message, extra=kwargs)
+        # Use stacklevel=3 for exceptions as well
+        self.logger.exception(message, extra=kwargs, stacklevel=3)
 
     def critical(self, message: str, **kwargs):
         self._log("critical", message, **kwargs)
