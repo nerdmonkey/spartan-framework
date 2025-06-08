@@ -58,4 +58,6 @@ class StreamLogger(BaseLogger):
         self.log(message, level="DEBUG", **kwargs)
 
     def exception(self, message: str, *args, **kwargs):
-        self.logger.exception(self._format_message("ERROR", message), *args, **kwargs)
+        extra = kwargs.get("extra")
+        formatted = self._format_message("ERROR", message, extra)
+        self.logger.error(formatted, exc_info=True)
