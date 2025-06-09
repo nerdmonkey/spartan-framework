@@ -29,25 +29,30 @@ class BothLogger(BaseLogger):
 
     def info(self, message: str, **kwargs):
         extra = kwargs.get("extra")
-        self.file_logger.info(message, **kwargs)
+        stacklevel = kwargs.pop("stacklevel", 6)  # Set higher default
+        self.file_logger.info(message, **{**kwargs, "stacklevel": stacklevel})
         self.stream_logger.info(message + _prettify_extra(extra))
 
     def warning(self, message: str, **kwargs):
         extra = kwargs.get("extra")
-        self.file_logger.warning(message, **kwargs)
+        stacklevel = kwargs.pop("stacklevel", 6)
+        self.file_logger.warning(message, **{**kwargs, "stacklevel": stacklevel})
         self.stream_logger.warning(message + _prettify_extra(extra))
 
     def error(self, message: str, **kwargs):
         extra = kwargs.get("extra")
-        self.file_logger.error(message, **kwargs)
+        stacklevel = kwargs.pop("stacklevel", 6)
+        self.file_logger.error(message, **{**kwargs, "stacklevel": stacklevel})
         self.stream_logger.error(message + _prettify_extra(extra))
 
     def debug(self, message: str, **kwargs):
         extra = kwargs.get("extra")
-        self.file_logger.debug(message, **kwargs)
+        stacklevel = kwargs.pop("stacklevel", 6)
+        self.file_logger.debug(message, **{**kwargs, "stacklevel": stacklevel})
         self.stream_logger.debug(message + _prettify_extra(extra))
 
     def exception(self, message: str, *args, **kwargs):
         extra = kwargs.get("extra")
-        self.file_logger.exception(message, *args, **kwargs)
+        stacklevel = kwargs.pop("stacklevel", 6)
+        self.file_logger.exception(message, *args, **{**kwargs, "stacklevel": stacklevel})
         self.stream_logger.exception(message, extra=extra)
