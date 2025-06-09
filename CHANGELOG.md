@@ -26,3 +26,7 @@ All notable changes to `spartan` will be documented in this file.
 - Refactored logger imports and formatting: streamlined import statements, adjusted timestamp handling in FileLogger, and improved code readability in various modules. ([e9755a5])
 - Enhanced logging functionality: added extra data handling in BothLogger and StreamLogger, updated inference handler logging messages, and improved error handling in main function. ([ef73954])
 - Refactored logging setup: removed environment parameter, implemented BothLogger and StreamLogger, and replaced predict handler with inference handler. ([de7155c])
+
+## [2025-06-09]
+### Added
+- Add unit tests for BothLogger and StreamLogger with mock implementations. ([a9d0a3f] by Sydel Palinlin)
