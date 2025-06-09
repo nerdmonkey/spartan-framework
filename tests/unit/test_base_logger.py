@@ -75,3 +75,18 @@ def test_log_exception(logger):
     with patch.object(logger.logger, "exception") as mock_exception:
         logger.exception("test message")
         mock_exception.assert_called_once_with("test message")
+
+
+def test_base_logger_cannot_instantiate():
+    with pytest.raises(TypeError):
+        BaseLogger()
+
+
+def test_base_logger_requires_all_methods():
+    # Only implement one method, should still fail
+    class IncompleteLogger(BaseLogger):
+        def info(self, message: str, **kwargs):
+            pass
+
+    with pytest.raises(TypeError):
+        IncompleteLogger()
