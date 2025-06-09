@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
+import inspect
 
 from app.helpers.environment import env
 
@@ -47,12 +48,28 @@ class FileLogger(BaseLogger):
 
         class JsonFormatter(logging.Formatter):
             def format(self, record):
+                # Use inspect to find the first frame inside the project, outside the logger package
+                stack = inspect.stack()
+                project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+                rel_path = None
+                lineno = None
+                for frame_info in stack:
+                    filename = frame_info.filename
+                    # Only consider frames inside the project root and outside the logger directory
+                    if filename.startswith(project_root) and '/logger/' not in filename.replace('\\', '/').replace(project_root.replace('\\', '/'), ''):
+                        rel_path = os.path.relpath(filename, project_root)
+                        lineno = frame_info.lineno
+                        break
+                # Fallback to record.pathname if not found
+                if not rel_path:
+                    rel_path = os.path.relpath(record.pathname, project_root)
+                    lineno = record.lineno
                 log_entry = {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "level": record.levelname,
                     "service": service_name,
                     "message": record.getMessage(),
-                    "location": f"{record.filename}:{record.lineno}",
+                    "location": f"{rel_path}:{lineno}",
                 }
 
                 if record.exc_info:
@@ -72,8 +89,8 @@ class FileLogger(BaseLogger):
     def _log(self, level: str, message: str, **kwargs):
         log_method = getattr(self.logger, level.lower())
         extra = kwargs.pop("extra", {})
-        # Use stacklevel=3 to get the caller's file/line (Python 3.8+)
-        log_method(message, extra={"extra": extra}, stacklevel=3)
+        stacklevel = kwargs.pop("stacklevel", 1)
+        log_method(message, extra={"extra": extra}, stacklevel=stacklevel)
 
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
@@ -88,8 +105,8 @@ class FileLogger(BaseLogger):
         self._log("debug", message, **kwargs)
 
     def exception(self, message: str, **kwargs):
-        # Use stacklevel=3 for exceptions as well
-        self.logger.exception(message, extra=kwargs, stacklevel=3)
+        stacklevel = kwargs.pop("stacklevel", 1)
+        self.logger.exception(message, extra=kwargs, stacklevel=stacklevel)
 
     def critical(self, message: str, **kwargs):
         self._log("critical", message, **kwargs)
