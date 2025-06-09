@@ -76,9 +76,9 @@ class QueueService:
 
             if queue_url.endswith(".fifo"):
                 entry["MessageGroupId"] = group_id or "default"
-                entry[
-                    "MessageDeduplicationId"
-                ] = f"{datetime.utcnow().timestamp()}-{i}"
+                entry["MessageDeduplicationId"] = (
+                    f"{datetime.utcnow().timestamp()}-{i}"
+                )
 
             entries.append(entry)
 

@@ -150,7 +150,9 @@ def test_create_queue_error(monkeypatch):
             {"Error": {"Code": "Boom", "Message": "fail"}}, "create_queue"
         )
 
-    monkeypatch.setattr(queue_service.sqs_client, "create_queue", raise_client_error)
+    monkeypatch.setattr(
+        queue_service.sqs_client, "create_queue", raise_client_error
+    )
     with pytest.raises(Exception):
         queue_service.create_queue("fail-queue")
 
@@ -187,7 +189,9 @@ def test_receive_messages_error(monkeypatch):
             {"Error": {"Code": "Boom", "Message": "fail"}}, "receive_message"
         )
 
-    monkeypatch.setattr(queue_service.sqs_client, "receive_message", raise_client_error)
+    monkeypatch.setattr(
+        queue_service.sqs_client, "receive_message", raise_client_error
+    )
     with pytest.raises(Exception):
         queue_service.receive_messages(url)
 
@@ -212,7 +216,9 @@ def test_change_message_visibility(monkeypatch):
     if msgs:
         rh = msgs[0]["ReceiptHandle"]
         monkeypatch.setattr(
-            queue_service.sqs_client, "change_message_visibility", lambda **kw: True
+            queue_service.sqs_client,
+            "change_message_visibility",
+            lambda **kw: True,
         )
         assert queue_service.change_message_visibility(url, rh, 10) is None
 
@@ -231,7 +237,9 @@ def test_purge_queue_and_error(monkeypatch):
             {"Error": {"Code": "Boom", "Message": "fail"}}, "purge_queue"
         )
 
-    monkeypatch.setattr(queue_service.sqs_client, "purge_queue", raise_client_error)
+    monkeypatch.setattr(
+        queue_service.sqs_client, "purge_queue", raise_client_error
+    )
     with pytest.raises(Exception):
         queue_service.purge_queue(url)
 
@@ -247,10 +255,13 @@ def test_get_queue_attributes_and_error(monkeypatch):
         from botocore.exceptions import ClientError
 
         raise ClientError(
-            {"Error": {"Code": "Boom", "Message": "fail"}}, "get_queue_attributes"
+            {"Error": {"Code": "Boom", "Message": "fail"}},
+            "get_queue_attributes",
         )
 
-    monkeypatch.setattr(queue_service.sqs_client, "get_queue_attributes", raise_client_error)
+    monkeypatch.setattr(
+        queue_service.sqs_client, "get_queue_attributes", raise_client_error
+    )
     with pytest.raises(Exception):
         queue_service.get_queue_attributes(url)
 
@@ -258,8 +269,8 @@ def test_get_queue_attributes_and_error(monkeypatch):
 @mock_aws
 def test_list_queues_and_get_queue_url_and_error(monkeypatch):
     queue_service = QueueService()
-    url1 = queue_service.create_queue("ListQueue1")
-    url2 = queue_service.create_queue("ListQueue2")
+    queue_service.create_queue("ListQueue1")
+    queue_service.create_queue("ListQueue2")
     urls = queue_service.list_queues()
     assert any("ListQueue1" in u for u in urls)
     assert any("ListQueue2" in u for u in urls)
@@ -269,8 +280,12 @@ def test_list_queues_and_get_queue_url_and_error(monkeypatch):
     def raise_client_error(*a, **kw):
         from botocore.exceptions import ClientError
 
-        raise ClientError({"Error": {"Code": "Boom", "Message": "fail"}}, "get_queue_url")
+        raise ClientError(
+            {"Error": {"Code": "Boom", "Message": "fail"}}, "get_queue_url"
+        )
 
-    monkeypatch.setattr(queue_service.sqs_client, "get_queue_url", raise_client_error)
+    monkeypatch.setattr(
+        queue_service.sqs_client, "get_queue_url", raise_client_error
+    )
     with pytest.raises(Exception):
         queue_service.get_queue_url("ListQueue1")
