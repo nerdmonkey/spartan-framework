@@ -36,7 +36,9 @@ class BothLogger(BaseLogger):
     def warning(self, message: str, **kwargs):
         extra = kwargs.get("extra")
         stacklevel = kwargs.pop("stacklevel", 6)
-        self.file_logger.warning(message, **{**kwargs, "stacklevel": stacklevel})
+        self.file_logger.warning(
+            message, **{**kwargs, "stacklevel": stacklevel}
+        )
         self.stream_logger.warning(message + _prettify_extra(extra))
 
     def error(self, message: str, **kwargs):
@@ -54,5 +56,7 @@ class BothLogger(BaseLogger):
     def exception(self, message: str, *args, **kwargs):
         extra = kwargs.get("extra")
         stacklevel = kwargs.pop("stacklevel", 6)
-        self.file_logger.exception(message, *args, **{**kwargs, "stacklevel": stacklevel})
+        self.file_logger.exception(
+            message, *args, **{**kwargs, "stacklevel": stacklevel}
+        )
         self.stream_logger.exception(message, extra=extra)

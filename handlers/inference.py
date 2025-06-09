@@ -28,6 +28,8 @@ if __name__ == "__main__":
     context = MockLambdaContext()
 
     try:
-        logger.info("Handler Response", extra={"response": main(event, context)})
+        logger.info(
+            "Handler Response", extra={"response": main(event, context)}
+        )
     except Exception as e:
         logger.exception("Unhandled exception in main", extra={"error": str(e)})
