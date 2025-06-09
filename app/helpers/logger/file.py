@@ -1,9 +1,9 @@
+import inspect
 import json
 import logging
 import os
 from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
-import inspect
 
 from app.helpers.environment import env
 
@@ -50,13 +50,19 @@ class FileLogger(BaseLogger):
             def format(self, record):
                 # Use inspect to find the first frame inside the project, outside the logger package
                 stack = inspect.stack()
-                project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+                project_root = os.path.abspath(
+                    os.path.join(os.path.dirname(__file__), "../../..")
+                )
                 rel_path = None
                 lineno = None
                 for frame_info in stack:
                     filename = frame_info.filename
                     # Only consider frames inside the project root and outside the logger directory
-                    if filename.startswith(project_root) and '/logger/' not in filename.replace('\\', '/').replace(project_root.replace('\\', '/'), ''):
+                    if filename.startswith(
+                        project_root
+                    ) and "/logger/" not in filename.replace("\\", "/").replace(
+                        project_root.replace("\\", "/"), ""
+                    ):
                         rel_path = os.path.relpath(filename, project_root)
                         lineno = frame_info.lineno
                         break
