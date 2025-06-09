@@ -1,8 +1,8 @@
-import pytest
-from unittest.mock import MagicMock, patch
-
 import sys
 import types
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 import handlers.inference as inference_module
 
@@ -10,9 +10,11 @@ import handlers.inference as inference_module
 def test_main_logs_and_returns(mocker):
     # Arrange
     event = {"foo": "bar"}
+
     class DummyContext:
         def __init__(self):
             self.value = 123
+
     context = DummyContext()
     logger_mock = mocker.patch.object(inference_module, "logger")
 
@@ -70,9 +72,11 @@ def test_main_exception_logging(mocker):
 def test_main_with_realistic_context(mocker):
     # Arrange
     event = {"foo": "bar"}
+
     class DummyContext:
         def __init__(self):
             self.value = 42
+
     context = DummyContext()
     logger_mock = mocker.patch.object(inference_module, "logger")
 
