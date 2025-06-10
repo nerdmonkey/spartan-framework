@@ -23,7 +23,7 @@ class EnvironmentVariables(BaseSettings):
         ALLOWED_ORIGINS (str): Comma-separated list of allowed origins for CORS.
         LOG_LEVEL (str): The logging level (e.g., DEBUG, INFO, WARNING, ERROR).
         LOG_CHANNEL (str): The logging channel to use.
-        LOG_FILE (str): The file path for logging output.
+        LOG_DIR (str): The directory path for logging output.
         DB_TYPE (str): The type of the database (e.g., PostgreSQL, MySQL).
         DB_DRIVER (str): The database driver to use.
         DB_HOST (str): The hostname of the database server.
