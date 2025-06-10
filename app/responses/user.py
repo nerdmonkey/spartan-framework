@@ -40,9 +40,9 @@ class Pagination(BaseModel):
     Pydantic model representing pagination information.
 
     Attributes:
-        page (int): The current page number.
+        current_page (int): The current page number.
         items_per_page (int): The number of items per page.
-        total_items (int): The total number of items.
+        total (int): The total number of items.
     """
 
     current_page: int
