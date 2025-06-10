@@ -63,3 +63,16 @@ def test_logger_warning_called(logging, mock_logger):
     logging.warning(message, warning="TestWarning")
 
     mock_logger.warning.assert_called_once_with(message, warning="TestWarning")
+
+
+def test_set_level_changes_logger_level(logging, mock_logger):
+    mock_logger.setLevel.side_effect = lambda level: setattr(mock_logger, "level", level)
+
+    logging.set_level("DEBUG")
+
+    mock_logger.setLevel.assert_called_once_with("DEBUG")
+    assert getattr(mock_logger, "level", None) == "DEBUG"
+
+
+def test_get_logger_returns_underlying_logger(logging, mock_logger):
+    assert logging.get_logger() is mock_logger
