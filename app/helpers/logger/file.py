@@ -92,6 +92,16 @@ class FileLogger(BaseLogger):
         stacklevel = kwargs.pop("stacklevel", 1)
         log_method(message, extra={"extra": extra}, stacklevel=stacklevel)
 
+    def log(self, message: str, level: str = "INFO", **kwargs):
+        """Generic logging entry point.
+
+        This mirrors the behaviour of ``StreamLogger`` allowing ``BothLogger``
+        to delegate calls to a common ``log`` method on the underlying loggers.
+        ``_log`` handles the actual dispatch to the appropriate logging level
+        method.
+        """
+        self._log(level, message, **kwargs)
+
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
 
