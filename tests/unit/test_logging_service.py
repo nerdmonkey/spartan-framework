@@ -66,7 +66,9 @@ def test_logger_warning_called(logging, mock_logger):
 
 
 def test_set_level_changes_logger_level(logging, mock_logger):
-    mock_logger.setLevel.side_effect = lambda level: setattr(mock_logger, "level", level)
+    mock_logger.setLevel.side_effect = lambda level: setattr(
+        mock_logger, "level", level
+    )
 
     logging.set_level("DEBUG")
 
