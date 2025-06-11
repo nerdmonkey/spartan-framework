@@ -63,7 +63,7 @@ def test_log_levels(mock_logger, file_logger, log_level):
 
     # Verify the corresponding method was called on the mock
     getattr(mock_logger, log_level).assert_called_once_with(
-        test_message, extra={"extra": extra_args}, stacklevel=3
+        test_message, extra={"extra": extra_args}, stacklevel=1
     )
 
 

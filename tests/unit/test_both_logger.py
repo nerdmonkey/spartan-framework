@@ -63,7 +63,7 @@ def test_info_calls_both_loggers(
 ):
     both_logger.info("info message", extra={"a": 1})
     mock_file_logger.info.assert_called_once_with(
-        "info message", extra={"a": 1}
+        "info message", extra={"a": 1}, stacklevel=6
     )
     # The stream_logger gets prettified extra
     args, kwargs = mock_stream_logger.info.call_args
@@ -76,7 +76,7 @@ def test_warning_calls_both_loggers(
 ):
     both_logger.warning("warn message", extra={"b": 2})
     mock_file_logger.warning.assert_called_once_with(
-        "warn message", extra={"b": 2}
+        "warn message", extra={"b": 2}, stacklevel=6
     )
     args, kwargs = mock_stream_logger.warning.call_args
     assert "warn message" in args[0]
@@ -88,7 +88,7 @@ def test_error_calls_both_loggers(
 ):
     both_logger.error("error message", extra={"c": 3})
     mock_file_logger.error.assert_called_once_with(
-        "error message", extra={"c": 3}
+        "error message", extra={"c": 3}, stacklevel=6
     )
     args, kwargs = mock_stream_logger.error.call_args
     assert "error message" in args[0]
@@ -100,7 +100,7 @@ def test_debug_calls_both_loggers(
 ):
     both_logger.debug("debug message", extra={"d": 4})
     mock_file_logger.debug.assert_called_once_with(
-        "debug message", extra={"d": 4}
+        "debug message", extra={"d": 4}, stacklevel=6
     )
     args, kwargs = mock_stream_logger.debug.call_args
     assert "debug message" in args[0]
@@ -112,7 +112,7 @@ def test_exception_calls_both_loggers(
 ):
     both_logger.exception("exception message", extra={"e": 5})
     mock_file_logger.exception.assert_called_once_with(
-        "exception message", extra={"e": 5}
+        "exception message", extra={"e": 5}, stacklevel=6
     )
     mock_stream_logger.exception.assert_called_once_with(
         "exception message", extra={"e": 5}
