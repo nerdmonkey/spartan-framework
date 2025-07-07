@@ -12,7 +12,7 @@ def tracer():
     with patch.object(
         LocalTracer,
         "_get_trace_file_path",
-        return_value=Path(__file__).parent.parent.parent.parent
+        return_value=Path(__file__).parent.parent.parent
         / "storage"
         / "traces"
         / "spartan.trace",
@@ -22,7 +22,7 @@ def tracer():
 
 def test_trace_file_path(tracer):
     expected_path = (
-        Path(__file__).parent.parent.parent.parent
+        Path(__file__).parent.parent.parent
         / "storage"
         / "traces"
         / "spartan.trace"
