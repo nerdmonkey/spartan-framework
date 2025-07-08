@@ -10,40 +10,35 @@ load_dotenv(dotenv_path=".env")
 
 class EnvironmentVariables(BaseSettings):
     """
-    EnvironmentVariables is a configuration class that loads environment variables
-    for the application using Pydantic's BaseSettings. It includes settings for
-    application name, environment, debug mode, allowed origins, logging, and database
-    connection details.
-
+    EnvironmentVariables is a configuration class for managing application environment variables.
     Attributes:
         APP_NAME (str): The name of the application.
-        APP_ENVIRONMENT (str): The environment in which the application is running
-        (e.g., development, production).
+        APP_ENVIRONMENT (str): The current environment (e.g., development, production).
         APP_DEBUG (bool): Flag to enable or disable debug mode.
-        ALLOWED_ORIGINS (str): Comma-separated list of allowed origins for CORS.
-        LOG_LEVEL (str): The logging level (e.g., DEBUG, INFO, WARNING, ERROR).
-        LOG_CHANNEL (str): The logging channel to use.
-        LOG_DIR (str): The directory path for logging output.
-        DB_TYPE (str): The type of the database (e.g., PostgreSQL, MySQL).
-        DB_DRIVER (str): The database driver to use.
-        DB_HOST (str): The hostname of the database server.
-        DB_PORT (Optional[int]): The port number of the database server. Defaults to None.
-        DB_NAME (str): The name of the database.
-        DB_USERNAME (str): The username for the database connection.
-        DB_PASSWORD (str): The password for the database connection.
-        DB_SSL_CA (Optional[str]): The SSL CA certificate for the database connection.
-        Defaults to None.
-        DB_SSL_VERIFY_CERT (Optional[bool]): Flag to enable or disable SSL certificate
-        verification. Defaults to None.
-
-    Methods:
-        default_db_port(cls, v): Validates and converts the database port to an integer.
-                                 Returns None if the value is invalid.
+        APP_MAINTENANCE (bool): Flag to enable or disable maintenance mode. Defaults to False.
+        ALLOWED_ORIGINS (str): Comma-separated list of allowed CORS origins.
+        LOG_LEVEL (str): Logging level (e.g., INFO, DEBUG).
+        LOG_CHANNEL (str): Logging channel to use.
+        LOG_DIR (str): Directory where logs are stored.
+        DB_TYPE (str): Type of the database (e.g., postgres, mysql).
+        DB_DRIVER (str): Database driver to use.
+        DB_HOST (str): Database host address.
+        DB_PORT (Optional[int]): Database port number. Defaults to None if not provided.
+        DB_NAME (str): Name of the database.
+        DB_USERNAME (str): Username for database authentication.
+        DB_PASSWORD (str): Password for database authentication.
+        DB_SSL_CA (Optional[str]): Path to the SSL CA certificate for the database. Defaults to None.
+        DB_SSL_VERIFY_CERT (Optional[bool]): Whether to verify the database SSL certificate. Defaults to None.
+    Config:
+        model_config: Specifies the .env file and encoding to load environment variables.
+    Validators:
+        default_db_port: Ensures DB_PORT is converted to an integer if possible, otherwise returns None.
     """
 
     APP_NAME: str
     APP_ENVIRONMENT: str
     APP_DEBUG: bool
+    APP_MAINTENANCE: bool = False
     ALLOWED_ORIGINS: str
     LOG_LEVEL: str
     LOG_CHANNEL: str
