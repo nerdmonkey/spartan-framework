@@ -17,32 +17,38 @@ class EnvironmentVariables(BaseSettings):
         APP_DEBUG (bool): Flag to enable or disable debug mode.
         APP_MAINTENANCE (bool): Flag to enable or disable maintenance mode. Defaults to False.
         ALLOWED_ORIGINS (str): Comma-separated list of allowed CORS origins.
-        LOG_LEVEL (str): Logging level (e.g., INFO, DEBUG).
-        LOG_CHANNEL (str): Logging channel to use.
-        LOG_DIR (str): Directory where logs are stored.
-        DB_TYPE (str): Type of the database (e.g., postgres, mysql).
-        DB_DRIVER (str): Database driver to use.
-        DB_HOST (str): Database host address.
-        DB_PORT (Optional[int]): Database port number. Defaults to None if not provided.
-        DB_NAME (str): Name of the database.
-        DB_USERNAME (str): Username for database authentication.
-        DB_PASSWORD (str): Password for database authentication.
-        DB_SSL_CA (Optional[str]): Path to the SSL CA certificate for the database. Defaults to None.
-        DB_SSL_VERIFY_CERT (Optional[bool]): Whether to verify the database SSL certificate. Defaults to None.
-    Config:
-        model_config: Specifies the .env file and encoding to load environment variables.
-    Validators:
-        default_db_port: Ensures DB_PORT is converted to an integer if possible, otherwise returns None.
+        LOG_LEVEL (str): The logging level (e.g., INFO, DEBUG).
+        LOG_CHANNEL (str): The logging channel to use.
+        LOG_DIR (str): Directory path for storing log files.
+        DB_TYPE (str): The type of database (e.g., postgres, mysql).
+        DB_DRIVER (str): The database driver to use.
+        DB_HOST (str): The database host address.
+        DB_PORT (Optional[int]): The database port. Defaults to None if not provided.
+        DB_NAME (str): The name of the database.
+        DB_USERNAME (str): The database username.
+        DB_PASSWORD (str): The database password.
+        DB_SSL_CA (Optional[str]): Path to the SSL CA certificate for the database. Optional.
+        DB_SSL_VERIFY_CERT (Optional[bool]): Whether to verify the database SSL certificate. Optional.
+        STORAGE_TYPE (str): The storage type to use. Defaults to "local".
+        STORAGE_BUCKET (Optional[str]): The storage bucket name. Optional.
+        STORAGE_PATH (str): The storage path. Defaults to "storage/core".
+    Class Attributes:
+        model_config: Configuration for environment file loading.
+    Methods:
+        default_db_port(cls, v): Validator to ensure DB_PORT is an integer or None.
     """
+
 
     APP_NAME: str
     APP_ENVIRONMENT: str
     APP_DEBUG: bool
     APP_MAINTENANCE: bool = False
     ALLOWED_ORIGINS: str
+
     LOG_LEVEL: str
     LOG_CHANNEL: str
     LOG_DIR: str
+
     DB_TYPE: str
     DB_DRIVER: str
     DB_HOST: str
@@ -52,6 +58,10 @@ class EnvironmentVariables(BaseSettings):
     DB_PASSWORD: str
     DB_SSL_CA: Optional[str] = None
     DB_SSL_VERIFY_CERT: Optional[bool] = None
+
+    STORAGE_TYPE: str = "local"
+    STORAGE_BUCKET: Optional[str] = None
+    STORAGE_PATH: str = "storage/core"
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
