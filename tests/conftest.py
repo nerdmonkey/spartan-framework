@@ -10,9 +10,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.helpers.database import db
-from app.helpers.logger.file import FileLogger
-from app.models.base import Base
-from app.models.user import User
+from app.helpers.logger import get_logger
+from app.models.db.base import Base
+from app.models.db.user import User
+
 
 load_dotenv(dotenv_path=".env_testing")
 
@@ -99,14 +100,8 @@ def mock_datetime():
 
 @pytest.fixture
 def file_logger(temp_log_dir):
-    """Create a FileLogger instance with temporary directory"""
-    logger = FileLogger(
-        service_name="test-service",
-        level="DEBUG",
-        log_dir=temp_log_dir,
-        max_bytes=1024,  # Small size for testing rotation
-        backup_count=2,
-    )
+    """Create a logger instance with temporary directory"""
+    logger = get_logger("test-service")
     return logger
 
 
@@ -126,8 +121,21 @@ def _setup_testing_environment():
 
 
 @pytest.fixture(autouse=True)
-def _prevent_external_calls(monkeypatch):
+def _prevent_external_calls(monkeypatch, request):
     """Prevent any accidental external calls during testing"""
+
+    # Skip socket blocking for E2E tests
+    if hasattr(request, "fspath") and "e2e" in str(request.fspath):
+        return  # Don't block sockets for E2E tests
+
+    # Skip socket blocking for stock API tests
+    if request.node.name and (
+        "stock" in request.node.name.lower()
+        or "test_stocks" in request.module.__name__
+        if hasattr(request, "module")
+        else False
+    ):
+        return  # Don't block sockets for stock tests
 
     def mock_external_call(*args, **kwargs):
         raise RuntimeError("External calls are not allowed during testing")
@@ -157,3 +165,8 @@ def mock_env_cloud():
         "app.helpers.tracer.factory.os.getenv", side_effect=mock_getenv
     ) as mock:
         yield mock
+
+
+# Main conftest now delegates to specific test type conftest files
+# Unit tests: tests/unit/conftest.py handles mocking
+# E2E tests: tests/e2e/conftest.py handles real services

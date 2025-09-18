@@ -1,79 +1,102 @@
+from functools import lru_cache
+
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session as SQLAlchemySession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from app.helpers.environment import env
+from app.helpers.logger import get_logger
 
 
-def create_database_engine() -> Engine:
-    """
-    Creates and returns a SQLAlchemy Engine instance based on the database configuration
-    specified in the environment variables.
+logger = get_logger("database")
 
-    The function supports multiple database types including SQLite, PostgreSQL, MySQL, and MSSQL.
-    It constructs the appropriate database URL based on the database type and other configuration
-    parameters such as username, password, host, port, and driver.
 
-    Returns:
-        Engine: A SQLAlchemy Engine instance configured for the specified database.
+def _build_database_url() -> str:
+    """Build database URL based on environment configuration."""
+    settings = env()
+    db_type = settings.DB_TYPE
 
-    Raises:
-        ValueError: If the specified database type is not supported.
+    if db_type == "sqlite":
+        return f"sqlite:///./database/{settings.DB_NAME}.db"
 
-    Environment Variables:
-        DB_TYPE (str): The type of the database (e.g., 'sqlite', 'psql', 'mysql', 'mssql').
-        DB_NAME (str): The name of the database.
-        DB_USERNAME (str): The username for the database (not required for SQLite).
-        DB_PASSWORD (str): The password for the database (not required for SQLite).
-        DB_HOST (str): The host of the database (not required for SQLite).
-        DB_PORT (str): The port of the database (not required for SQLite).
-        DB_DRIVER (str): The driver for the database (only required for MSSQL).
-    """
-    database_type = env().DB_TYPE
-    database = env().DB_NAME
-
-    url_formats = {
-        "sqlite": f"sqlite:///./database/{database}.db",
-        "psql": "postgresql+pg8000://{username}:{password}@{host}:{port}/{database}",
-        "mysql": "mysql+pymysql://{username}:{password}@{host}:{port}/{database}",
-        "mssql": "mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}",
+    urls = {
+        "psql": "postgresql+pg8000",
+        "mysql": "mysql+pymysql",
+        "mssql": "mssql+pyodbc",
     }
 
-    if database_type in url_formats:
-        database_url = url_formats[database_type]
-        if database_type != "sqlite":
-            database_url = database_url.format(
-                username=env().DB_USERNAME,
-                password=env().DB_PASSWORD,
-                host=env().DB_HOST,
-                port=env().DB_PORT,
-                database=database,
-                driver=env().DB_DRIVER,
-            )
-        return create_engine(
-            database_url,
-            # pool_size=30,
-            # max_overflow=30,
-            connect_args=(
-                {"check_same_thread": False}
-                if database_type == "sqlite"
-                else {}
-            ),
+    if db_type not in urls:
+        raise ValueError(f"Unsupported database type: {db_type}")
+
+    base_url = f"{urls[db_type]}://{settings.DB_USERNAME}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+
+    return (
+        f"{base_url}?driver={settings.DB_DRIVER}"
+        if db_type == "mssql"
+        else base_url
+    )
+
+
+@lru_cache(maxsize=1)
+def get_engine():
+    """Get cached database engine with environment-specific configuration."""
+    settings = env()
+    url = _build_database_url()
+    connect_args = (
+        {"check_same_thread": False} if settings.DB_TYPE == "sqlite" else {}
+    )
+
+    # Container vs Lambda configuration
+    is_container = getattr(settings, "APP_RUNTIME", "lambda") == "container"
+
+    engine_kwargs = {
+        "url": url,
+        "connect_args": connect_args,
+    }
+
+    if is_container:
+        # Container: Larger connection pool for concurrent requests
+        engine_kwargs.update(
+            {
+                "pool_size": 20,
+                "max_overflow": 30,
+                "pool_pre_ping": True,
+                "pool_recycle": 3600,
+            }
         )
+        logger.info("Database engine created for CONTAINER environment")
+    else:
+        # Lambda: Minimal pool for serverless
+        engine_kwargs.update(
+            {
+                "pool_size": 1,
+                "max_overflow": 0,
+            }
+        )
+        logger.info("Database engine created for LAMBDA environment")
 
-    raise ValueError(f"Unsupported database type: {database_type}")
+    return create_engine(**engine_kwargs)
 
 
-engine = create_database_engine()
-Session = sessionmaker(bind=engine)
+@lru_cache(maxsize=1)
+def get_session_factory():
+    """Get session factory based on runtime environment."""
+    settings = env()
+    engine = get_engine()
+    is_container = getattr(settings, "APP_RUNTIME", "lambda") == "container"
+
+    if is_container:
+        # Container: Thread-safe scoped sessions
+        return scoped_session(sessionmaker(bind=engine))
+    else:
+        # Lambda: Simple session factory
+        return sessionmaker(bind=engine)
 
 
-def db() -> SQLAlchemySession:
-    """
-    Creates and returns a new SQLAlchemy session.
+def db() -> Session:
+    """Get database session optimized for runtime environment."""
+    session_factory = get_session_factory()
+    return session_factory()
 
-    Returns:
-        SQLAlchemySession: A new SQLAlchemy session instance.
-    """
-    return Session()
+
+# For backward compatibility
+engine = get_engine()
