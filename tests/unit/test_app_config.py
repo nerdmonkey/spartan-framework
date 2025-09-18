@@ -1,7 +1,7 @@
 import os
-from unittest.mock import patch, MagicMock
 
 from pydantic import ConfigDict
+
 from app.helpers.environment import EnvironmentVariables, env
 
 
@@ -27,9 +27,22 @@ def test_settings_loads_env_vars():
         "DB_NAME": "testdb",
         "DB_USERNAME": "user",
         "DB_PASSWORD": "password",
+        "DB_PORT": "",  # Set to empty to test default behavior
+        "DB_SSL_CA": "",  # Set to empty to test None conversion
+        "DB_SSL_VERIFY_CERT": "",  # Set to empty to test None conversion
+        "COGNITO_REGION": "us-east-1",
+        "COGNITO_USER_POOL_ID": "test-pool-id",
+        "COGNITO_CLIENT_ID": "test-client-id",
+        "TEST_USERNAME": "testuser",
+        "TEST_PASSWORD": "testpass",
+        "PUSHER_ID": "test-pusher-id",
+        "PUSHER_KEY": "test-pusher-key",
+        "PUSHER_SECRET": "test-pusher-secret",
+        "PUSHER_CLUSTER": "test-cluster",
+        "REPORTS_DESTINATION_PATH": "storage/reports",
         "STORAGE_TYPE": "s3",
         "STORAGE_BUCKET": "my-test-bucket",
-        "STORAGE_PATH": "custom/storage/path"
+        "STORAGE_PATH": "custom/storage/path",
     }
 
     # Apply environment variables
@@ -89,7 +102,7 @@ def test_get_settings_cached():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
     }
 
     for key, value in test_env_vars.items():
@@ -128,7 +141,7 @@ def test_env_function_with_variable_name():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
     }
 
     for key, value in test_env_vars.items():
@@ -171,7 +184,7 @@ def test_db_port_validator():
         "DB_HOST": "localhost",
         "DB_NAME": "testdb",
         "DB_USERNAME": "user",
-        "DB_PASSWORD": "password"
+        "DB_PASSWORD": "password",
     }
 
     # Test with valid port number
@@ -217,7 +230,20 @@ def test_optional_fields_defaults():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
+        "DB_PORT": "",  # Set to empty to test default behavior
+        "DB_SSL_CA": "",  # Set to empty to test None conversion
+        "DB_SSL_VERIFY_CERT": "",  # Set to empty to test None conversion
+        "COGNITO_REGION": "us-east-1",
+        "COGNITO_USER_POOL_ID": "test-pool-id",
+        "COGNITO_CLIENT_ID": "test-client-id",
+        "TEST_USERNAME": "testuser",
+        "TEST_PASSWORD": "testpass",
+        "PUSHER_ID": "test-pusher-id",
+        "PUSHER_KEY": "test-pusher-key",
+        "PUSHER_SECRET": "test-pusher-secret",
+        "PUSHER_CLUSTER": "test-cluster",
+        "REPORTS_DESTINATION_PATH": "storage/reports",
     }
 
     for key, value in test_env_vars.items():
@@ -233,7 +259,9 @@ def test_optional_fields_defaults():
         assert settings.DB_SSL_VERIFY_CERT is None
         # Test storage values (will come from .env file in this case)
         assert settings.STORAGE_TYPE == "local"
-        assert settings.STORAGE_BUCKET == ""  # From .env file (empty string)
+        assert (
+            settings.STORAGE_BUCKET is None
+        )  # Empty string from .env gets converted to None
         assert settings.STORAGE_PATH == "storage/core"
     finally:
         for key in test_env_vars.keys():
@@ -260,7 +288,7 @@ def test_storage_configuration():
         "DB_PASSWORD": "test",
         "STORAGE_TYPE": "s3",
         "STORAGE_BUCKET": "my-bucket",
-        "STORAGE_PATH": "custom/path"
+        "STORAGE_PATH": "custom/path",
     }
 
     for key, value in test_env_vars.items():
@@ -278,7 +306,7 @@ def test_storage_configuration():
             os.environ.pop(key, None)
 
 
-def test_storage_defaults_when_not_provided():
+def test_storage_defaults_when_not_provided(mocker):
     """
     Test that storage fields use correct defaults when not provided in environment.
     """
@@ -295,8 +323,18 @@ def test_storage_defaults_when_not_provided():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
-        # Note: No STORAGE_* variables provided
+        "DB_PASSWORD": "test",
+        "COGNITO_REGION": "us-east-1",
+        "COGNITO_USER_POOL_ID": "test-pool-id",
+        "COGNITO_CLIENT_ID": "test-client-id",
+        "TEST_USERNAME": "testuser",
+        "TEST_PASSWORD": "testpass",
+        "PUSHER_ID": "test-pusher-id",
+        "PUSHER_KEY": "test-pusher-key",
+        "PUSHER_SECRET": "test-pusher-secret",
+        "PUSHER_CLUSTER": "test-cluster",
+        "REPORTS_DESTINATION_PATH": "storage/reports",
+        # Note: No STORAGE_* variables provided to test defaults
     }
 
     # Clear storage environment variables that might be set in .env
@@ -312,13 +350,15 @@ def test_storage_defaults_when_not_provided():
 
     try:
         # Create settings with env_file=None to avoid .env loading
-        with patch.object(EnvironmentVariables, 'model_config', ConfigDict(env_file=None)):
-            settings = EnvironmentVariables()
+        mocker.patch.object(
+            EnvironmentVariables, "model_config", ConfigDict(env_file=None)
+        )
+        settings = EnvironmentVariables()
 
-            # Test default storage values (without .env interference)
-            assert settings.STORAGE_TYPE == "local"
-            assert settings.STORAGE_BUCKET is None
-            assert settings.STORAGE_PATH == "storage/core"
+        # Test default storage values (without .env interference)
+        assert settings.STORAGE_TYPE == "local"
+        assert settings.STORAGE_BUCKET is None
+        assert settings.STORAGE_PATH == "storage/core"
     finally:
         # Restore original values
         for key in test_env_vars.keys():

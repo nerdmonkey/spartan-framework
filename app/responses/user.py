@@ -1,25 +1,33 @@
-from datetime import datetime
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_serializer
+from pydantic import BaseModel, ConfigDict, field_validator
+
+
+class ProfileResponse(BaseModel):
+    """
+    Pydantic model representing a e for a user.
+
+    Attributes:
+        id (int): The unique identifier of the user.
+        username (str): The username of the user.
+        email (str): The email address of the user.
+    """
+
+    given_name: Optional[str]
+    family_name: Optional[str]
 
 
 class UserResponse(BaseModel):
-    id: int
+    id: str
     username: str
     email: str
-    created_at: datetime
-    updated_at: datetime
+    profile: Optional[ProfileResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_serializer("created_at")
-    def created_at(cls, v: datetime) -> str:
-        return v.strftime("%Y-%m-%d %H:%M:%S")
-
-    @field_serializer("updated_at")
-    def updated_at(cls, v: datetime) -> str:
-        return v.strftime("%Y-%m-%d %H:%M:%S")
+    @field_validator("id", mode="before")
+    def convert_id_to_string(cls, v):
+        return str(v)
 
 
 class SingleUserResponse(BaseModel):
@@ -40,9 +48,9 @@ class Pagination(BaseModel):
     Pydantic model representing pagination information.
 
     Attributes:
-        current_page (int): The current page number.
+        page (int): The current page number.
         items_per_page (int): The number of items per page.
-        total (int): The total number of items.
+        total_items (int): The total number of items.
     """
 
     current_page: int
@@ -80,8 +88,8 @@ class UserCreateResponse(BaseModel):
     id: int
     username: str
     email: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
 
 
 class UserUpdateResponse(BaseModel):
@@ -97,5 +105,5 @@ class UserUpdateResponse(BaseModel):
     id: int
     username: str
     email: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str

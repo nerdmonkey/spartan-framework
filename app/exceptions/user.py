@@ -1,13 +1,7 @@
-class UserNotFoundError(Exception):
-    """
-    Exception raised when a user is not found in the system.
-
-    This exception should be used to indicate that a requested user could not be located,
-    typically in scenarios where user data is being queried or accessed.
-
-    Attributes:
-        message (str): Explanation of the error.
-    """
+class UserNotFoundException(Exception):
+    def __init__(self, message="User not found"):
+        self.message = message
+        super().__init__(self.message)
 
 
 class DuplicateUserError(Exception):
@@ -23,10 +17,25 @@ class DuplicateUserError(Exception):
     """
 
 
-class InvalidSortFieldError(Exception):
-    """
-    Exception raised for errors in the sorting field.
+class InternalServerErrorException(Exception):
+    def __init__(self, message="Internal server error"):
+        self.message = message
+        super().__init__(self.message)
 
-    Attributes:
-        message -- explanation of the error
-    """
+
+class UnauthorizedException(Exception):
+    def __init__(self, message="Unauthorized access"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidSortFieldException(Exception):
+    def __init__(self, message="Invalid sort field"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidSortTypeException(Exception):
+    def __init__(self, message="Invalid sort type"):
+        self.message = message
+        super().__init__(self.message)

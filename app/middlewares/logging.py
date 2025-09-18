@@ -1,87 +1,74 @@
-import functools
-from typing import Any, Callable
+import json
+
+from app.helpers.environment import env
+from app.helpers.logger import get_logger
 
 
-def standard_logger(func: Callable = None, *, logger=None) -> Callable:
-    """
-    A decorator that provides standardized logging for Lambda functions.
-    Can be used with or without parameters.
+def standard_logger(handler, logger=None):
+    logger = logger or get_logger("spartan-framework")
 
-    @standard_logger
-    def func(): pass
-
-    or
-
-    @standard_logger(logger=custom_logger)
-    def func(): pass
-    """
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(event: dict, context: Any) -> Any:
-            # Use provided logger or get default logger
-            nonlocal logger
-            if logger is None:
-                from app.helpers.logger import get_logger
-
-                logger = get_logger()
-
-            # Prepare Lambda metadata
-            lambda_metadata = {
-                "name": context.function_name,
-                "version": context.function_version,
-                "arn": context.invoked_function_arn,
-                "memory_size": context.memory_limit_in_mb,
-                "aws_request_id": context.aws_request_id,
-            }
-
-            # Calculate input size
+    def wrapped_handler(event, context):
+        lambda_function = {
+            "name": context.function_name,
+            "version": context.function_version,
+            "arn": context.invoked_function_arn,
+            "memory_size": context.memory_limit_in_mb,
+            "aws_request_id": context.aws_request_id,
+        }
+        try:
             input_data_size = len(str(event).encode("utf-8"))
+            logger.info(
+                "Input Data",
+                extra={
+                    "input_data": event,
+                    "input_data_size": input_data_size,
+                    "lambda_function": lambda_function,
+                },
+            )
 
-            try:
-                # Log input data
-                logger.info(
-                    "Lambda function invoked",
-                    extra={
-                        "input_data": event,
-                        "input_data_size": input_data_size,
-                        "lambda_function": lambda_metadata,
-                    },
+            if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
+                print(
+                    json.dumps(
+                        {
+                            "input_data": event,
+                            "input_data_size": input_data_size,
+                            "lambda_function": lambda_function,
+                        },
+                        indent=4,
+                    )
                 )
 
-                # Execute the function
-                response = func(event, context)
+            response = handler(event, context)
 
-                # Calculate output size
-                output_data_size = len(str(response).encode("utf-8"))
+            output_data_size = len(str(response).encode("utf-8"))
+            logger.info(
+                "Output Data",
+                extra={
+                    "output_data": response,
+                    "output_data_size": output_data_size,
+                    "lambda_function": lambda_function,
+                },
+            )
 
-                # Log successful execution
-                logger.info(
-                    "Lambda function completed successfully",
-                    extra={
-                        "output_data": response,
-                        "output_data_size": output_data_size,
-                        "lambda_function": lambda_metadata,
-                    },
+            if env("APP_ENVIRONMENT") == "local" and env("APP_DEBUG"):
+                print(
+                    json.dumps(
+                        {
+                            "output_data": response,
+                            "output_data_size": output_data_size,
+                            "lambda_function": lambda_function,
+                        },
+                        indent=4,
+                    )
                 )
 
-                return response
+            return response
 
-            except Exception as e:
-                # Log error details
-                error_message = str(e)
-                logger.error(
-                    "Error in Lambda function",
-                    extra={
-                        "error": error_message,
-                        "lambda_function": lambda_metadata,
-                    },
-                )
-                raise
+        except Exception as e:
+            logger.error(
+                "Error in Lambda function",
+                extra={"error": str(e), "lambda_function": lambda_function},
+            )
+            raise
 
-        return wrapper
-
-    # Handle both @standard_logger and @standard_logger(logger=custom_logger) cases
-    if func is None:
-        return decorator
-    return decorator(func)
+    return wrapped_handler
