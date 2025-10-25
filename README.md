@@ -1,4 +1,4 @@
-<p align="center"><img src="./ssf_banner.png" alt="Social Card of Spartan"></p>
+<p align="center"><img src="./docs/ssf_banner.png" alt="Social Card of Spartan"></p>
 
 # Spartan Framework
 
