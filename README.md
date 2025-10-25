@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/nerdmonkey/spartan-framework/blob/main/ssf_banner.png" alt="Social Card of Spartan"></p>
+<p align="center"><img src="./ssf_banner.png" alt="Social Card of Spartan"></p>
 
 # Spartan Framework
 
