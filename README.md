@@ -1,17 +1,17 @@
 <p align="center"><img src="docs/ssf_banner.png" alt="Social Card of Spartan"></p>
 
-# Spartan Framework
+# Spartan Serverless Framework
 
 ## About
-Spartan Framework—"the Swiss Army knife for serverless development"—is a powerful scaffold that simplifies the creation of serverless applications on AWS. It streamlines your development process and ensures code consistency, allowing you to build scalable and efficient applications on AWS with ease.
+Spartan Serverless Framework—"the Swiss Army knife for serverless development"—is a powerful scaffold that simplifies the creation of serverless applications on AWS. It streamlines your development process and ensures code consistency, allowing you to build scalable and efficient applications on AWS with ease.
 
-#### Spartan Framework is versatile and can be used to efficiently develop:
+#### Spartan Serverless Framework is versatile and can be used to efficiently develop:
 - API
 - Workflows or State Machines
 - ETL Pipelines
 - Containerized Microservices
 
-Fully tested in AWS, Spartan Framework is also compatible with other cloud providers like Azure and GCP, making it a flexible choice for a wide range of serverless applications.
+Fully tested in AWS, Spartan Serverless Framework is also compatible with other cloud providers like Azure and GCP, making it a flexible choice for a wide range of serverless applications.
 
 
 ## Installation

@@ -234,6 +234,7 @@ def test_optional_fields_defaults():
         "DB_PORT": "",  # Set to empty to test default behavior
         "DB_SSL_CA": "",  # Set to empty to test None conversion
         "DB_SSL_VERIFY_CERT": "",  # Set to empty to test None conversion
+        "STORAGE_BUCKET": "",  # Set to empty to test None conversion
         "COGNITO_REGION": "us-east-1",
         "COGNITO_USER_POOL_ID": "test-pool-id",
         "COGNITO_CLIENT_ID": "test-client-id",
