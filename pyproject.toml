@@ -35,6 +35,10 @@ pymysql = "1.1.2"
 pg8000 = "1.31.4"
 psycopg2-binary = "2.9.10"
 email-validator = "^2.0.0"
+google-cloud-logging = {version = "^3.8.0", optional = true}
+
+[tool.poetry.extras]
+gcloud = ["google-cloud-logging"]
 
 [tool.poetry.group.dev.dependencies]
 alembic = "1.16.5"
