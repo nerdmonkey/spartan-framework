@@ -1,0 +1,12 @@
+# Ignore everything by default
+**
+
+# Allow only specific files and folders
+!LICENSE
+!README.md
+!app/**
+!config/**
+!docs/**
+!handlers/**
+!poetry.lock
+!requirements.txt
