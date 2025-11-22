@@ -1,12 +1,30 @@
-# Ignore everything by default
-**
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore, with the addition of
+# "#!include" directives (which are not supported by git).
 
-# Allow only specific files and folders
-!LICENSE
-!README.md
-!app/**
-!config/**
-!docs/**
-!handlers/**
-!poetry.lock
+.git
+.vscode
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+.coverage
+.tox
+.cache
+nosetests.xml
+.pytest_cache
+.vscode/
+
+# Allow main.py and required directories
+!main.py
 !requirements.txt
+!app/
+!config/
+!handlers/

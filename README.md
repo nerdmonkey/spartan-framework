@@ -10,7 +10,7 @@ Spartan Serverless Framework—"the Swiss Army knife for serverless development"
 - Workflows or State Machines
 - Small or Medium-sized ETL Pipelines
 - Containerized Microservices
-- AI Agent (Coming Soon)
+- Agentic AI (Coming Soon)
 
 Fully tested in AWS, Spartan Serverless Framework is also compatible with other cloud providers like Azure and GCP, making it a flexible choice for a wide range of serverless applications.
 
