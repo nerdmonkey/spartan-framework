@@ -238,6 +238,71 @@ def test_get_by_id_including_deleted_handles_exceptions(mocker):
     assert repo.get_by_id_including_deleted("1") is None
 
 
+def test_get_by_id_handles_dynamodb_exception(mocker):
+    def bad_get_item(**k):
+        raise Exception("boom")
+
+    client = SimpleNamespace(get_item=bad_get_item)
+    repo = make_repo_with_client(client)
+
+    # get_by_id should catch exceptions and return None
+    assert repo.get_by_id("1") is None
+
+
+def test_delete_by_id_success_and_failure(mocker):
+    client = SimpleNamespace(delete_item=lambda **k: None)
+    repo = make_repo_with_client(client)
+    assert repo.delete_by_id("1") is True
+
+    def bad_delete(**k):
+        raise Exception("nope")
+
+    client2 = SimpleNamespace(delete_item=bad_delete)
+    repo2 = make_repo_with_client(client2)
+    assert repo2.delete_by_id("1") is False
+
+
+def test_soft_delete_when_entity_missing_or_no_attr(mocker):
+    # Case: get_by_id_including_deleted returns None
+    repo = make_repo_with_client(SimpleNamespace())
+    repo.get_by_id_including_deleted = lambda _id: None
+    assert repo.soft_delete_by_id("1") is False
+
+    # Case: entity returned but has no deleted_at attribute
+    class NoDeleted:
+        pass
+
+    repo2 = make_repo_with_client(SimpleNamespace())
+    repo2.get_by_id_including_deleted = lambda _id: NoDeleted()
+    assert repo2.soft_delete_by_id("1") is False
+
+
+def test_get_by_id_including_deleted_validation_raises():
+    repo = make_repo_with_client(SimpleNamespace())
+    with pytest.raises(ValueError):
+        repo.get_by_id_including_deleted(None)
+    with pytest.raises(ValueError):
+        repo.get_by_id_including_deleted("..\\etc")
+
+
+def test_list_by_entity_type_handles_query_exception(mocker):
+    def bad_query(**k):
+        raise Exception("boom")
+
+    client = SimpleNamespace(query=bad_query)
+    repo = make_repo_with_client(client)
+
+    out = repo.list_by_entity_type()
+    assert out == {"items": [], "last_evaluated_key": None, "count": 0}
+
+
+def test_batch_get_by_ids_handles_batch_exception(mocker):
+    client = SimpleNamespace(batch_get_item=lambda **k: (_ for _ in ()).throw(Exception("boom")))
+    repo = make_repo_with_client(client, table_name="tbl")
+    out = repo.batch_get_by_ids(["1", "2"])
+    assert out == []
+
+
 def test_list_by_entity_type_builds_search_and_filters(mocker):
     captured = {}
 
