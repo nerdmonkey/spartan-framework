@@ -47,10 +47,10 @@ class DDBModel(BaseModel, ABC):
             if value is not None:
                 if isinstance(value, str):
                     item[key] = {"S": value}
-                elif isinstance(value, (int, float)):
-                    item[key] = {"N": str(value)}
                 elif isinstance(value, bool):
                     item[key] = {"BOOL": value}
+                elif isinstance(value, (int, float)):
+                    item[key] = {"N": str(value)}
                 elif isinstance(value, datetime):
                     item[key] = {"S": value.isoformat()}
                 elif isinstance(value, list):
