@@ -13,6 +13,45 @@ sys.modules["aws_xray_sdk.core"] = fake_core
 sys.modules["aws_xray_sdk"] = types.ModuleType("aws_xray_sdk")
 sys.modules["aws_xray_sdk"].core = fake_core
 
+import pytest
+from app.services.tracing.factory import TracerFactory
+from app.services.tracing.local import LocalTracer
+from app.services.tracing.cloud import CloudTracer
+from app.services.tracing.gcloud import GCloudTracer
+
+def test_env_override_selects_gcloud(monkeypatch):
+    # Ensure env('TRACER_TYPE') returns 'gcloud'
+    monkeypatch.setattr(
+        "app.services.tracing.factory.env",
+        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+    )
+    # Patch GCloudTracer to simulate GCP tracing available
+    import app.services.tracing.gcloud as gcloud_mod
+    monkeypatch.setattr(gcloud_mod, "GCP_TRACING_AVAILABLE", True)
+    class FakeTrace:
+        @staticmethod
+        def TraceServiceClient(*args, **kwargs):
+            return object()
+    monkeypatch.setattr(gcloud_mod, "trace_v1", FakeTrace(), raising=False)
+    tracer = TracerFactory.create_tracer(service_name="svc")
+    assert isinstance(tracer, GCloudTracer)
+
+def test_param_override_selects_local(monkeypatch):
+    # Even if environment indicates cloud, explicit parameter should win
+    monkeypatch.setattr(
+        "app.services.tracing.factory.env",
+        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+    )
+    tracer = TracerFactory.create_tracer(service_name="svc", tracer_type="local")
+    assert isinstance(tracer, LocalTracer)
+
+def test_invalid_override_raises(monkeypatch):
+    monkeypatch.setattr(
+        "app.services.tracing.factory.env",
+        lambda k, d=None: {"APP_ENVIRONMENT": "production"}.get(k, d),
+    )
+    with pytest.raises(ValueError):
+        TracerFactory.create_tracer(service_name="svc", tracer_type="unsupported-tracer")
 
 def test_gcloud_tracer_basic_behaviour(monkeypatch):
     """GCloudTracer should construct when trace_v1 is available and its wrappers should call through."""
