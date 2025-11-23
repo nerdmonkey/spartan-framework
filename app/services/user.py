@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.exceptions.user import (
     DuplicateUserError,
-    InvalidSortFieldError,
-    UserNotFoundError,
+    InvalidSortFieldException,
+    UserNotFoundException,
 )
 from app.models.user import User
 from app.requests.user import UserCreateRequest, UserUpdateRequest
@@ -47,7 +47,7 @@ class UserService:
         """
         user = self.db.query(User).filter(User.id == id).first()
         if not user:
-            raise UserNotFoundError("User not found")
+            raise UserNotFoundException("User not found")
         return user
 
     def filter(self, *conditions):
@@ -88,7 +88,7 @@ class UserService:
 
         # Sorting logic
         if not hasattr(User, sort_by):
-            raise InvalidSortFieldError("Invalid sort field or sort type")
+            raise InvalidSortFieldException("Invalid sort field or sort type")
 
         sort_column = getattr(User, sort_by)
         query = query.order_by(
@@ -161,33 +161,25 @@ class UserService:
             updated_at=new_user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
         )
 
-    def update(
-        self, id: int, user_request: UserUpdateRequest
-    ) -> UserUpdateResponse:
+    def update(self, id: int, user_request: UserUpdateRequest) -> UserUpdateResponse:
         """
         Update a user in the database.
-
         Args:
             id (int): The ID of the user.
             user_request (UserUpdateRequest): The user update request object.
-
         Returns:
             UserUpdateResponse: The response data of the updated user.
-
         Raises:
-            UserNotFoundError: If the user is not found.
+            UserNotFoundException: If the user is not found.
         """
         user = self.get_by_id(id)
         update_data = user_request.model_dump(exclude_unset=True)
         if "password" in update_data:
             update_data["password"] = "hashed_" + update_data["password"]
-
         for key, value in update_data.items():
             setattr(user, key, value)
-
         self.db.commit()
         self.db.refresh(user)
-
         return UserUpdateResponse(
             id=user.id,
             username=user.username,
@@ -199,18 +191,14 @@ class UserService:
     def delete(self, id: int) -> UserResponse:
         """
         Delete a user by ID.
-
         Args:
             id (int): The ID of the user to delete.
-
         Returns:
             UserResponse: The deleted user information.
-
         Raises:
-            UserNotFoundError: If the user is not found.
+            UserNotFoundException: If the user is not found.
         """
         user = self.get_by_id(id)
-
         response = UserResponse(
             id=user.id,
             username=user.username,
@@ -218,10 +206,8 @@ class UserService:
             created_at=user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             updated_at=user.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
         )
-
         self.db.delete(user)
         self.db.commit()
-
         return response
 
     def total(self) -> int:
@@ -236,15 +222,12 @@ class UserService:
     def find(self, id: int) -> UserResponse:
         """
         Find a user by their ID and return the user response.
-
         Args:
             id (int): The ID of the user.
-
         Returns:
             UserResponse: The user response.
-
         Raises:
-            UserNotFoundError: If the user is not found.
+            UserNotFoundException: If the user is not found.
         """
         user = self.get_by_id(id)
         return UserResponse(
@@ -261,7 +244,7 @@ class UserService:
         )
 
         if not users_to_delete:
-            raise UserNotFoundError("No users found for the given IDs")
+            raise UserNotFoundException("No users found for the given IDs")
 
         deleted_user_ids = [user.id for user in users_to_delete]
         for user in users_to_delete:
