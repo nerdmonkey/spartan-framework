@@ -38,15 +38,15 @@ class LoggerFactory:
         """Detect if running in Google Cloud Platform environment."""
         # Check for Google Cloud environment indicators
         return any([
-            os.environ.get('GOOGLE_CLOUD_PROJECT'),
-            os.environ.get('GCLOUD_PROJECT'),
-            os.environ.get('GCP_PROJECT'),
-            os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'),
+            env('GOOGLE_CLOUD_PROJECT'),
+            env('GCLOUD_PROJECT'),
+            env('GCP_PROJECT'),
+            env('GOOGLE_APPLICATION_CREDENTIALS'),
             # Check for Cloud Run metadata server
             os.path.exists('/var/run/secrets/kubernetes.io/serviceaccount') and
-            os.environ.get('K_SERVICE'),  # Cloud Run indicator
+            env('K_SERVICE'),  # Cloud Run indicator
             # Check for App Engine
-            os.environ.get('GAE_APPLICATION'),
+            env('GAE_APPLICATION'),
             # Check for Compute Engine
             os.path.exists('/sys/class/dmi/id/product_name') and
             'Google' in open('/sys/class/dmi/id/product_name', 'r').read().strip() if
