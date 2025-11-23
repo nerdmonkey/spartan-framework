@@ -182,3 +182,4 @@ docker-compose.yml
 *.yml
 tinker.py
 .python_version
+.env.*
