@@ -171,3 +171,121 @@ def test_exists_uses_get_by_id(mocker):
     assert repo.exists("1") is True
     repo.get_by_id = lambda x: None
     assert repo.exists("1") is False
+
+
+def test_list_by_entity_type_with_pagination_and_search(mocker):
+    # Prepare items more than requested limit and include a bad item
+    items = [
+        {"PK": {"S": "ENTITY#1"}, "SK": {"S": "METADATA"}, "Name": {"S": "one"}},
+        {"PK": {"S": "ENTITY#2"}, "SK": {"S": "METADATA"}, "Name": {"S": "two"}},
+        {"PK": {"S": "ENTITY#3"}, "SK": {"S": "METADATA"}, "Name": {"S": "bad"}},
+    ]
+
+    def query(**k):
+        return {"Items": items, "Count": 3, "LastEvaluatedKey": {"PK": {"S": "ENTITY#3"}}}
+
+    client = SimpleNamespace(query=query)
+    repo = make_repo_with_client(client)
+
+    out = repo.list_by_entity_type(limit=1, search=None)
+    # Should return only one valid entity and include last_evaluated_key from response
+    assert out["count"] == 1
+    assert len(out["items"]) == 1
+    assert out["last_evaluated_key"] == {"PK": {"S": "ENTITY#3"}}
+
+
+def test_batch_get_by_ids_batches_and_handles_parse_errors(mocker):
+    # Create 150 ids to force batching (100 + 50)
+    ids = [str(i) for i in range(1, 151)]
+
+    # Prepare responses per batch: first batch returns two valid items, second returns one bad and one valid
+    def batch_get_item(RequestItems):
+        keys = RequestItems.get("tbl", {}).get("Keys", [])
+        # decide which batch based on key content
+        first_pk = keys[0]["PK"]["S"]
+        if first_pk.endswith("#1"):
+            # simulate many items returned for first batch
+            resp_items = [
+                {"PK": {"S": "ENTITY#1"}, "SK": {"S": "METADATA"}, "Name": {"S": "one"}},
+                {"PK": {"S": "ENTITY#2"}, "SK": {"S": "METADATA"}, "Name": {"S": "two"}},
+            ]
+        else:
+            resp_items = [
+                {"PK": {"S": "ENTITY#3"}, "SK": {"S": "METADATA"}, "Name": {"S": "bad"}},
+                {"PK": {"S": "ENTITY#4"}, "SK": {"S": "METADATA"}, "Name": {"S": "four"}},
+            ]
+        return {"Responses": {"tbl": resp_items}}
+
+    client = SimpleNamespace(batch_get_item=batch_get_item)
+    repo = make_repo_with_client(client, table_name="tbl")
+
+    out = repo.batch_get_by_ids(ids)
+    # Should include parsed valid items and skip the 'bad' one
+    ids_out = [e.id for e in out]
+    assert "1" in ids_out
+    assert "2" in ids_out
+    assert "4" in ids_out
+    assert "3" not in ids_out
+
+
+def test_get_by_id_including_deleted_handles_exceptions(mocker):
+    def bad_get_item(**k):
+        raise Exception("dynamodb down")
+
+    client = SimpleNamespace(get_item=bad_get_item)
+    repo = make_repo_with_client(client)
+
+    assert repo.get_by_id_including_deleted("1") is None
+
+
+def test_list_by_entity_type_builds_search_and_filters(mocker):
+    captured = {}
+
+    def query(**k):
+        # capture the query params passed to dynamodb
+        captured.update(k)
+        # return a single valid item
+        return {"Items": [{"PK": {"S": "ENTITY#1"}, "SK": {"S": "METADATA"}, "Name": {"S": "one"}}], "Count": 1}
+
+    client = SimpleNamespace(query=query)
+    repo = make_repo_with_client(client)
+
+    out = repo.list_by_entity_type(limit=5, search="foo", sort_by="created_at", sort_order="asc", include_deleted=False)
+
+    # verify we got one item
+    assert out["count"] == 1
+
+    # verify query params include deletion filter and search filter
+    assert "FilterExpression" in captured
+    assert "DeletedAt" in captured["FilterExpression"] or "attribute_not_exists(DeletedAt)" in captured["FilterExpression"]
+    # search adds contains(#name, :search)
+    assert "contains(#name, :search)" in captured["FilterExpression"]
+    # ExpressionAttributeNames should map #name to Name
+    assert captured.get("ExpressionAttributeNames", {}).get("#name") == "Name"
+    # ExpressionAttributeValues should include :search
+    assert captured.get("ExpressionAttributeValues", {}).get(":search", {}).get("S") == "foo"
+    # Limit should be min(limit*3, 100) => 15
+    assert captured.get("Limit") == 15
+    # ScanIndexForward should be True because sort_order=asc
+    assert captured.get("ScanIndexForward") is True
+
+
+def test_list_by_entity_type_include_deleted_true_no_deletion_filter(mocker):
+    captured = {}
+
+    def query(**k):
+        captured.update(k)
+        return {"Items": [], "Count": 0}
+
+    client = SimpleNamespace(query=query)
+    repo = make_repo_with_client(client)
+
+    out = repo.list_by_entity_type(limit=2, search=None, sort_order="desc", include_deleted=True)
+
+    # No deletion FilterExpression when include_deleted=True
+    fe = captured.get("FilterExpression")
+    if fe:
+        assert "DeletedAt" not in fe
+
+    # ScanIndexForward should be False for desc
+    assert captured.get("ScanIndexForward") is False
