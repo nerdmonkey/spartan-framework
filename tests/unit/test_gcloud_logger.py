@@ -4,17 +4,14 @@ from types import SimpleNamespace
 
 def test_gcloud_happy_path_redaction_and_structured_logging(monkeypatch):
     """GCloudLogger should create structured logs and redact sensitive fields."""
+    import sys
+    # Patch sys.modules so imports in gcloud.py resolve to stubs
+    sys.modules["google.cloud.logging"] = SimpleNamespace(Client=lambda: SimpleNamespace())
+    sys.modules["google.cloud.logging_v2.handlers"] = SimpleNamespace(CloudLoggingHandler=lambda client, name=None: SimpleNamespace())
+
     mod = __import__("app.services.logging.gcloud", fromlist=["*"])
-
-    # Ensure module thinks GCP logging is available and provide minimal stubs
     monkeypatch.setattr(mod, "GCP_LOGGING_AVAILABLE", True)
-    monkeypatch.setattr(mod, "gcp_logging", SimpleNamespace(Client=lambda: SimpleNamespace()))
-    monkeypatch.setattr(mod, "CloudLoggingHandler", lambda client, name=None: SimpleNamespace())
-
-    # Patch env to deterministic values
     monkeypatch.setattr(mod, "env", lambda k, d=None: {"APP_ENVIRONMENT": "ci", "APP_VERSION": "9.9.9", "LOG_SAMPLE_RATE": "1.0"}.get(k, d))
-
-    # Create logger instance
     from app.services.logging.gcloud import GCloudLogger
 
     gw = GCloudLogger(service_name="svc", level="INFO", sample_rate=1.0)
@@ -49,12 +46,13 @@ def test_gcloud_happy_path_redaction_and_structured_logging(monkeypatch):
 
 def test_gcloud_sampling_blocks_logging(monkeypatch):
     """When sampling is off, no calls should be made to the underlying logger."""
+    import sys
+    sys.modules["google.cloud.logging"] = SimpleNamespace(Client=lambda: SimpleNamespace())
+    sys.modules["google.cloud.logging_v2.handlers"] = SimpleNamespace(CloudLoggingHandler=lambda client, name=None: SimpleNamespace())
+
     mod = __import__("app.services.logging.gcloud", fromlist=["*"])
     monkeypatch.setattr(mod, "GCP_LOGGING_AVAILABLE", True)
-    monkeypatch.setattr(mod, "gcp_logging", SimpleNamespace(Client=lambda: SimpleNamespace()))
-    monkeypatch.setattr(mod, "CloudLoggingHandler", lambda client, name=None: SimpleNamespace())
     monkeypatch.setattr(mod, "env", lambda k, d=None: {"LOG_SAMPLE_RATE": "0.0", "APP_ENVIRONMENT": "ci", "APP_VERSION": "v"}.get(k, d))
-
     from app.services.logging.gcloud import GCloudLogger
 
     gw = GCloudLogger(service_name="svc", level="INFO")
@@ -78,18 +76,17 @@ def test_gcloud_sampling_blocks_logging(monkeypatch):
 
 def test_gcloud_exception_logging_and_fallback(monkeypatch):
     """exception() should call logger.exception and fallback path should set a fallback logger when handler setup fails."""
+    import sys
+    sys.modules["google.cloud.logging"] = SimpleNamespace(Client=lambda: SimpleNamespace())
+    # Patch handler to raise
+    class RaiseHandler:
+        def __new__(cls, *args, **kwargs):
+            raise RuntimeError("boom")
+    sys.modules["google.cloud.logging_v2.handlers"] = SimpleNamespace(CloudLoggingHandler=RaiseHandler)
+
     mod = __import__("app.services.logging.gcloud", fromlist=["*"])
-
-    # Make CloudLoggingHandler constructor raise to trigger fallback
     monkeypatch.setattr(mod, "GCP_LOGGING_AVAILABLE", True)
-    monkeypatch.setattr(mod, "gcp_logging", SimpleNamespace(Client=lambda: SimpleNamespace()))
-
-    def raise_handler(client, name=None):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(mod, "CloudLoggingHandler", raise_handler)
     monkeypatch.setattr(mod, "env", lambda k, d=None: {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "ci", "APP_VERSION": "v"}.get(k, d))
-
     from app.services.logging.gcloud import GCloudLogger
 
     gw = GCloudLogger(service_name="svc", level="ERROR")
