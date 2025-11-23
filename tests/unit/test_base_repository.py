@@ -51,7 +51,7 @@ class FakeModel:
         }
 
 
-class TestRepo(BaseRepository):
+class RepoImpl(BaseRepository):
     def get_model_class(self):
         return FakeModel
 
@@ -60,7 +60,7 @@ class TestRepo(BaseRepository):
 
 
 def make_repo_with_client(client, table_name="tbl"):
-    repo = TestRepo()
+    repo = RepoImpl()
     repo.dynamodb = client
     repo.table_name = table_name
     return repo
