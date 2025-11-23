@@ -78,15 +78,13 @@ def get_dynamodb_clients():
 import os
 
 
-if os.environ.get("APP_ENVIRONMENT") != "test":
-    dynamodb_resource, dynamodb_client, table = get_dynamodb_clients()
-    table_name = env().DDB_TABLE_NAME
-else:
-    # Lazy initialization for tests
-    dynamodb_resource = None
-    dynamodb_client = None
-    table = None
-    table_name = None
+# Do not initialize DynamoDB clients at import time. Keep lazy initialization
+# so tests (and other consumers) can control client creation (and use moto).
+# This prevents accidental network calls during test collection.
+dynamodb_resource = None
+dynamodb_client = None
+table = None
+table_name = None
 
 
 def get_clients():
