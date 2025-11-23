@@ -13,8 +13,8 @@ class ProfileResponse(BaseModel):
         email (str): The email address of the user.
     """
 
-    given_name: Optional[str]
-    family_name: Optional[str]
+    given_name: Optional[str] = None
+    family_name: Optional[str] = None
 
 
 class UserResponse(BaseModel):
