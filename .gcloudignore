@@ -11,6 +11,8 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+database/
+docs/
 env/
 venv/
 .venv/
