@@ -1,8 +1,7 @@
-from contextlib import contextmanager
-
-from contextlib import contextmanager
 import sys
 import types
+from contextlib import contextmanager
+
 
 # Prevent aws_xray_sdk from creating sockets during import in tests by
 # inserting a lightweight fake module into sys.modules before importing
@@ -13,37 +12,49 @@ sys.modules["aws_xray_sdk.core"] = fake_core
 sys.modules["aws_xray_sdk"] = types.ModuleType("aws_xray_sdk")
 sys.modules["aws_xray_sdk"].core = fake_core
 
-import pytest
-from app.services.tracing.factory import TracerFactory
-from app.services.tracing.local import LocalTracer
-from app.services.tracing.cloud import CloudTracer
-from app.services.tracing.gcloud import GCloudTracer
+import pytest  # noqa: E402
+
+from app.services.tracing.factory import TracerFactory  # noqa: E402
+from app.services.tracing.gcloud import GCloudTracer  # noqa: E402
+from app.services.tracing.local import LocalTracer  # noqa: E402
+
 
 def test_env_override_selects_gcloud(monkeypatch):
     # Ensure env('TRACER_TYPE') returns 'gcloud'
     monkeypatch.setattr(
         "app.services.tracing.factory.env",
-        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+        lambda k, d=None: {
+            "TRACER_TYPE": "gcloud",
+            "APP_ENVIRONMENT": "production",
+        }.get(k, d),
     )
     # Patch GCloudTracer to simulate GCP tracing available
     import app.services.tracing.gcloud as gcloud_mod
+
     monkeypatch.setattr(gcloud_mod, "GCP_TRACING_AVAILABLE", True)
+
     class FakeTrace:
         @staticmethod
         def TraceServiceClient(*args, **kwargs):
             return object()
+
     monkeypatch.setattr(gcloud_mod, "trace_v1", FakeTrace(), raising=False)
     tracer = TracerFactory.create_tracer(service_name="svc")
     assert isinstance(tracer, GCloudTracer)
+
 
 def test_param_override_selects_local(monkeypatch):
     # Even if environment indicates cloud, explicit parameter should win
     monkeypatch.setattr(
         "app.services.tracing.factory.env",
-        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+        lambda k, d=None: {
+            "TRACER_TYPE": "gcloud",
+            "APP_ENVIRONMENT": "production",
+        }.get(k, d),
     )
     tracer = TracerFactory.create_tracer(service_name="svc", tracer_type="local")
     assert isinstance(tracer, LocalTracer)
+
 
 def test_invalid_override_raises(monkeypatch):
     monkeypatch.setattr(
@@ -51,31 +62,49 @@ def test_invalid_override_raises(monkeypatch):
         lambda k, d=None: {"APP_ENVIRONMENT": "production"}.get(k, d),
     )
     with pytest.raises(ValueError):
-        TracerFactory.create_tracer(service_name="svc", tracer_type="unsupported-tracer")
+        TracerFactory.create_tracer(
+            service_name="svc", tracer_type="unsupported-tracer"
+        )
 
-def test_gcloud_tracer_basic_behaviour(monkeypatch):
-    """GCloudTracer should construct when trace_v1 is available and its wrappers should call through."""
+
+def test_gcloud_tracer_basic_behaviour(monkeypatch, mocker):
+    """
+    GCloudTracer should construct with OpenTelemetry and its
+    wrappers should call through.
+    """
     mod = __import__("app.services.tracing.gcloud", fromlist=["*"])
 
-    # Make trace available
+    # Make OpenTelemetry available
     monkeypatch.setattr(mod, "GCP_TRACING_AVAILABLE", True)
-    monkeypatch.setattr(mod, "trace_v1", __import__("types").SimpleNamespace(TraceServiceClient=lambda: __import__("types").SimpleNamespace()), raising=False)
+
+    # Mock OpenTelemetry components
+    mock_span = mocker.Mock()
+    mock_span.__enter__ = mocker.Mock(return_value=mock_span)
+    mock_span.__exit__ = mocker.Mock(return_value=None)
+
+    mock_tracer = mocker.Mock()
+    mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
+
+    monkeypatch.setattr(mod, "CloudTraceSpanExporter", mocker.Mock())
+    monkeypatch.setattr(mod, "TracerProvider", mocker.Mock())
+    monkeypatch.setattr(mod.trace, "get_tracer", mocker.Mock(return_value=mock_tracer))
 
     from app.services.tracing.gcloud import GCloudTracer
 
     gw = GCloudTracer("svc")
+    gw.tracer = mock_tracer
 
     # capture_lambda_handler should return a wrapper that calls the original
     called = {}
 
     def handler(event, context):
-        called['ok'] = True
+        called["ok"] = True
         return "result"
 
     wrapped = gw.capture_lambda_handler(handler)
     res = wrapped({}, {})
     assert res == "result"
-    assert called.get('ok') is True
+    assert called.get("ok") is True
 
     # create_segment should be usable as a context manager
     with gw.create_segment("seg"):
@@ -83,9 +112,18 @@ def test_gcloud_tracer_basic_behaviour(monkeypatch):
     assert x == 1
 
 
-def test_tracerservice_delegation(monkeypatch):
-    """TracerService helpers should delegate to the underlying tracer instance."""
-    from app.services.tracer import TracerService, trace_function, trace_segment, capture_lambda_handler, capture_method
+def test_tracerservice_delegation(monkeypatch):  # noqa: C901
+    """
+    TracerService helpers should delegate to the underlying tracer
+    instance.
+    """
+    from app.services.tracer import (
+        TracerService,
+        capture_lambda_handler,
+        capture_method,
+        trace_function,
+        trace_segment,
+    )
 
     # Create a fake tracer that records calls
     class FakeTracer:

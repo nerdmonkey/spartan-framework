@@ -30,7 +30,7 @@ spartan --help
 1. Install all the required packages
 ```bash
 python -m venv .venv
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 2. Copy the .env.example to .env
 
@@ -49,14 +49,9 @@ spartan migrate upgrade
 spartan db seed
 ```
 
-6. Then run it using the following command
-```bash
-spartan serve
-```
-
 ## Testing
 ```bash
-pytest
+pytest -vv
 ```
 
 ## Changelog

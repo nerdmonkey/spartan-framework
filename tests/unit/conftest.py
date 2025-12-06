@@ -8,16 +8,6 @@ import pytest
 
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_aws_services(mocker):
-    """Mock AWS services for unit tests."""
+def setup_test_environment():
+    """Setup test environment variables."""
     os.environ["APP_ENVIRONMENT"] = "test"
-
-    mock_ddb = mocker.patch("app.helpers.ddb.dynamodb_client")
-    mock_table = mocker.patch("app.helpers.ddb.table")
-    mocker.patch("boto3.client")
-    mocker.patch("boto3.resource")
-
-    mock_table.return_value = mocker.Mock()
-    mock_ddb.return_value = mocker.Mock()
-
-    return {"dynamodb": mock_ddb, "table": mock_table}

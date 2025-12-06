@@ -5,6 +5,7 @@ from faker import Faker
 from app.helpers.database import db
 from app.models.user import User
 
+
 db = db()
 fake = Faker()
 

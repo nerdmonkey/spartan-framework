@@ -12,7 +12,7 @@ class LoggerService:
     def get_logger(service_name: str = None):
         """Get cached logger instance for the given service name."""
         if not service_name:
-            service_name = "spartan-framework"
+            service_name = "spartan-framework-lazaro"
 
         log_level = env("LOG_LEVEL") or "INFO"
         return LoggerFactory.create_logger(service_name, log_level)

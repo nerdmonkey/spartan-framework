@@ -1,20 +1,59 @@
-from handlers.inference import main as inference_main
+import functions_framework
+from cloudevents.http.event import CloudEvent
+from app.helpers.logger import get_logger
+from app.helpers.environment import env
 
-def main(event, context):
-    """Entry point for Google Cloud Functions."""
-    return inference_main(event, context)
+logger = get_logger("spartan.lazaro.main")
+
+@functions_framework.cloud_event
+def main(cloud_event: CloudEvent) -> None:
+    try:
+        # Process event
+        logger.info("Received Cloud Event", extra={
+            "event_type": cloud_event["type"],
+            "event_source": cloud_event["source"],
+            "event_id": cloud_event["id"],
+            "app_environment": env("APP_ENVIRONMENT", "unknown"),
+            "log_level": env("LOG_LEVEL", "INFO"),
+            "log_channel": env("LOG_CHANNEL", "default"),
+            "data": cloud_event.data
+        })
+    except Exception as e:
+        logger.exception("Failed to process", extra={"error": str(e)})
+        raise  # Causes Pub/Sub to retry
+
+    # No return value needed for Pub/Sub triggers
 
 
 if __name__ == "__main__":
-    from app.helpers.context import MockLambdaContext, MockLambdaEvent
-    from app.helpers.logger import get_logger
+    """
+    Local testing entry point.
+    Run with: python main.py
+    """
+    from app.helpers.context import MockCloudEvent, MockCloudFunctionsContext
 
-    logger = get_logger("spartan.inference")
+    # Create a mock CloudEvent for testing
+    mock_event_data = MockCloudEvent().to_dict()
 
-    event = MockLambdaEvent()
-    context = MockLambdaContext()
+    # Create CloudEvent from mock data
+    test_event = CloudEvent(
+        attributes={
+            "specversion": mock_event_data["specversion"],
+            "type": mock_event_data["type"],
+            "source": mock_event_data["source"],
+            "id": mock_event_data["id"],
+        },
+        data=mock_event_data["data"]
+    )
+
+    # Test the function locally
+    print("=" * 60)
+    print("Testing Cloud Function locally with mock GCP CloudEvent")
+    print("=" * 60)
 
     try:
-        logger.info("Handler Response", extra={"response": inference_main(event, context)})
+        main(test_event)
+        print("\n✓ Function executed successfully")
     except Exception as e:
-        logger.exception("Unhandled exception in main", extra={"error": str(e)})
+        print(f"\n✗ Function failed: {e}")
+        raise

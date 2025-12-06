@@ -1,20 +1,38 @@
 import json
-from app.helpers.context import MockLambdaContext, MockLambdaEvent
 
-def test_mock_lambda_context_attributes():
-    ctx = MockLambdaContext()
-    assert ctx.function_name == "mock_function_name"
-    assert ctx.function_version == "$LATEST"
-    assert ctx.invoked_function_arn.startswith("arn:aws:lambda")
-    assert ctx.memory_limit_in_mb == 512
-    assert ctx.aws_request_id == "mock_aws_request_id"
-    assert ctx.log_group_name == "/aws/lambda/mock_function_name"
-    assert ctx.log_stream_name.startswith("2024/10/20")
-    assert ctx.get_remaining_time_in_millis() == 300000
+from app.helpers.context import (
+    MockCloudEvent,
+    MockCloudFunctionsContext,
+    MockCloudRunContext,
+)
 
-def test_mock_lambda_event_to_dict_and_json():
-    event = MockLambdaEvent()
+
+def test_mock_cloud_functions_context_attributes():
+    ctx = MockCloudFunctionsContext()
+    assert ctx.event_id == "mock_event_id_123456"
+    assert ctx.event_type == "google.cloud.pubsub.topic.v1.messagePublished"
+    assert ctx.timestamp is not None
+    assert ctx.resource == "projects/mock-project/topics/mock-topic"
+    assert ctx.request_id == "mock_request_id_abc123"
+
+
+def test_mock_cloud_run_context_attributes():
+    ctx = MockCloudRunContext()
+    assert ctx.request_id == "mock_request_id_xyz789"
+    assert ctx.service == "mock-cloud-run-service"
+    assert ctx.revision == "mock-cloud-run-service-00001-abc"
+
+
+def test_mock_cloud_event_to_dict_and_json():
+    event = MockCloudEvent()
     d = event.to_dict()
-    assert d == {"key1": "value1", "key2": "value2", "key3": "value3"}
+    assert d["specversion"] == "1.0"
+    assert d["type"] == "google.cloud.pubsub.topic.v1.messagePublished"
+    assert d["source"].startswith("//pubsub.googleapis.com")
+    assert d["id"] == "mock_event_id_123456"
+    assert "data" in d
+    assert "message" in d["data"]
+
     j = event.to_json()
-    assert json.loads(j) == d
+    parsed = json.loads(j)
+    assert parsed["type"] == "google.cloud.pubsub.topic.v1.messagePublished"
