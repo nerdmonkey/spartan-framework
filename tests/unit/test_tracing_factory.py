@@ -16,6 +16,7 @@ def test_tracer_factory_selects_gcloud_when_gcp_env(monkeypatch):
     # Ensure gcloud tracer thinks the GCP tracing client is available
     # Prevent aws_xray_sdk from performing network/socket operations during import
     import sys
+    from unittest.mock import MagicMock
 
     fake_xray = SimpleNamespace(
         xray_recorder=SimpleNamespace(
@@ -31,14 +32,17 @@ def test_tracer_factory_selects_gcloud_when_gcp_env(monkeypatch):
 
     mod_gcloud = importlib.import_module("app.services.tracing.gcloud")
     monkeypatch.setattr(mod_gcloud, "GCP_TRACING_AVAILABLE", True)
-    # Provide a fake trace_v1 with TraceServiceClient constructor
-    # (module may not define trace_v1)
-    monkeypatch.setattr(
-        mod_gcloud,
-        "trace_v1",
-        SimpleNamespace(TraceServiceClient=lambda: SimpleNamespace()),
-        raising=False,
-    )
+    
+    mock_trace = MagicMock()
+    mock_trace.get_tracer = MagicMock()
+    mock_trace.set_tracer_provider = MagicMock()
+    
+    monkeypatch.setattr(mod_gcloud, "CloudTraceSpanExporter", MagicMock(), raising=False)
+    monkeypatch.setattr(mod_gcloud, "TracerProvider", MagicMock(), raising=False)
+    monkeypatch.setattr(mod_gcloud, "BatchSpanProcessor", MagicMock(), raising=False)
+    monkeypatch.setattr(mod_gcloud, "ResourceAttributes", MagicMock(), raising=False)
+    monkeypatch.setattr(mod_gcloud, "Resource", MagicMock(), raising=False)
+    monkeypatch.setattr(mod_gcloud, "trace", mock_trace, raising=False)
 
     # Reload factory so it picks up the patched env
     factory = importlib.reload(importlib.import_module("app.services.tracing.factory"))

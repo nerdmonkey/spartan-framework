@@ -1,8 +1,19 @@
 # .coveragerc
 
 [run]
-source = my_module
-omit = */.serverless/*, */tests/*, */.venv/*, */venv/*, */database/*, tinker.py, handlers/company.py, handlers/order.py, __init__.py
+source = app
+omit =
+    */tests/*
+    */.venv/*
+    */venv/*
+    */database/migrations/*
+    */database/seeders/*
+    tinker.py
+    */__init__.py
+    */__pycache__/*
+    */.pytest_cache/*
+    */.serverless/*
 
 [report]
 show_missing = true
+precision = 2

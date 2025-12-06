@@ -121,6 +121,10 @@ def test_gcloud_logger_resource_labels_cloud_run(monkeypatch):
     mock_logger = MagicMock()
     mock_client.logger.return_value = mock_logger
 
+    # Mock Resource class to track initialization
+    mock_resource_instance = MagicMock()
+    mock_resource_class = MagicMock(return_value=mock_resource_instance)
+
     # Mock env() to return Cloud Run environment values
     def mock_env(key, default=None):
         env_values = {
@@ -132,15 +136,20 @@ def test_gcloud_logger_resource_labels_cloud_run(monkeypatch):
 
     with patch(
         "app.services.logging.gcloud.get_gcp_logging_client", return_value=mock_client
-    ), patch("app.services.logging.gcloud.env", side_effect=mock_env):
+    ), patch("app.services.logging.gcloud.env", side_effect=mock_env), patch(
+        "app.services.logging.gcloud.Resource", mock_resource_class
+    ):
         from app.services.logging.gcloud import GCloudLogger
 
         logger = GCloudLogger("test-service", sample_rate=1.0)
 
         assert logger.resource is not None
-        assert logger.resource.type == "cloud_run_revision"
-        assert logger.resource.labels["service_name"] == "my-service"
-        assert logger.resource.labels["revision_name"] == "my-service-abc123"
+        # Verify Resource was called with correct arguments
+        mock_resource_class.assert_called_once()
+        call_kwargs = mock_resource_class.call_args[1]
+        assert call_kwargs["type"] == "cloud_run_revision"
+        assert call_kwargs["labels"]["service_name"] == "my-service"
+        assert call_kwargs["labels"]["revision_name"] == "my-service-abc123"
 
 
 def test_gcloud_logger_exception_with_context(monkeypatch):

@@ -113,8 +113,8 @@ class Handlers:
         Create a new instance of the Handlers class if one does not already exist.
 
         This method ensures that only one instance of the Handlers class is created
-        (singleton pattern). If an instance already exists, it returns the existing instance.
-        Otherwise, it creates a new instance and initializes the handlers.
+        (singleton pattern). If an instance already exists, it returns the existing
+        instance. Otherwise, it creates a new instance and initializes the handlers.
 
         Returns:
             Handlers: The singleton instance of the Handlers class.

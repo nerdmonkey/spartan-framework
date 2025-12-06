@@ -10,7 +10,6 @@ from app.services.tracing.gcloud import GCP_TRACING_AVAILABLE, GCloudTracer
 
 def test_gcloud_tracer_import_error_when_unavailable(mocker):
     """Test GCloudTracer raises ImportError when OpenTelemetry not available."""
-    # Temporarily patch GCP_TRACING_AVAILABLE to False
     mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", False)
 
     with pytest.raises(ImportError) as exc_info:
@@ -19,23 +18,22 @@ def test_gcloud_tracer_import_error_when_unavailable(mocker):
     assert "OpenTelemetry dependencies not available" in str(exc_info.value)
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_initialization(mocker):
     """Test GCloudTracer initializes with service name and OpenTelemetry tracer."""
-    # Mock OpenTelemetry components
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_exporter = mocker.Mock()
     mock_provider = mocker.Mock()
     mock_tracer = mocker.Mock()
-
-    mocker.patch(
-        "app.services.tracing.gcloud.CloudTraceSpanExporter", return_value=mock_exporter
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", return_value=mock_exporter, create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
 
     tracer = GCloudTracer("my-service")
 
@@ -43,22 +41,22 @@ def test_gcloud_tracer_initialization(mocker):
     assert tracer.tracer is mock_tracer
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_initialization_with_project_id(mocker):
     """Test GCloudTracer initializes with project_id."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_exporter = mocker.Mock()
     mock_provider = mocker.Mock()
     mock_tracer = mocker.Mock()
-
-    mocker.patch(
-        "app.services.tracing.gcloud.CloudTraceSpanExporter", return_value=mock_exporter
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", return_value=mock_exporter, create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
 
     tracer = GCloudTracer("my-service", project_id="my-project")
 
@@ -66,9 +64,9 @@ def test_gcloud_tracer_initialization_with_project_id(mocker):
     assert tracer.project_id == "my-project"
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_capture_lambda_handler(mocker):
     """Test capture_lambda_handler decorator wraps function and creates span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -76,14 +74,20 @@ def test_gcloud_tracer_capture_lambda_handler(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    mock_trace.SpanKind = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", mocker.Mock(OK=mocker.Mock(), ERROR=mocker.Mock()), create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -98,9 +102,9 @@ def test_gcloud_tracer_capture_lambda_handler(mocker):
     mock_tracer.start_as_current_span.assert_called_once()
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_capture_lambda_handler_with_exception(mocker):
     """Test capture_lambda_handler records exceptions on span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -108,14 +112,22 @@ def test_gcloud_tracer_capture_lambda_handler_with_exception(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    mock_trace.SpanKind = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", mocker.Mock(OK=mocker.Mock(), ERROR=mocker.Mock()), create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -132,9 +144,9 @@ def test_gcloud_tracer_capture_lambda_handler_with_exception(mocker):
     mock_span.set_status.assert_called()
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_capture_method(mocker):
     """Test capture_method decorator wraps instance methods."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -142,14 +154,19 @@ def test_gcloud_tracer_capture_method(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -164,14 +181,13 @@ def test_gcloud_tracer_capture_method(mocker):
 
     assert result == "arg1=value1, arg2=value2"
     mock_tracer.start_as_current_span.assert_called_once()
-    # Verify span name includes class name
     call_args = mock_tracer.start_as_current_span.call_args
     assert "MyClass.my_method" in call_args[0][0]
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_capture_method_with_exception(mocker):
     """Test capture_method records exceptions on span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -179,14 +195,19 @@ def test_gcloud_tracer_capture_method_with_exception(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -206,9 +227,9 @@ def test_gcloud_tracer_capture_method_with_exception(mocker):
     mock_span.set_status.assert_called()
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_create_segment(mocker):
     """Test create_segment context manager creates span with metadata."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -216,14 +237,19 @@ def test_gcloud_tracer_create_segment(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -234,13 +260,12 @@ def test_gcloud_tracer_create_segment(mocker):
 
     assert executed
     mock_tracer.start_as_current_span.assert_called_once_with("test-segment")
-    # Verify metadata was set as attributes
     assert mock_span.set_attribute.call_count >= 2
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_create_segment_exception_handling(mocker):
     """Test create_segment records exceptions on span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -248,14 +273,19 @@ def test_gcloud_tracer_create_segment_exception_handling(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -269,9 +299,9 @@ def test_gcloud_tracer_create_segment_exception_handling(mocker):
     mock_span.set_status.assert_called()
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_create_subsegment(mocker):
     """Test create_subsegment context manager creates child span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -279,14 +309,19 @@ def test_gcloud_tracer_create_subsegment(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -299,9 +334,9 @@ def test_gcloud_tracer_create_subsegment(mocker):
     mock_tracer.start_as_current_span.assert_called_once_with("sub-segment")
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_create_subsegment_exception_handling(mocker):
     """Test create_subsegment records exceptions on span."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mock_span = mocker.Mock()
     mock_span.__enter__ = mocker.Mock(return_value=mock_span)
     mock_span.__exit__ = mocker.Mock(return_value=None)
@@ -309,14 +344,19 @@ def test_gcloud_tracer_create_subsegment_exception_handling(mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+
     mock_provider = mocker.Mock()
-    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter")
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mocker.patch("app.services.tracing.gcloud.CloudTraceSpanExporter", create=True)
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
+    mocker.patch("app.services.tracing.gcloud.Status", create=True)
+    mocker.patch("app.services.tracing.gcloud.StatusCode", create=True)
 
     tracer = GCloudTracer("test-service")
     tracer.tracer = mock_tracer
@@ -330,24 +370,27 @@ def test_gcloud_tracer_create_subsegment_exception_handling(mocker):
     mock_span.set_status.assert_called()
 
 
-@pytest.mark.skipif(not GCP_TRACING_AVAILABLE, reason="OpenTelemetry not installed")
 def test_gcloud_tracer_handles_exporter_initialization_failure(mocker, capsys):
     """Test GCloudTracer handles Cloud Trace exporter initialization
     failure gracefully."""
+    mocker.patch("app.services.tracing.gcloud.GCP_TRACING_AVAILABLE", True)
     mocker.patch(
         "app.services.tracing.gcloud.CloudTraceSpanExporter",
         side_effect=Exception("No credentials"),
+        create=True
     )
     mock_provider = mocker.Mock()
     mock_tracer = mocker.Mock()
-    mocker.patch(
-        "app.services.tracing.gcloud.TracerProvider", return_value=mock_provider
-    )
-    mocker.patch(
-        "app.services.tracing.gcloud.trace.get_tracer", return_value=mock_tracer
-    )
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    
+    mocker.patch("app.services.tracing.gcloud.TracerProvider", return_value=mock_provider, create=True)
+    mocker.patch("app.services.tracing.gcloud.ResourceAttributes", mocker.Mock(SERVICE_NAME="service.name"), create=True)
+    mocker.patch("app.services.tracing.gcloud.Resource", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.BatchSpanProcessor", mocker.Mock(), create=True)
+    mocker.patch("app.services.tracing.gcloud.trace", mock_trace, create=True)
 
-    # Should not raise, but warn
     tracer = GCloudTracer("test-service")
 
     captured = capsys.readouterr()

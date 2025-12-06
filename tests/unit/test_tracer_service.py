@@ -30,15 +30,16 @@ def test_env_override_selects_gcloud(monkeypatch):
     )
     # Patch GCloudTracer to simulate GCP tracing available
     import app.services.tracing.gcloud as gcloud_mod
+    from unittest.mock import MagicMock
 
     monkeypatch.setattr(gcloud_mod, "GCP_TRACING_AVAILABLE", True)
-
-    class FakeTrace:
-        @staticmethod
-        def TraceServiceClient(*args, **kwargs):
-            return object()
-
-    monkeypatch.setattr(gcloud_mod, "trace_v1", FakeTrace(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "CloudTraceSpanExporter", MagicMock(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "TracerProvider", MagicMock(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "BatchSpanProcessor", MagicMock(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "ResourceAttributes", MagicMock(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "Resource", MagicMock(), raising=False)
+    monkeypatch.setattr(gcloud_mod, "trace", MagicMock(), raising=False)
+    
     tracer = TracerFactory.create_tracer(service_name="svc")
     assert isinstance(tracer, GCloudTracer)
 
@@ -85,9 +86,19 @@ def test_gcloud_tracer_basic_behaviour(monkeypatch, mocker):
     mock_tracer = mocker.Mock()
     mock_tracer.start_as_current_span = mocker.Mock(return_value=mock_span)
 
-    monkeypatch.setattr(mod, "CloudTraceSpanExporter", mocker.Mock())
-    monkeypatch.setattr(mod, "TracerProvider", mocker.Mock())
-    monkeypatch.setattr(mod.trace, "get_tracer", mocker.Mock(return_value=mock_tracer))
+    mock_trace = mocker.Mock()
+    mock_trace.get_tracer = mocker.Mock(return_value=mock_tracer)
+    mock_trace.set_tracer_provider = mocker.Mock()
+    mock_trace.SpanKind = mocker.Mock(SERVER=mocker.Mock())
+
+    monkeypatch.setattr(mod, "CloudTraceSpanExporter", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "TracerProvider", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "BatchSpanProcessor", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "ResourceAttributes", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "Resource", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "Status", mocker.Mock(), raising=False)
+    monkeypatch.setattr(mod, "StatusCode", mocker.Mock(OK=mocker.Mock(), ERROR=mocker.Mock()), raising=False)
+    monkeypatch.setattr(mod, "trace", mock_trace, raising=False)
 
     from app.services.tracing.gcloud import GCloudTracer
 
