@@ -28,3 +28,4 @@ nosetests.xml
 !app/
 !config/
 !handlers/
+!LICENSE
