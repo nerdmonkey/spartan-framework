@@ -1,9 +1,11 @@
 <p align="center"><img src="docs/ssf_banner.png" alt="Social Card of Spartan"></p>
 
-# Spartan Serverless Framework
+# Spartan Serverless Framework — Core
 
 ## About
-Spartan Serverless Framework—"the Swiss Army knife for serverless development"—is a powerful scaffold that simplifies the creation of serverless applications on AWS. It streamlines your development process and ensures code consistency, allowing you to build scalable and efficient applications on AWS with ease.
+Spartan Serverless Framework—"the Swiss Army knife for serverless development"—is the core scaffold and foundation of the Spartan ecosystem. It simplifies the creation of serverless applications on AWS and serves as the base for cloud-specific variants.
+
+> **Spartan Ecosystem:** [Bogart](https://github.com/nerdmonkey/spartan-bogart) (AWS) · [Lazaro](https://github.com/nerdmonkey/spartan-lazaro) (GCP) · [Orbit](https://github.com/nerdmonkey/spartan-orbit) (Azure)
 
 #### Spartan Serverless Framework is versatile and can be used to efficiently develop:
 - RESTful API
