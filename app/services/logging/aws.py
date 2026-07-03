@@ -108,7 +108,7 @@ class AWSCloudWatchLogger(BaseLogger):
         return random.random() <= self.sample_rate
 
     def info(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
+        # Apply sampling only for high-volume informational logs
         if not self._should_sample_log():
             return
 
@@ -117,23 +117,15 @@ class AWSCloudWatchLogger(BaseLogger):
         self.logger.info(message, extra=kwargs, caller_location=location)
 
     def error(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
-            return
-
         location = self._get_caller_location()
         self.logger.error(message, extra=kwargs, caller_location=location)
 
     def warning(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
-            return
-
         location = self._get_caller_location()
         self.logger.warning(message, extra=kwargs, caller_location=location)
 
     def debug(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
+        # Apply sampling only for high-volume debug logs
         if not self._should_sample_log():
             return
 
@@ -141,18 +133,10 @@ class AWSCloudWatchLogger(BaseLogger):
         self.logger.debug(message, extra=kwargs, caller_location=location)
 
     def exception(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
-            return
-
         location = self._get_caller_location()
         self.logger.exception(message, extra=kwargs, caller_location=location)
 
     def critical(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
-            return
-
         location = self._get_caller_location()
         self.logger.critical(message, extra=kwargs, caller_location=location)
 

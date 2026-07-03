@@ -141,6 +141,9 @@ def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
         def info(self, message, extra=None, caller_location=None):
             self.calls.append(("info", message, extra, caller_location))
 
+        def error(self, message, extra=None, caller_location=None):
+            self.calls.append(("error", message, extra, caller_location))
+
         def inject_lambda_context(self, *args, **kwargs):
             return lambda f: f
 
@@ -168,6 +171,11 @@ def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
     cw.info("should_not_log", extra={"a": "b"})
     # DummyLogger should have no calls recorded
     assert not getattr(cw.logger, "calls", None)
+
+    # Error logs should bypass sampling and always be emitted
+    cw.error("must_log", extra={"a": "b"})
+    assert cw.logger.calls
+    assert cw.logger.calls[-1][0] == "error"
 
     # inject_lambda_context should return a callable (decorator)
     deco = cw.inject_lambda_context()

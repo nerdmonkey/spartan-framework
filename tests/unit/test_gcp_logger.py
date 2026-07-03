@@ -90,6 +90,9 @@ def test_gcp_sampling_blocks_logging(monkeypatch):
         def info(self, message, extra=None):
             self.calls.append(("info", message, extra))
 
+        def error(self, message, extra=None):
+            self.calls.append(("error", message, extra))
+
     fake = FakeLogger()
     gw.logger = fake
 
@@ -98,6 +101,11 @@ def test_gcp_sampling_blocks_logging(monkeypatch):
 
     gw.info("nope", extra={"a": 1})
     assert not fake.calls
+
+    # Error logs should bypass sampling
+    gw.error("must_log", extra={"a": 1})
+    assert fake.calls
+    assert fake.calls[-1][0] == "error"
 
 
 def test_gcp_exception_logging_and_fallback(monkeypatch):

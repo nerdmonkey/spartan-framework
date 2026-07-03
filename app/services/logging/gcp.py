@@ -164,8 +164,8 @@ class GCPLogger(BaseLogger):
 
     def _log(self, level: str, message: str, **kwargs):
         """Internal logging method with sampling and structured logging."""
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
+        # Apply sampling only to high-volume informational/debug logs
+        if level.lower() in ("info", "debug") and not self._should_sample_log():
             return
 
         # Create structured log data
@@ -190,10 +190,6 @@ class GCPLogger(BaseLogger):
         self._log("debug", message, **kwargs)
 
     def exception(self, message: str, **kwargs):
-        # Apply sampling for high-volume scenarios
-        if not self._should_sample_log():
-            return
-
         # Create structured log data
         structured_data = self._create_structured_log("ERROR", message, **kwargs)
 
