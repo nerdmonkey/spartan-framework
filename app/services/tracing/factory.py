@@ -4,23 +4,25 @@ from typing import Optional
 from app.helpers.environment import env
 
 from .base import BaseTracer
-from .cloud import CloudTracer
+from .aws import AWSTracer
 from .local import LocalTracer
-from .gcloud import GCloudTracer
+from .gcp import GCPTracer
 
 
 class TracerFactory:
     @staticmethod
-    def create_tracer(service_name: Optional[str] = None, tracer_type: Optional[str] = None) -> BaseTracer:
+    def create_tracer(
+        service_name: Optional[str] = None, tracer_type: Optional[str] = None
+    ) -> BaseTracer:
         """
         Create a tracer instance.
 
         Priority for selecting tracer:
         1. Explicit tracer_type parameter (if provided)
         2. TRACER_TYPE environment variable (via app.helpers.environment.env)
-        3. Auto-detect: local -> GCP -> AWS/cloud
+        3. Auto-detect: local -> GCP -> AWS
 
-        tracer_type values accepted (case-insensitive): 'local', 'gcloud', 'gcp', 'cloud', 'aws'
+        tracer_type values accepted (case-insensitive): 'local', 'gcp', 'aws', 'xray'
         """
         # 1) parameter override
         chosen = None
@@ -36,10 +38,10 @@ class TracerFactory:
         if chosen:
             if chosen in ("local",):
                 return LocalTracer(service)
-            if chosen in ("gcloud", "gcp"):
-                return GCloudTracer(service)
-            if chosen in ("cloud", "aws", "xray"):
-                return CloudTracer(service)
+            if chosen in ("gcp",):
+                return GCPTracer(service)
+            if chosen in ("aws", "xray"):
+                return AWSTracer(service)
             # unknown explicit value -> raise to surface misconfiguration
             raise ValueError(f"Unknown tracer_type override: {tracer_type!r}")
 
@@ -49,19 +51,21 @@ class TracerFactory:
 
         # Detect GCP environment similar to logger factory heuristics
         def _is_gcp_environment() -> bool:
-            return any([
-                env('GOOGLE_CLOUD_PROJECT'),
-                env('GCLOUD_PROJECT'),
-                env('GCP_PROJECT'),
-                env('GOOGLE_APPLICATION_CREDENTIALS'),
-                env('GAE_APPLICATION'),
-                env('K_SERVICE'),
-            ])
+            return any(
+                [
+                    env("GOOGLE_CLOUD_PROJECT"),
+                    env("GCLOUD_PROJECT"),
+                    env("GCP_PROJECT"),
+                    env("GOOGLE_APPLICATION_CREDENTIALS"),
+                    env("GAE_APPLICATION"),
+                    env("K_SERVICE"),
+                ]
+            )
 
         if _is_gcp_environment():
-            return GCloudTracer(service)
+            return GCPTracer(service)
 
-        return CloudTracer(service)
+        return AWSTracer(service)
 
 
 def validate_service_name(service_name):

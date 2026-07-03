@@ -38,7 +38,7 @@ email-validator = "^2.0.0"
 google-cloud-logging = {version = "^3.8.0", optional = true}
 
 [tool.poetry.extras]
-gcloud = ["google-cloud-logging"]
+gcp = ["google-cloud-logging"]
 
 [tool.poetry.group.dev.dependencies]
 alembic = "1.16.5"
@@ -151,6 +151,7 @@ skip = [
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = [
     "tests",
     "integration",

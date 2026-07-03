@@ -8,13 +8,14 @@ from .base import BaseTracer
 
 try:
     from google.cloud import trace_v1
+
     GCP_TRACING_AVAILABLE = True
 except Exception as e:  # pragma: no cover - availability depends on env
     GCP_TRACING_AVAILABLE = False
     _IMPORT_ERROR = e
 
 
-class GCloudTracer(BaseTracer):
+class GCPTracer(BaseTracer):
     """Google Cloud tracer (lightweight wrapper)."""
 
     def __init__(self, service_name: str):

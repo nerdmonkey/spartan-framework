@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from aws_xray_sdk.core import xray_recorder
 
 
-class CloudTracer:
+class AWSTracer:
     def __init__(self, service_name):
         self.service_name = service_name
         self.tracer = xray_recorder

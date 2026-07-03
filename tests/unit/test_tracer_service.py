@@ -16,34 +16,46 @@ sys.modules["aws_xray_sdk"].core = fake_core
 import pytest
 from app.services.tracing.factory import TracerFactory
 from app.services.tracing.local import LocalTracer
-from app.services.tracing.cloud import CloudTracer
-from app.services.tracing.gcloud import GCloudTracer
+from app.services.tracing.aws import AWSTracer
+from app.services.tracing.gcp import GCPTracer
 
-def test_env_override_selects_gcloud(monkeypatch):
-    # Ensure env('TRACER_TYPE') returns 'gcloud'
+
+def test_env_override_selects_gcp(monkeypatch):
+    # Ensure env('TRACER_TYPE') returns 'gcp'
     monkeypatch.setattr(
         "app.services.tracing.factory.env",
-        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+        lambda k, d=None: {
+            "TRACER_TYPE": "gcp",
+            "APP_ENVIRONMENT": "production",
+        }.get(k, d),
     )
-    # Patch GCloudTracer to simulate GCP tracing available
-    import app.services.tracing.gcloud as gcloud_mod
-    monkeypatch.setattr(gcloud_mod, "GCP_TRACING_AVAILABLE", True)
+    # Patch GCPTracer to simulate GCP tracing available
+    import app.services.tracing.gcp as gcp_mod
+
+    monkeypatch.setattr(gcp_mod, "GCP_TRACING_AVAILABLE", True)
+
     class FakeTrace:
         @staticmethod
         def TraceServiceClient(*args, **kwargs):
             return object()
-    monkeypatch.setattr(gcloud_mod, "trace_v1", FakeTrace(), raising=False)
+
+    monkeypatch.setattr(gcp_mod, "trace_v1", FakeTrace(), raising=False)
     tracer = TracerFactory.create_tracer(service_name="svc")
-    assert isinstance(tracer, GCloudTracer)
+    assert isinstance(tracer, GCPTracer)
+
 
 def test_param_override_selects_local(monkeypatch):
     # Even if environment indicates cloud, explicit parameter should win
     monkeypatch.setattr(
         "app.services.tracing.factory.env",
-        lambda k, d=None: {"TRACER_TYPE": "gcloud", "APP_ENVIRONMENT": "production"}.get(k, d),
+        lambda k, d=None: {
+            "TRACER_TYPE": "gcp",
+            "APP_ENVIRONMENT": "production",
+        }.get(k, d),
     )
     tracer = TracerFactory.create_tracer(service_name="svc", tracer_type="local")
     assert isinstance(tracer, LocalTracer)
+
 
 def test_invalid_override_raises(monkeypatch):
     monkeypatch.setattr(
@@ -51,31 +63,41 @@ def test_invalid_override_raises(monkeypatch):
         lambda k, d=None: {"APP_ENVIRONMENT": "production"}.get(k, d),
     )
     with pytest.raises(ValueError):
-        TracerFactory.create_tracer(service_name="svc", tracer_type="unsupported-tracer")
+        TracerFactory.create_tracer(
+            service_name="svc", tracer_type="unsupported-tracer"
+        )
 
-def test_gcloud_tracer_basic_behaviour(monkeypatch):
-    """GCloudTracer should construct when trace_v1 is available and its wrappers should call through."""
-    mod = __import__("app.services.tracing.gcloud", fromlist=["*"])
+
+def test_gcp_tracer_basic_behaviour(monkeypatch):
+    """GCPTracer should construct when trace_v1 is available and its wrappers should call through."""
+    mod = __import__("app.services.tracing.gcp", fromlist=["*"])
 
     # Make trace available
     monkeypatch.setattr(mod, "GCP_TRACING_AVAILABLE", True)
-    monkeypatch.setattr(mod, "trace_v1", __import__("types").SimpleNamespace(TraceServiceClient=lambda: __import__("types").SimpleNamespace()), raising=False)
+    monkeypatch.setattr(
+        mod,
+        "trace_v1",
+        __import__("types").SimpleNamespace(
+            TraceServiceClient=lambda: __import__("types").SimpleNamespace()
+        ),
+        raising=False,
+    )
 
-    from app.services.tracing.gcloud import GCloudTracer
+    from app.services.tracing.gcp import GCPTracer
 
-    gw = GCloudTracer("svc")
+    gw = GCPTracer("svc")
 
     # capture_lambda_handler should return a wrapper that calls the original
     called = {}
 
     def handler(event, context):
-        called['ok'] = True
+        called["ok"] = True
         return "result"
 
     wrapped = gw.capture_lambda_handler(handler)
     res = wrapped({}, {})
     assert res == "result"
-    assert called.get('ok') is True
+    assert called.get("ok") is True
 
     # create_segment should be usable as a context manager
     with gw.create_segment("seg"):
@@ -85,7 +107,13 @@ def test_gcloud_tracer_basic_behaviour(monkeypatch):
 
 def test_tracerservice_delegation(monkeypatch):
     """TracerService helpers should delegate to the underlying tracer instance."""
-    from app.services.tracer import TracerService, trace_function, trace_segment, capture_lambda_handler, capture_method
+    from app.services.tracer import (
+        TracerService,
+        trace_function,
+        trace_segment,
+        capture_lambda_handler,
+        capture_method,
+    )
 
     # Create a fake tracer that records calls
     class FakeTracer:

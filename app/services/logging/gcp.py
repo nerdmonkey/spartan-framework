@@ -12,19 +12,22 @@ try:
     from google.cloud import logging as gcp_logging
     from google.cloud.logging_v2.handlers import CloudLoggingHandler
     import logging
+
     GCP_LOGGING_AVAILABLE = True
 except (ImportError, TypeError, AttributeError) as e:
     GCP_LOGGING_AVAILABLE = False
     _IMPORT_ERROR = e
 
 
-class GCloudLogger(BaseLogger):
+class GCPLogger(BaseLogger):
     """Google Cloud Logging implementation with structured JSON logging."""
 
-    def __init__(self, service_name: str, level: str = "INFO", sample_rate: float = None):
+    def __init__(
+        self, service_name: str, level: str = "INFO", sample_rate: float = None
+    ):
         if not GCP_LOGGING_AVAILABLE:
             error_msg = "Google Cloud Logging dependencies not available."
-            if hasattr(globals(), '_IMPORT_ERROR'):
+            if hasattr(globals(), "_IMPORT_ERROR"):
                 error_msg += f" Error: {_IMPORT_ERROR}"
             else:
                 error_msg += " Install with: pip install google-cloud-logging"
@@ -36,8 +39,16 @@ class GCloudLogger(BaseLogger):
 
         # Define sensitive field names for PII sanitization
         self._sensitive_fields = {
-            'password', 'token', 'secret', 'key', 'auth', 'credentials',
-            'api_key', 'access_token', 'refresh_token', 'private_key'
+            "password",
+            "token",
+            "secret",
+            "key",
+            "auth",
+            "credentials",
+            "api_key",
+            "access_token",
+            "refresh_token",
+            "private_key",
         }
 
         # Get project root for location tracking
@@ -58,7 +69,7 @@ class GCloudLogger(BaseLogger):
             handler = CloudLoggingHandler(client, name=service_name)
 
             # Setup standard Python logger with Cloud Logging handler
-            self.logger = logging.getLogger(f"{service_name}_gcloud")
+            self.logger = logging.getLogger(f"{service_name}_gcp")
             self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
 
             # Clear any existing handlers
@@ -71,10 +82,10 @@ class GCloudLogger(BaseLogger):
             print(f"Warning: Failed to setup Google Cloud Logging: {e}")
             print("Falling back to standard logging...")
 
-            self.logger = logging.getLogger(f"{service_name}_gcloud_fallback")
+            self.logger = logging.getLogger(f"{service_name}_gcp_fallback")
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             self.logger.handlers = []
@@ -89,13 +100,15 @@ class GCloudLogger(BaseLogger):
             filename = frame_info.filename
             # Only consider frames inside the project root and outside the logging-related directories
             normalized_path = filename.replace("\\", "/")
-            rel_normalized = normalized_path.replace(self.project_root.replace("\\", "/"), "")
+            rel_normalized = normalized_path.replace(
+                self.project_root.replace("\\", "/"), ""
+            )
 
             # Skip frames from logging-related files
             is_logging_frame = (
-                "/services/logging/" in rel_normalized or
-                "/helpers/logger.py" in rel_normalized or
-                "/logging/" in rel_normalized
+                "/services/logging/" in rel_normalized
+                or "/helpers/logger.py" in rel_normalized
+                or "/logging/" in rel_normalized
             )
 
             if filename.startswith(self.project_root) and not is_logging_frame:
@@ -116,7 +129,7 @@ class GCloudLogger(BaseLogger):
         sanitized = {}
         for key, value in extra.items():
             if key.lower() in self._sensitive_fields:
-                sanitized[key] = '[REDACTED]'
+                sanitized[key] = "[REDACTED]"
             else:
                 sanitized[key] = value
 
@@ -126,7 +139,9 @@ class GCloudLogger(BaseLogger):
         """Determine if this log should be sampled based on sample rate."""
         return random.random() <= self.sample_rate
 
-    def _create_structured_log(self, level: str, message: str, **kwargs) -> Dict[str, Any]:
+    def _create_structured_log(
+        self, level: str, message: str, **kwargs
+    ) -> Dict[str, Any]:
         """Create structured log entry for Google Cloud Logging."""
         extra = kwargs.get("extra", {})
         sanitized_extra = self._sanitize_extra_data(extra)

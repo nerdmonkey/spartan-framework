@@ -1,5 +1,6 @@
 import logging
 import os
+import socket
 import tempfile
 from datetime import datetime
 from unittest.mock import Mock, patch
@@ -13,7 +14,6 @@ from app.helpers.database import db
 from app.helpers.logger import get_logger
 from app.models.db.base import Base
 from app.models.db.user import User
-
 
 load_dotenv(dotenv_path=".env_testing")
 
@@ -48,9 +48,7 @@ def test_db_session():
 
     engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(bind=engine)
-    TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine
-    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     db = TestingSessionLocal()
 
@@ -130,8 +128,7 @@ def _prevent_external_calls(monkeypatch, request):
 
     # Skip socket blocking for stock API tests
     if request.node.name and (
-        "stock" in request.node.name.lower()
-        or "test_stocks" in request.module.__name__
+        "stock" in request.node.name.lower() or "test_stocks" in request.module.__name__
         if hasattr(request, "module")
         else False
     ):
@@ -140,8 +137,9 @@ def _prevent_external_calls(monkeypatch, request):
     def mock_external_call(*args, **kwargs):
         raise RuntimeError("External calls are not allowed during testing")
 
-    # Add any external calls you want to prevent
-    monkeypatch.setattr("socket.socket", mock_external_call)
+    # Block outbound network calls while preserving socket object behavior
+    monkeypatch.setattr(socket.socket, "connect", mock_external_call)
+    monkeypatch.setattr("socket.create_connection", mock_external_call)
 
 
 @pytest.fixture
@@ -152,18 +150,16 @@ def mock_tracer_config():
 
 @pytest.fixture
 def mock_env_cloud():
-    """Fixture to mock environment for cloud configuration"""
+    """Fixture to mock environment for AWS tracer configuration."""
 
     def mock_getenv(key, default=None):  # Add default parameter
         if key == "TRACER_TYPE":
-            return "cloud"
+            return "aws"
         if key == "SERVICE_NAME":
             return "test_service"
         return default  # Return default instead of None
 
-    with patch(
-        "app.helpers.tracer.factory.os.getenv", side_effect=mock_getenv
-    ) as mock:
+    with patch("app.helpers.tracer.factory.os.getenv", side_effect=mock_getenv) as mock:
         yield mock
 
 

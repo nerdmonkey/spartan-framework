@@ -4,16 +4,19 @@ from types import SimpleNamespace
 
 def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     """CloudWatchLogger should use custom formatter to add env/version and redact sensitive fields."""
+
     # Replace the Logger used in the module with a fake implementation
     class FakeHandler:
         def __init__(self):
             class Formatter:
                 def format(self, record):
                     # Original formatter returns JSON with message and extra
-                    return json.dumps({
-                        "message": record.getMessage(),
-                        "extra": getattr(record, "extra", {}),
-                    })
+                    return json.dumps(
+                        {
+                            "message": record.getMessage(),
+                            "extra": getattr(record, "extra", {}),
+                        }
+                    )
 
             self.formatter = Formatter()
 
@@ -75,15 +78,23 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
             return decorator
 
     # Monkeypatch module-level dependencies before creating CloudWatchLogger
-    import app.services.logging.cloud as cloud_mod
+    import app.services.logging.aws as aws_mod
 
-    monkeypatch.setattr(cloud_mod, "Logger", FakeLogger)
-    monkeypatch.setattr(cloud_mod, "env", lambda k, d=None: {"APP_ENVIRONMENT": "ci", "APP_VERSION": "9.9.9", "LOG_SAMPLE_RATE": "1.0"}.get(k, d))
+    monkeypatch.setattr(aws_mod, "Logger", FakeLogger)
+    monkeypatch.setattr(
+        aws_mod,
+        "env",
+        lambda k, d=None: {
+            "APP_ENVIRONMENT": "ci",
+            "APP_VERSION": "9.9.9",
+            "LOG_SAMPLE_RATE": "1.0",
+        }.get(k, d),
+    )
 
     # Create logger and call info with sensitive data in extra
-    from app.services.logging.cloud import CloudWatchLogger
+    from app.services.logging.aws import AWSCloudWatchLogger
 
-    cw = CloudWatchLogger(service_name="svc", level="INFO", sample_rate=1.0)
+    cw = AWSCloudWatchLogger(service_name="svc", level="INFO", sample_rate=1.0)
 
     # Call info with token in extra which should be redacted by custom formatter
     cw.info("hello", token="secrettoken", extra={"api_key": "k", "safe": "v"})
@@ -95,6 +106,7 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     assert formatted["version"] == "9.9.9"
     # At least one sensitive field should be redacted somewhere in the output
     assert "[REDACTED]" in cw.logger.last
+
     # Non-sensitive field should be present somewhere in the output
     def contains_value(obj, val):
         if isinstance(obj, dict):
@@ -108,12 +120,18 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
 
 def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
     """Sampling should prevent logs when sample_rate is low and inject_lambda_context returns decorator."""
+
     class DummyLogger:
         def __init__(self, *args, **kwargs):
             class H:
                 class F:
                     def format(self, r):
-                        return json.dumps({"message": r.getMessage(), "extra": getattr(r, "extra", {})})
+                        return json.dumps(
+                            {
+                                "message": r.getMessage(),
+                                "extra": getattr(r, "extra", {}),
+                            }
+                        )
 
                 formatter = F()
 
@@ -126,17 +144,26 @@ def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
         def inject_lambda_context(self, *args, **kwargs):
             return lambda f: f
 
-    import app.services.logging.cloud as cloud_mod
-    monkeypatch.setattr(cloud_mod, "Logger", DummyLogger)
-    monkeypatch.setattr(cloud_mod, "env", lambda k, d=None: {"LOG_SAMPLE_RATE": "0.0", "APP_ENVIRONMENT": "x", "APP_VERSION": "y"}.get(k, d))
+    import app.services.logging.aws as aws_mod
 
-    from app.services.logging.cloud import CloudWatchLogger
+    monkeypatch.setattr(aws_mod, "Logger", DummyLogger)
+    monkeypatch.setattr(
+        aws_mod,
+        "env",
+        lambda k, d=None: {
+            "LOG_SAMPLE_RATE": "0.0",
+            "APP_ENVIRONMENT": "x",
+            "APP_VERSION": "y",
+        }.get(k, d),
+    )
 
-    cw = CloudWatchLogger(service_name="svc", level="INFO")
+    from app.services.logging.aws import AWSCloudWatchLogger
+
+    cw = AWSCloudWatchLogger(service_name="svc", level="INFO")
 
     # Force sampling to drop logs by setting sample_rate 0.0 and making random.random return 1.0
     cw.sample_rate = 0.0
-    monkeypatch.setattr(cloud_mod.random, "random", lambda: 1.0)
+    monkeypatch.setattr(aws_mod.random, "random", lambda: 1.0)
 
     cw.info("should_not_log", extra={"a": "b"})
     # DummyLogger should have no calls recorded
