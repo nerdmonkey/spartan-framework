@@ -2,80 +2,79 @@ import json
 from types import SimpleNamespace
 
 
+class _Formatter:
+    def format(self, record):
+        return json.dumps(
+            {
+                "message": record.getMessage(),
+                "extra": getattr(record, "extra", {}),
+            }
+        )
+
+
+class _FakeHandler:
+    def __init__(self):
+        self.formatter = _Formatter()
+
+
+class _FakeInnerLogger:
+    def __init__(self):
+        self.handlers = [_FakeHandler()]
+
+
+class FakeLogger:
+    def __init__(self, *args, **kwargs):
+        self._logger = _FakeInnerLogger()
+        self.calls = []
+
+    def info(self, message, extra=None, caller_location=None):
+        record = SimpleNamespace()
+        record.getMessage = lambda: message
+        record.extra = extra or {}
+        if caller_location is not None:
+            record.caller_location = caller_location
+        record.pathname = __file__
+        record.lineno = 10
+        formatted = None
+        for handler in self._logger.handlers:
+            formatted = handler.formatter.format(record)
+        self.last = formatted
+        self.calls.append(("info", message, extra, caller_location))
+
+    def error(self, message, extra=None, caller_location=None):
+        return self.info(message, extra=extra, caller_location=caller_location)
+
+    def warning(self, message, extra=None, caller_location=None):
+        return self.info(message, extra=extra, caller_location=caller_location)
+
+    def debug(self, message, extra=None, caller_location=None):
+        return self.info(message, extra=extra, caller_location=caller_location)
+
+    def exception(self, message, extra=None, caller_location=None):
+        return self.info(message, extra=extra, caller_location=caller_location)
+
+    def critical(self, message, extra=None, caller_location=None):
+        return self.info(message, extra=extra, caller_location=caller_location)
+
+    def inject_lambda_context(self, *args, **kwargs):
+        def decorator(func=None):
+            if func is None:
+                return lambda wrapped: wrapped
+            return func
+
+        return decorator
+
+
+def contains_value(obj, val):
+    if isinstance(obj, dict):
+        return any(contains_value(v, val) for v in obj.values())
+    if isinstance(obj, list):
+        return any(contains_value(v, val) for v in obj)
+    return obj == val
+
+
 def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     """CloudWatchLogger should use custom formatter to add env/version and redact sensitive fields."""
-
-    # Replace the Logger used in the module with a fake implementation
-    class FakeHandler:
-        def __init__(self):
-            class Formatter:
-                def format(self, record):
-                    # Original formatter returns JSON with message and extra
-                    return json.dumps(
-                        {
-                            "message": record.getMessage(),
-                            "extra": getattr(record, "extra", {}),
-                        }
-                    )
-
-            self.formatter = Formatter()
-
-    class FakeInnerLogger:
-        def __init__(self):
-            self.handlers = [FakeHandler()]
-
-    class FakeLogger:
-        def __init__(self, *args, **kwargs):
-            # mimic aws_lambda_powertools.Logger internal logger
-            self._logger = FakeInnerLogger()
-            self.calls = []
-
-        def _emit(self, record):
-            # Not used, kept for parity
-            pass
-
-        def _collect(self, formatted):
-            # store formatted message for assertions
-            self.last = formatted
-
-        def info(self, message, extra=None, caller_location=None):
-            record = SimpleNamespace()
-            record.getMessage = lambda: message
-            record.extra = extra or {}
-            if caller_location is not None:
-                record.caller_location = caller_location
-            record.pathname = __file__
-            record.lineno = 10
-            # Call the (possibly monkey-patched) formatter(s)
-            out = None
-            for h in self._logger.handlers:
-                out = h.formatter.format(record)
-            self.last = out
-            self.calls.append(("info", message, extra, caller_location))
-
-        def error(self, message, extra=None, caller_location=None):
-            return self.info(message, extra=extra, caller_location=caller_location)
-
-        def warning(self, message, extra=None, caller_location=None):
-            return self.info(message, extra=extra, caller_location=caller_location)
-
-        def debug(self, message, extra=None, caller_location=None):
-            return self.info(message, extra=extra, caller_location=caller_location)
-
-        def exception(self, message, extra=None, caller_location=None):
-            return self.info(message, extra=extra, caller_location=caller_location)
-
-        def critical(self, message, extra=None, caller_location=None):
-            return self.info(message, extra=extra, caller_location=caller_location)
-
-        def inject_lambda_context(self, *args, **kwargs):
-            # Return a no-op decorator for testing
-            def decorator(f=None):
-                if f is None:
-                    return lambda fn: fn
-                return f
-
-            return decorator
 
     # Monkeypatch module-level dependencies before creating CloudWatchLogger
     import app.services.logging.aws as aws_mod
@@ -106,14 +105,6 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     assert formatted["version"] == "9.9.9"
     # At least one sensitive field should be redacted somewhere in the output
     assert "[REDACTED]" in cw.logger.last
-
-    # Non-sensitive field should be present somewhere in the output
-    def contains_value(obj, val):
-        if isinstance(obj, dict):
-            return any(contains_value(v, val) for v in obj.values())
-        if isinstance(obj, list):
-            return any(contains_value(v, val) for v in obj)
-        return obj == val
 
     assert contains_value(formatted, "v")
 

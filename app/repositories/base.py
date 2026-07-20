@@ -96,9 +96,7 @@ class BaseRepository(ABC):
             return True
 
         except Exception as e:
-            logger.error(
-                f"Failed to save {self.get_entity_type().lower()}: {e}"
-            )
+            logger.error(f"Failed to save {self.get_entity_type().lower()}: {e}")
             return False
 
     def delete_by_id(self, entity_id: str) -> bool:
@@ -214,62 +212,17 @@ class BaseRepository(ABC):
             Dictionary with items and pagination info
         """
         try:
-            # Build query parameters for EntityType GSI
-            query_params = {
-                "TableName": self.table_name,
-                "IndexName": "GSI2",
-                "KeyConditionExpression": "EntityType = :entity_type",
-                "ExpressionAttributeValues": {
-                    ":entity_type": {"S": self.get_entity_type()},
-                },
-                "Limit": min(limit * 3, 100),  # Scan more to handle filtering
-                "ScanIndexForward": sort_order.lower() == "asc",
-            }
-
-            # Add soft deletion filter
-            if not include_deleted:
-                query_params[
-                    "FilterExpression"
-                ] = "(attribute_not_exists(DeletedAt) OR DeletedAt = :null_str)"
-                query_params["ExpressionAttributeValues"][":null_str"] = {
-                    "S": "NULL"
-                }
-
-            # Add pagination token if provided
-            if last_evaluated_key:
-                query_params["ExclusiveStartKey"] = last_evaluated_key
-
-            # Add search filter if provided
-            if search:
-                filter_expr = query_params.get("FilterExpression", "")
-                if filter_expr:
-                    filter_expr += " AND "
-                filter_expr += "contains(#name, :search)"
-                query_params["FilterExpression"] = filter_expr
-                if "ExpressionAttributeNames" not in query_params:
-                    query_params["ExpressionAttributeNames"] = {}
-                query_params["ExpressionAttributeNames"]["#name"] = "Name"
-                query_params["ExpressionAttributeValues"][":search"] = {
-                    "S": search
-                }
-
+            query_params = self._build_list_query_params(
+                limit=limit,
+                last_evaluated_key=last_evaluated_key,
+                search=search,
+                sort_order=sort_order,
+                include_deleted=include_deleted,
+            )
             logger.info(f"Query params: {query_params}")
             response = self.dynamodb.query(**query_params)
             logger.info(f"Query response - Count: {response.get('Count', 0)}")
-
-            # Convert items to models
-            model_class = self.get_model_class()
-            entities = []
-            for item in response.get("Items", []):
-                try:
-                    entity = model_class.from_ddb_item(item)
-                    entities.append(entity)
-                    if len(entities) >= limit:
-                        break
-                except Exception as e:
-                    logger.warning(f"Skipping invalid record: {e}")
-                    continue
-
+            entities = self._parse_query_entities(response.get("Items", []), limit)
             return {
                 "items": entities,
                 "last_evaluated_key": response.get("LastEvaluatedKey"),
@@ -277,10 +230,63 @@ class BaseRepository(ABC):
             }
 
         except Exception as e:
-            logger.error(
-                f"Failed to list {self.get_entity_type().lower()}s: {e}"
-            )
+            logger.error(f"Failed to list {self.get_entity_type().lower()}s: {e}")
             return {"items": [], "last_evaluated_key": None, "count": 0}
+
+    def _build_list_query_params(
+        self,
+        limit: int,
+        last_evaluated_key: Optional[dict],
+        search: Optional[str],
+        sort_order: str,
+        include_deleted: bool,
+    ) -> Dict[str, Any]:
+        query_params = {
+            "TableName": self.table_name,
+            "IndexName": "GSI2",
+            "KeyConditionExpression": "EntityType = :entity_type",
+            "ExpressionAttributeValues": {
+                ":entity_type": {"S": self.get_entity_type()},
+            },
+            "Limit": min(limit * 3, 100),
+            "ScanIndexForward": sort_order.lower() == "asc",
+        }
+
+        if not include_deleted:
+            query_params["FilterExpression"] = (
+                "(attribute_not_exists(DeletedAt) OR DeletedAt = :null_str)"
+            )
+            query_params["ExpressionAttributeValues"][":null_str"] = {"S": "NULL"}
+
+        if last_evaluated_key:
+            query_params["ExclusiveStartKey"] = last_evaluated_key
+
+        if search:
+            self._add_search_filter(query_params, search)
+
+        return query_params
+
+    def _add_search_filter(self, query_params: Dict[str, Any], search: str) -> None:
+        filter_expr = query_params.get("FilterExpression", "")
+        if filter_expr:
+            filter_expr += " AND "
+        filter_expr += "contains(#name, :search)"
+        query_params["FilterExpression"] = filter_expr
+        query_params.setdefault("ExpressionAttributeNames", {})["#name"] = "Name"
+        query_params["ExpressionAttributeValues"][":search"] = {"S": search}
+
+    def _parse_query_entities(self, items: List[dict], limit: int) -> List[T]:
+        model_class = self.get_model_class()
+        entities = []
+        for item in items:
+            try:
+                entity = model_class.from_ddb_item(item)
+                entities.append(entity)
+                if len(entities) >= limit:
+                    break
+            except Exception as e:
+                logger.warning(f"Skipping invalid record: {e}")
+        return entities
 
     def batch_get_by_ids(self, entity_ids: List[str]) -> List[T]:
         """
@@ -321,9 +327,7 @@ class BaseRepository(ABC):
 
                 # Convert items to models
                 model_class = self.get_model_class()
-                for item in response.get("Responses", {}).get(
-                    self.table_name, []
-                ):
+                for item in response.get("Responses", {}).get(self.table_name, []):
                     try:
                         entity = model_class.from_ddb_item(item)
                         # Skip soft deleted items
@@ -339,9 +343,7 @@ class BaseRepository(ABC):
             return all_entities
 
         except Exception as e:
-            logger.error(
-                f"Failed to batch get {self.get_entity_type().lower()}s: {e}"
-            )
+            logger.error(f"Failed to batch get {self.get_entity_type().lower()}s: {e}")
             return []
 
     def exists(self, entity_id: str) -> bool:

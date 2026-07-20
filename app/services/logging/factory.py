@@ -1,9 +1,9 @@
 import os
-from typing import Optional, Dict, Type, Callable, List
+from typing import Dict, List, Optional, Type
 
 from app.helpers.environment import env
-from app.services.logging.both import BothLogger
 from app.services.logging.aws import AWSCloudWatchLogger
+from app.services.logging.both import BothLogger
 from app.services.logging.file import FileLogger
 from app.services.logging.stream import StreamLogger
 

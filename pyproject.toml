@@ -88,18 +88,7 @@ exclude = '''
 
 [tool.autopep8]
 max-line-length = 120
-exclude = [
-    "app/exceptions/__init__.py",
-    ".git",
-    "build",
-    "dist",
-    ".venv",
-    ".serverless",
-    "node_modules",
-    ".vscode",
-    ".pytest_cache",
-    "__pycache__"
-]
+exclude = "app/exceptions/__init__.py,.git,build,dist,.venv,.serverless,node_modules,.vscode,.pytest_cache,__pycache__"
 
 [tool.autoflake]
 remove-all-unused-imports = true

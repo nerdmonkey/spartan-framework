@@ -1,10 +1,8 @@
-import inspect
-import os
 from contextlib import contextmanager
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
-from app.helpers.environment import env
 from .base import BaseTracer
+
 
 try:
     from google.cloud import trace_v1

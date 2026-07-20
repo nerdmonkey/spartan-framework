@@ -15,6 +15,7 @@ from app.helpers.logger import get_logger
 from app.models.db.base import Base
 from app.models.db.user import User
 
+
 load_dotenv(dotenv_path=".env_testing")
 
 get_db = db()

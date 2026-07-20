@@ -1,8 +1,13 @@
-from contextlib import contextmanager
-
-from contextlib import contextmanager
 import sys
 import types
+from contextlib import contextmanager
+
+import pytest
+
+from app.services.tracing.factory import TracerFactory
+from app.services.tracing.gcp import GCPTracer
+from app.services.tracing.local import LocalTracer
+
 
 # Prevent aws_xray_sdk from creating sockets during import in tests by
 # inserting a lightweight fake module into sys.modules before importing
@@ -12,12 +17,6 @@ fake_core.xray_recorder = types.SimpleNamespace()
 sys.modules["aws_xray_sdk.core"] = fake_core
 sys.modules["aws_xray_sdk"] = types.ModuleType("aws_xray_sdk")
 sys.modules["aws_xray_sdk"].core = fake_core
-
-import pytest
-from app.services.tracing.factory import TracerFactory
-from app.services.tracing.local import LocalTracer
-from app.services.tracing.aws import AWSTracer
-from app.services.tracing.gcp import GCPTracer
 
 
 def test_env_override_selects_gcp(monkeypatch):
@@ -105,17 +104,15 @@ def test_gcp_tracer_basic_behaviour(monkeypatch):
     assert x == 1
 
 
-def test_tracerservice_delegation(monkeypatch):
-    """TracerService helpers should delegate to the underlying tracer instance."""
+def _build_fake_tracer():
     from app.services.tracer import (
         TracerService,
-        trace_function,
-        trace_segment,
         capture_lambda_handler,
         capture_method,
+        trace_function,
+        trace_segment,
     )
 
-    # Create a fake tracer that records calls
     class FakeTracer:
         def __init__(self):
             self.segments = []
@@ -140,33 +137,49 @@ def test_tracerservice_delegation(monkeypatch):
 
             return wrapper
 
-    fake = FakeTracer()
+    return (
+        FakeTracer(),
+        TracerService,
+        capture_lambda_handler,
+        capture_method,
+        trace_function,
+        trace_segment,
+    )
 
-    # Monkeypatch TracerService.get_tracer to return our fake tracer
+
+def test_tracerservice_trace_function(monkeypatch):
+    fake, TracerService, _, _, trace_function, _ = _build_fake_tracer()
     monkeypatch.setattr(TracerService, "get_tracer", staticmethod(lambda: fake))
 
-    # Test trace_function decorator
     @trace_function(name="myseg")
     def f():
         return 42
 
     assert f() == 42
-    # Should have entered and exited the segment
     assert ("enter", "myseg", None) in fake.segments
     assert ("exit", "myseg", None) in fake.segments
 
-    # Test trace_segment context manager
+
+def test_tracerservice_trace_segment(monkeypatch):
+    fake, TracerService, _, _, _, trace_segment = _build_fake_tracer()
+    monkeypatch.setattr(TracerService, "get_tracer", staticmethod(lambda: fake))
+
     with trace_segment("outer", {"a": 1}):
         pass
     assert ("enter", "outer", {"a": 1}) in fake.segments
     assert ("exit", "outer", {"a": 1}) in fake.segments
 
-    # Test capture_lambda_handler and capture_method delegate
+
+def test_tracerservice_capture_helpers(monkeypatch):
+    fake, TracerService, capture_lambda_handler, capture_method, _, _ = (
+        _build_fake_tracer()
+    )
+    monkeypatch.setattr(TracerService, "get_tracer", staticmethod(lambda: fake))
+
     def handler(e, c):
         return "ok"
 
     deco = capture_lambda_handler(handler)
-    # capture_lambda_handler returns a callable that wraps the handler
     assert callable(deco)
 
     class C:

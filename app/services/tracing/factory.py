@@ -3,10 +3,10 @@ from typing import Optional
 
 from app.helpers.environment import env
 
-from .base import BaseTracer
 from .aws import AWSTracer
-from .local import LocalTracer
+from .base import BaseTracer
 from .gcp import GCPTracer
+from .local import LocalTracer
 
 
 class TracerFactory:

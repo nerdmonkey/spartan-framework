@@ -1,17 +1,19 @@
 import inspect
-import json
 import os
 import random
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
 from app.helpers.environment import env
+
 from .base import BaseLogger
 
+
 try:
+    import logging
+
     from google.cloud import logging as gcp_logging
     from google.cloud.logging_v2.handlers import CloudLoggingHandler
-    import logging
 
     GCP_LOGGING_AVAILABLE = True
 except (ImportError, TypeError, AttributeError) as e:

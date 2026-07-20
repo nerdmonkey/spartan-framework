@@ -1,11 +1,13 @@
 import inspect
-import os
 import json
+import os
 import random
+
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging import correlation_paths
 
 from app.helpers.environment import env
+
 from .base import BaseLogger
 
 
