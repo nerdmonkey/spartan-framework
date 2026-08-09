@@ -98,6 +98,10 @@ def test_gcp_tracer_basic_behaviour(monkeypatch):
     assert res == "result"
     assert called.get("ok") is True
 
+    # capture_handler is the runtime-agnostic alias and should behave the same
+    wrapped2 = gw.capture_handler(handler)
+    assert wrapped2({}, {}) == "result"
+
     # create_segment should be usable as a context manager
     with gw.create_segment("seg"):
         x = 1
@@ -130,6 +134,9 @@ def _build_fake_tracer():
                 return handler(event, context)
 
             return wrapper
+
+        def capture_handler(self, handler):
+            return self.capture_lambda_handler(handler)
 
         def capture_method(self, method):
             def wrapper(*args, **kwargs):
@@ -188,3 +195,17 @@ def test_tracerservice_capture_helpers(monkeypatch):
 
     cm = capture_method(C.m)
     assert callable(cm)
+
+
+def test_tracerservice_capture_handler(monkeypatch):
+    from app.services.tracer import TracerService, capture_handler
+
+    fake, _, _, _, _, _ = _build_fake_tracer()
+    monkeypatch.setattr(TracerService, "get_tracer", staticmethod(lambda: fake))
+
+    def handler(e, c):
+        return "ok"
+
+    deco = capture_handler(handler)
+    assert callable(deco)
+    assert deco({}, {}) == "ok"

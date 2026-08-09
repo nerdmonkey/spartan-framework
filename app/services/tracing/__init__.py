@@ -35,6 +35,12 @@ def capture_lambda_handler(handler):
     return tracer.capture_lambda_handler(handler)
 
 
+def capture_handler(handler):
+    """Runtime-agnostic decorator for tracing any handler (Lambda, container, etc.)."""
+    tracer = get_tracer()
+    return tracer.capture_handler(handler)
+
+
 def capture_method(method):
     """Decorator for tracing class methods."""
     tracer = get_tracer()
@@ -45,6 +51,7 @@ __all__ = [
     "trace_function",
     "trace_segment",
     "capture_lambda_handler",
+    "capture_handler",
     "capture_method",
     "get_tracer",
 ]

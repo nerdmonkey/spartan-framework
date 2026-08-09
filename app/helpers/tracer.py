@@ -1,5 +1,6 @@
 from app.services.tracer import (
     TracerService,
+    capture_handler,
     capture_lambda_handler,
     capture_method,
     get_tracer,
@@ -13,6 +14,7 @@ __all__ = [
     "trace_function",
     "trace_segment",
     "capture_lambda_handler",
+    "capture_handler",
     "capture_method",
     "get_tracer",
 ]

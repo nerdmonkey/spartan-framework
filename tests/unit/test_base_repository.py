@@ -11,15 +11,17 @@ import pytest
 # by setting test environment early.
 os.environ.setdefault("APP_ENVIRONMENT", "test")
 
-# Import BaseRepository directly from its source file to avoid executing
+# Import DynamoDBRepository directly from its source file to avoid executing
 # `app.repositories.__init__` which imports many repository modules.
 
 
-base_path = Path(__file__).resolve().parents[2] / "app" / "repositories" / "base.py"
-spec = importlib.util.spec_from_file_location("app_repositories_base", str(base_path))
+base_path = Path(__file__).resolve().parents[2] / "app" / "repositories" / "dynamodb.py"
+spec = importlib.util.spec_from_file_location(
+    "app_repositories_dynamodb", str(base_path)
+)
 base_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base_mod)
-BaseRepository = base_mod.BaseRepository
+BaseRepository = base_mod.DynamoDBRepository
 
 
 class FakeModel:

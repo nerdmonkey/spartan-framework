@@ -2,8 +2,10 @@ from contextlib import contextmanager
 
 from aws_xray_sdk.core import xray_recorder
 
+from .base import BaseTracer
 
-class AWSTracer:
+
+class AWSTracer(BaseTracer):
     def __init__(self, service_name):
         self.service_name = service_name
         self.tracer = xray_recorder
@@ -15,6 +17,10 @@ class AWSTracer:
             return func(event, context)
 
         return wrapper
+
+    def capture_handler(self, func):
+        """Runtime-agnostic alias for capture_lambda_handler."""
+        return self.capture_lambda_handler(func)
 
     def capture_method(self, func):
         def wrapper(instance, *args, **kwargs):
