@@ -45,6 +45,12 @@ class TracerService:
         return tracer.capture_lambda_handler(handler)
 
     @staticmethod
+    def capture_handler(handler):
+        """Runtime-agnostic decorator for tracing any handler (Lambda, container, etc.)."""
+        tracer = TracerService.get_tracer()
+        return tracer.capture_handler(handler)
+
+    @staticmethod
     def capture_method(method):
         """Decorator for tracing class methods."""
         tracer = TracerService.get_tracer()
@@ -62,6 +68,10 @@ def trace_segment(name: str, metadata: Optional[Dict[str, Any]] = None):
 
 def capture_lambda_handler(handler):
     return TracerService.capture_lambda_handler(handler)
+
+
+def capture_handler(handler):
+    return TracerService.capture_handler(handler)
 
 
 def capture_method(method):

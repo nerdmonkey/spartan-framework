@@ -57,6 +57,31 @@ def test_capture_lambda_handler_error(tracer):
     assert any("lambda_handler_error" in line for line in lines)
 
 
+def test_capture_handler_success(tracer):
+    def handler(event, context):
+        return "ok"
+
+    wrapped = tracer.capture_handler(handler)
+    result = wrapped({"x": 1}, DummyContext())
+    assert result == "ok"
+    with open(tracer.trace_file) as f:
+        lines = f.readlines()
+    assert any("lambda_handler" in line for line in lines)
+    assert any("lambda_handler_response" in line for line in lines)
+
+
+def test_capture_handler_error(tracer):
+    def handler(event, context):
+        raise ValueError("fail")
+
+    wrapped = tracer.capture_handler(handler)
+    with pytest.raises(ValueError):
+        wrapped({}, DummyContext())
+    with open(tracer.trace_file) as f:
+        lines = f.readlines()
+    assert any("lambda_handler_error" in line for line in lines)
+
+
 def test_capture_method_success(tracer):
     def foo(x):
         return x * 2

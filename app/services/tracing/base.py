@@ -8,6 +8,14 @@ class BaseTracer(ABC):
     def capture_lambda_handler(self, handler):
         pass
 
+    def capture_handler(self, handler):
+        """Runtime-agnostic alias for capture_lambda_handler.
+
+        Serverless callers can keep using capture_lambda_handler; container/
+        microservice callers should use this name instead.
+        """
+        return self.capture_lambda_handler(handler)
+
     @abstractmethod
     def capture_method(self, method):
         pass

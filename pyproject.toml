@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "spartan-framework"
 version = "0.1.8"
-description = "A micro framework for serverless development in AWS"
+description = "A provider-agnostic micro framework for serverless and containerized application development"
 authors = ["Sydel Palinlin <sydel.palinlin@gmail.com>"]
 license = "MIT"
 readme = "README.md"
