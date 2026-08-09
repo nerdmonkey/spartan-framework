@@ -1,11 +1,16 @@
 import boto3
 import jsonpickle
 
+from app.services.state_store import BaseStateStore
 
-class AppService:
+
+class AppService(BaseStateStore):
     """
-    A service class to interact with an AWS DynamoDB table.
-    Provides methods to set, get, and remove a state in a DynamoDB table.
+    DynamoDB implementation of the Spartan BaseStateStore contract.
+
+    AWS-specific: talks to a DynamoDB table via boto3. Provides methods to
+    set, get, and remove a state in that table. A SQL- or GCP-flavored state
+    store would implement the same BaseStateStore contract.
     """
 
     def __init__(self):

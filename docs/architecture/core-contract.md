@@ -110,9 +110,31 @@ Repository (BaseRepository)
 - `UserService` (`app/services/user.py`) talks directly to a SQLAlchemy
   `Session` — wiring it to `BaseService`/`BaseRepository` is reference-app
   work, tracked under issue #14 (golden path), not this issue.
-- `AppService` (`app/services/app.py`) is a Core service that is 100% AWS
-  DynamoDB (`boto3`) — a Core/provider boundary violation in its own right,
-  tracked as a follow-up issue rather than fixed here.
+### State store — fixed by issue #17
+
+`AppService` (`app/services/app.py`) was a Core service that was 100% AWS
+DynamoDB (`boto3`) with no Core interface — a Core/provider boundary
+violation in its own right, flagged above as a follow-up rather than fixed
+as part of #11.
+
+Fixed the same way `BaseRepository`/`DynamoDBRepository` was: added
+`app/services/state_store.py` — `BaseStateStore`, a persistence-agnostic ABC
+(`set_state`, `get_state`, `remove_state`) — and made `AppService` implement
+it (`AppService(BaseStateStore)`). `AppService` remains the AWS/DynamoDB-
+specific implementation; its public name, constructor, and method behavior
+are unchanged.
+
+```python
+StateStore (BaseStateStore)
+└── AppService   (AWS/DynamoDB-flavored; a SQL- or GCP-flavored state store
+                   would implement the same BaseStateStore contract)
+```
+
+Moving `AppService`'s implementation into a separate `spartan-bogart`
+package (the issue's alternative direction) is out of scope here: Core's
+AWS/GCP implementations aren't split into separate installable packages yet
+(see above), so that move is blocked on that unrelated packaging milestone,
+not on this issue.
 
 ## Runtime scope decision
 

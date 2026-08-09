@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.services.app import AppService
+from app.services.state_store import BaseStateStore
 
 
 class DummyTable:
@@ -33,6 +34,7 @@ def test_app_service_set_get_remove(mock_boto3):
     dummy_resource.Table.return_value = dummy_table
     mock_boto3.resource.return_value = dummy_resource
     svc = AppService()
+    assert isinstance(svc, BaseStateStore)
     # set
     result = svc.set_state("k", {"x": 1})
     assert result is not None
